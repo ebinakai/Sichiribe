@@ -2,7 +2,7 @@
 
 ## Description
 
-7セグメント表示器が示したデータをシリアル等で読み取れない場合のために、メータの表示状態を録画し、そこからデータを取り出すためのプログラムを作成した。処理の流れは以下の通りである。
+7セグメント表示器が示したデータをシリアル等で読み取れない場合のために、メータの表示状態を録画し、そこからデータを取り出すためのプログラムを作成した。
 
 ## Init
 
@@ -22,9 +22,6 @@ source ./env/bin/activate
 # ライブラリのインストール
 python3 -m pip install --upgrade pip
 pip install -r requirements.txt
-
-# 実行
-python3 main.py 解析する動画のファイルパス
 ```
 
 ## Execution
@@ -34,6 +31,10 @@ python3 main.py 解析する動画のファイルパス
 実行例を以下に示す。
 
 ```bash
+# 一番シンプルな例
+python3 main.py test/sample.mp4  
+
+# 諸項目を設定する場合
 python3 main.py test/sample.mp4 --sampling-sec 5 --num-frames 30 --skip-sec 0 --format csv --debug
 ```
 
@@ -74,6 +75,8 @@ python3 main.py test/sample.mp4 --sampling-sec 5 --num-frames 30 --skip-sec 0 --
 | `exporter.py` | 取得した結果を任意の形式で出力・保存する部分 |
 
 ### Process flow configuration
+
+プログラムの処理の流れは以下の通りである。
 
 1. 指定された引数を元に設定を適用
 2. 動画の読み込み・フレームの分割
