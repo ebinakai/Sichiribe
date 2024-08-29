@@ -1,18 +1,17 @@
-# ロガーの設定
-import logging
-formatter = '%(asctime)s - %(name)s - %(levelname)s - %(message)s'
-logging.basicConfig(level=logging.INFO, format=formatter)
-logger = logging.getLogger(__name__)
-logger.setLevel(logging.DEBUG)
-
 # 警告がだるいので非表示
 import warnings
 warnings.filterwarnings("ignore", category=FutureWarning)
+warnings.filterwarnings("ignore", category=UserWarning, module='cv2')
+
+# ロガーの設定
+import logging
+formatter = '%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+logging.basicConfig(level=logging.DEBUG, format=formatter)
+logger = logging.getLogger(__name__)
 
 import argparse
 from utils.frameEditor import FrameEditor
-from utils.regionSelector import RegionSelector
-from utils.detector import Detector
+from utils.ocr import OCR as Detector
 from utils.exporter import Exporter, get_supported_formats
 
 def run(  video_path, 
@@ -24,8 +23,7 @@ def run(  video_path,
 
   # インスタンスの生成
   fe = FrameEditor(sampling_sec, num_frames_per_sample)
-  sr = RegionSelector()
-  dt = Detector(model='ocr')
+  dt = Detector()
   ep = Exporter(method=output_format)
 
   # フレームの切り出し
@@ -33,7 +31,7 @@ def run(  video_path,
   timestamps = fe.generate_timestamp()
 
   # トリミング範囲の選択
-  selected_rect = sr.run(frame_paths[0])
+  selected_rect = fe.region_select(frame_paths[0])
 
   # 選択範囲のトリミング
   cropped_frame_paths = fe.frame_crop(selected_rect)
@@ -42,18 +40,21 @@ def run(  video_path,
   grouped_frame_paths = fe.group_frame_paths(cropped_frame_paths)
 
   # OCRでテキスト検出
-  ocr_result, failed_rate = dt.detect(grouped_frame_paths)
-  logger.info(f"OCR Result: {ocr_result}")
-  logger.info(f"Failed Rate: {failed_rate}")
+  ocr_results = []
+  for paths in grouped_frame_paths:
+    ocr_result, failed_rate = dt.detect(paths)
+    ocr_results.append(ocr_result)
+    logger.info(f"OCR Result: {ocr_result}")
+    logger.info(f"Failed Rate: {failed_rate}")
 
   # 結果のエクスポート
-  data = ep.format(ocr_result, timestamps)
+  data = ep.format(ocr_results, timestamps)
   ep.export(data)
 
 
 if __name__ == "__main__":
   export_formats = get_supported_formats()
-  # video_path = "contents/video.mp4"
+  
   # 引数を取得
   parser = argparse.ArgumentParser(description='7セグメントディスプレイの数字を読み取る') 
   parser.add_argument('video_path', help='解析する動画のパス')

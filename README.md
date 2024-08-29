@@ -60,7 +60,6 @@ python3 main.py test/sample.mp4 --sampling-sec 5 --num-frames 30 --skip-sec 0 --
 └── utils
     ├── common.py
     ├── frameEditor.py
-    ├── regionSelector.py
     ├── detector.py
     └── exporter.py
 ```
@@ -70,7 +69,6 @@ python3 main.py test/sample.mp4 --sampling-sec 5 --num-frames 30 --skip-sec 0 --
 | `main.py` | 実行ファイル |
 | `common.py` | 汎用的な機能の関数 |
 | `frameEditor.py` |  動画のフレームに関する機能 |
-| `regionSelector.py` | 画像内の7セグ表示器の座標を選択する機能 |
 | `detector.py` | 7セグ表示器から数字を推測するプログラム |
 | `exporter.py` | 取得した結果を任意の形式で出力・保存する部分 |
 

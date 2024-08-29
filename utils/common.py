@@ -1,6 +1,7 @@
 import os
 import shutil
 import logging
+import datetime
 
 logger = logging.getLogger("__main__").getChild(__name__)
 
@@ -30,3 +31,6 @@ def ask_user_confirmation(prompt):
     if answer in ['y', 'n']:
       return answer == 'y'
     print("Please answer with 'y' or 'n'.")
+    
+def get_now_str():
+  return datetime.datetime.now().strftime('%Y%m%d%H%M%S')

@@ -2,6 +2,7 @@ import logging
 import json
 import datetime
 import os
+from utils.common import get_now_str
 
 # ロガーの設定
 logger = logging.getLogger("__main__").getChild(__name__)
@@ -37,8 +38,8 @@ class Exporter:
   
   # ファイル名を時刻を含めて生成
   def generate_filepath(self, extension):
-    now = datetime.datetime.now()
-    filename = f"{self.base_filename}_{now.strftime('%Y%m%d%H%M%S')}.{extension}"
+    now = get_now_str()
+    filename = f"{self.base_filename}_{now}.{extension}"
     return os.path.join(self.out_dir, filename)
 
   # csv形式で保存

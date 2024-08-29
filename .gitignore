@@ -7,6 +7,7 @@ env/*
 __pycache__
 contents/
 frames/
-frames_cropped/
+frames_*/
 images/
 results/
+test_thresholds/
