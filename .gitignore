@@ -11,3 +11,6 @@ frames_*/
 images/
 results/
 test_thresholds/
+
+model/
+7segment_digits_dataset/

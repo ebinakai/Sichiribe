@@ -12,7 +12,7 @@ logger = logging.getLogger(__name__)
 import argparse
 from utils.capture import FrameCapture
 from utils.frameEditor import FrameEditor
-from utils.ocr import OCR as Detector
+from utils.cnn import CNN as Detector
 from utils.common import get_now_str
 import time
 import os
@@ -24,6 +24,7 @@ if __name__ == "__main__":
   # 引数を取得
   parser = argparse.ArgumentParser(description='7セグメントディスプレイの数字を読み取る') 
   parser.add_argument('--device', help="カメラデバイスの番号", type=int, default=0)
+  parser.add_argument('--num-digits', help="7セグメント表示器の桁数", type=int, default=4)
   parser.add_argument('--num-frames', help="サンプリングするフレーム数", type=int, default=20)
   parser.add_argument('--interval-min', help="サンプリング間隔（分）", type=float, default=1)
   parser.add_argument('--total-sampling-min', help="サンプリングする合計時間（分）", type=float, default=20)
@@ -37,8 +38,8 @@ if __name__ == "__main__":
     os.makedirs(save_dir)
   
   fc = FrameCapture(device_num=args.device)
-  fe = FrameEditor()
-  dt = Detector()
+  fe = FrameEditor(num_digits=args.num_digits)
+  dt = Detector(args.num_digits)
   
   # 画角を調整するためにカメラフィードを表示
   fc.show_camera_feed()
@@ -46,7 +47,6 @@ if __name__ == "__main__":
   # フレームをキャプチャ
   frame = fc.capture()
   selected_rect = fe.region_select(frame)
-  
   
   interval_sec = args.interval_min * 60
   total_duration_seconds = args.total_sampling_min * 60

@@ -51,25 +51,40 @@ python3 main.py test/sample.mp4 --sampling-sec 5 --num-frames 30 --skip-sec 0 --
 | --format csv | 出力フォーマット(csv, json) |  
 | --debug | ログをデバッグモードにする場合は含める |
 
+## Live Execution
+
+カメラを接続して、ライブで解析する場合
+
+```bash
+# 短時間解析（6秒）のサンプル
+python live.py --device 1 --num-frames 10 --interval-min 0.03 --total-sampling-min 0.1 --debug --save-frame
+```
+
 ## Program instructions
 
 ### File structure
 
 ```bash
 ├── main.py
+├── live.py
 └── utils
     ├── common.py
     ├── frameEditor.py
     ├── detector.py
+    ├── ocr.py
+    ├── cnn.py
     └── exporter.py
 ```
 
 |  ファイル | 説明 |
 | --- | --- |  
-| `main.py` | 実行ファイル |
+| `main.py` | 動画ファイルから解析 |
+| `live.py` | 外部カメラからライブ解析 |
 | `common.py` | 汎用的な機能の関数 |
 | `frameEditor.py` |  動画のフレームに関する機能 |
-| `detector.py` | 7セグ表示器から数字を推測するプログラム |
+| `detector.py` | 7セグ表示器から数字を推測するプログラムの親クラス |
+| `ocr.py` | OCRにて画像から数字を取得するプログラム |
+| `cnn.py` | CNNモデルを用いて画像から数字を取得するプログラム |
 | `exporter.py` | 取得した結果を任意の形式で出力・保存する部分 |
 
 ### Process flow configuration
@@ -85,3 +100,18 @@ python3 main.py test/sample.mp4 --sampling-sec 5 --num-frames 30 --skip-sec 0 --
    2. 確認ウィンドウがアクティブな状態で y/n のどちらかを押下する
 4. クロップした部分を解析して表示内容を読み取る
 5. 読み取った内容を外部ファイル等に出力する
+
+## Model Training
+
+CNNモデルを学習させるためには以下のプログラムを実行する。
+参考にしたサイトは [ここ](https://child-programmer.com/seven-segment-digits-ocr-original-model/ "【7セグメント編】オリジナル学習済みモデルの作成方法：連続デジタル数字画像認識プログラミング入門（Python・OpenCV・Keras・CNN）") 。  
+上記サイトからデータセットも落としてこれるので、学習前にダウンロードしたあとに zip を解凍してプロジェクトフォルダに追加すること。また、カスタムデータセットを作成した際は、一文字ごとに分割して PNG形式で保存するとプログラムを改変せずに実行できる。  
+
+```bash
+python cnn/train.py
+```
+
+## References
+
+- [子供プログラマー](https://child-programmer.com/seven-segment-digits-ocr-original-model/ "【7セグメント編】オリジナル学習済みモデルの作成方法：連続デジタル数字画像認識プログラミング入門（Python・OpenCV・Keras・CNN）")
+- [Github | Kazuhito00/7segment-display-reader](https://github.com/Kazuhito00/7segment-display-reader "Kazuhito00/7segment-display-reader")

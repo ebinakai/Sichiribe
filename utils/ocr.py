@@ -2,9 +2,7 @@ from utils.detector import Detector
 
 import easyocr
 import logging
-import cv2
 import statistics
-import numpy as np
 
 logger = logging.getLogger("__main__").getChild(__name__)
 
@@ -24,16 +22,8 @@ class OCR(Detector):
     
     for i, image in enumerate(images):
       
-      # imageがNumPy配列（すでにロードされた画像）かどうかを確認
-      if isinstance(image, np.ndarray):
-        # グレースケール画像に変換（もしすでにグレースケールでなければ）
-        if len(image.shape) == 3:  # 3チャンネル（カラー画像）の場合
-          image_gs = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
-        else:
-          image_gs = image  # すでにグレースケールの場合
-      else:
-        # 画像ファイルをグレースケールで読み込む
-        image_gs = cv2.imread(image, cv2.IMREAD_GRAYSCALE)
+      # 画像を読み込む
+      image_gs = self.load_image(image)
         
       # 画像が正常に読み込まれたか確認
       if image_gs is None:
@@ -48,15 +38,17 @@ class OCR(Detector):
 
       # テキストが検出されなかった場合 
       if len(result) == 0:
+        detect_nums.append(None)
         logger.debug("No text detected.")
         continue
       
       # 検出されたテキストを数値に変換
+      detect_txt = result[result_idx][1]
       try: 
-        detect_txt = result[result_idx][1]
         detect_nums.append(float(detect_txt))  #なんかここでリストに入っていない
         
       except:
+        detect_nums.append(None)
         logger.debug("Could not convert detected text to number.")
         continue
       
