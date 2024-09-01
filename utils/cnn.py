@@ -1,9 +1,15 @@
 from utils.detector import Detector
-
+import os
 import logging
 import statistics
 import cv2 
 import numpy as np
+
+# TensorFlow と h5py のログを無効にする
+os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3' 
+logging.getLogger('tensorflow').setLevel(logging.ERROR)
+logging.getLogger('h5py').setLevel(logging.ERROR)
+
 from tensorflow.keras.models import load_model
 from utils.detector import Detector
 
@@ -40,8 +46,10 @@ class CNN(Detector):
     # 結果を処理
     results = [ self.folder[prediction.argmax()] for prediction in predictions ]
 
-    # 数字に変換して返す
-    return int(''.join(results))
+    # 結合する
+    results_str = ''.join(results)
+    
+    return int(results_str) if results_str != '' else None
   
   def detect(self, images):
     # [引数] images: ファイルパスまたはnumpy画像データまたはそれを含んだリスト

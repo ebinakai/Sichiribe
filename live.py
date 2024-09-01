@@ -16,11 +16,11 @@ from utils.cnn import CNN as Detector
 from utils.exporter import Exporter, get_supported_formats
 from utils.common import get_now_str
 import time
+from datetime import timedelta
 import os
 import cv2
 
-# クラスのインスタンスを作成してフレームをキャプチャ
-if __name__ == "__main__":
+def get_args():
   export_formats = get_supported_formats()
   
   # 引数を取得
@@ -28,38 +28,42 @@ if __name__ == "__main__":
   parser.add_argument('--device', help="カメラデバイスの番号", type=int, default=0)
   parser.add_argument('--num-digits', help="7セグメント表示器の桁数", type=int, default=4)
   parser.add_argument('--num-frames', help="サンプリングするフレーム数", type=int, default=20)
-  parser.add_argument('--interval-min', help="サンプリング間隔（分）", type=float, default=1)
+  parser.add_argument('--sampling-sec', help="サンプリング間隔（秒）", type=int, default=10)
   parser.add_argument('--total-sampling-min', help="サンプリングする合計時間（分）", type=float, default=20)
   parser.add_argument('--format', help="出力形式 (json または csv)", choices=export_formats, default='json')
   parser.add_argument('--save-frame', help="キャプチャしたフレームを保存するか", action='store_true')
   parser.add_argument('--debug', help="デバッグモードを有効にする", action='store_true')
   args = parser.parse_args()
+
+  return args
+
+def main(device,
+        num_digits,
+        format,
+        sampling_sec,
+        total_duration_sec,
+        save_frame,
+):
   
-  if args.save_frame:
-    now = get_now_str()
-    save_dir = f"frames_{now}"
-    os.makedirs(save_dir)
-  
-  fc = FrameCapture(device_num=args.device)
-  fe = FrameEditor(num_digits=args.num_digits)
-  dt = Detector(num_digits=args.num_digits)
-  ep = Exporter(method=args.format)
+  fc = FrameCapture(device_num=device)
+  fe = FrameEditor(num_digits=num_digits)
+  dt = Detector(num_digits=num_digits)
+  ep = Exporter(method=format)
   
   # 画角を調整するためにカメラフィードを表示
   fc.show_camera_feed()
 
   # フレームをキャプチャ
   frame = fc.capture()
-  selected_rect = fe.region_select(frame)
+  click_points = fe.region_select(frame)
   
-  interval_sec = args.interval_min * 60
-  total_duration_seconds = args.total_sampling_min * 60
-  end_time = time.time() + total_duration_seconds
+  start_time = time.time()
+  end_time = time.time() + total_duration_sec
   frame_count = 0
-  timestamp = []
+  timestamps = []
   results = []
   while time.time() < end_time:
-    start_time = time.time()
+    temp_time = time.time()
     frames = []
 
     for i in range(args.num_frames):
@@ -69,11 +73,11 @@ if __name__ == "__main__":
         continue
       
       # 推論処理
-      cropped_frame = fe.crop(frame, selected_rect)
+      cropped_frame = fe.crop(frame, click_points)
       frames.append(cropped_frame)
       
       # フレームを保存
-      if args.save_frame:
+      if save_frame:
         frame_filename = os.path.join(save_dir, f"frame_{frame_count}.jpg")
         cv2.imwrite(frame_filename, cropped_frame)
         logger.debug(f"Frame {frame_count} has been saved as: {frame_filename}")
@@ -83,10 +87,14 @@ if __name__ == "__main__":
       value, failed_rate = dt.detect(frames)
       logger.info(f"Detected: {value}, Failed rate: {failed_rate}")
       results.append(value)
-      timestamp.append(get_now_str())
+      
+      # タイムスタンプを "HH:MM:SS" 形式で生成
+      elapsed_time = int(time.time() - start_time)
+      timestamp = timedelta(seconds=elapsed_time)
+      timestamps.append(str(timestamp))
           
-    elapsed_time = time.time() - start_time
-    time_to_wait = max(0, interval_sec - elapsed_time)
+    elapsed_time = time.time() - temp_time
+    time_to_wait = max(0, sampling_sec - elapsed_time)
 
     if time_to_wait > 0:
       logger.debug(f"Waiting for {time_to_wait:.2f}s")
@@ -95,6 +103,29 @@ if __name__ == "__main__":
   fc.release()
   
   # 結果のエクスポート
-  data = ep.format(results, timestamp)
+  data = ep.format(results, timestamps)
   ep.export(data)
+
+if __name__ == "__main__":
   
+  args = get_args()
+  
+  if args.save_frame:
+    now = get_now_str()
+    save_dir = f"frames_{now}"
+    os.makedirs(save_dir)
+    
+  # ログレベルを設定
+  logger.setLevel(logging.DEBUG) if args.debug else logger.setLevel(logging.INFO)
+  logger.debug("args: %s", args)
+    
+  main(
+    device=args.device,
+    num_digits=args.num_digits,
+    format=args.format,
+    sampling_sec=args.sampling_sec,
+    total_duration_sec=args.total_sampling_min * 60,
+    save_frame=args.save_frame,
+  )
+  
+  logger.info("All Done!")

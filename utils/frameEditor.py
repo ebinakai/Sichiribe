@@ -1,21 +1,9 @@
-import os, sys
-
-# 現在のファイルのディレクトリを取得
-current_dir = os.path.dirname(os.path.abspath(__file__))
-
-# プロジェクトのルートディレクトリを追加
-project_root = os.path.abspath(os.path.join(current_dir, os.pardir))
-sys.path.append(project_root)
-
-# utils ディレクトリを追加
-sys.path.append(current_dir)
-
+import os
 import cv2
 import logging
-import glob
 import numpy as np
 from datetime import timedelta
-from utils.common import ask_user_confirmation, clear_directory
+from utils.common import clear_directory
 
 # ロガーの設定
 logger = logging.getLogger("__main__").getChild(__name__)
@@ -45,11 +33,16 @@ class FrameEditor:
   def frame_devide(self, 
                    video_path, 
                    skip_sec=0, 
-                   out_dir='frames'
+                   save_frame=True,
+                   out_dir='frames',
+                   is_crop=True,
   ):
+    self.click_points = []
     
     # フレーム保存用のディレクトリ
-    os.makedirs(out_dir, exist_ok=True)
+    if save_frame:
+      os.makedirs(out_dir, exist_ok=True)
+      clear_directory(out_dir)
 
     # 動画の読み込み
     cap = cv2.VideoCapture(video_path)
@@ -59,30 +52,13 @@ class FrameEditor:
       logger.error("Error: Could not open video file.")
       exit(1)
 
-    # 動画のフレームレートを取得
     fps = cap.get(cv2.CAP_PROP_FPS)
     interval_frames = 1 if self.sampling_sec == 0 else  int(fps * self.sampling_sec)
     skip_frames = fps * skip_sec
-
-    # 既にフレームが存在する場合は再分割するか確認
-    saved_frame = glob.glob(f"{out_dir}/*")
-    if len(saved_frame) > 0:
-      logger.info("Frame files already exist.")
-
-      # ユーザーが'y'を選択した場合
-      if ask_user_confirmation("Do you want to skip spliting the frames?"):
-        self.frame_paths = sorted(saved_frame)
-        self.sampling_count = int((cap.get(cv2.CAP_PROP_FRAME_COUNT) - skip_frames) / interval_frames) + 1
-        logger.info("Frame splitting skipped.")
-        return self.frame_paths
-
-      # ユーザーが'n'を選択した場合
-      else:
-        # フレーム保存用のディレクトリ内のファイルを削除
-        clear_directory(out_dir)
-        logger.info("Frame re-splitting.")
-
     frame_count = -1
+    saved_frame_count = 0
+    frames = []
+
     while True:
       # フレームの読み込み
       ret, frame = cap.read()
@@ -94,61 +70,43 @@ class FrameEditor:
       
       # スキップフレーム数に達していない場合はスキップ
       if frame_count < skip_frames:
+        logger.debug("frame count %d was skipped", frame_count)
         continue
-
+      
       # サンプリング間隔に基づいてフレームを保存
       if frame_count % interval_frames < self.num_frames_per_sample:
-        frame_filename = os.path.join(out_dir, f'frame_{frame_count:06d}.jpg')
-        cv2.imwrite(frame_filename, frame)
-        self.frame_paths.append(frame_filename)
+        if is_crop:
+          # 切り取り領域を選択
+          if len(self.click_points) != 4:
+            self.region_select(frame)
+
+          # フレームの切り取り
+          frame = self.crop(frame, self.click_points)
+          
+        # 保存
+        if save_frame:
+          frame_filename = os.path.join(out_dir, f'frame_{frame_count:06d}.jpg')
+          cv2.imwrite(frame_filename, frame)
+          logger.debug(f"Frame saved to '{frame_filename}'.")
+          
+          frames.append(frame_filename)
+        else :
+          frames.append(frame)
+        saved_frame_count += 1
 
         if frame_count % interval_frames == 0:
           self.sampling_count += 1
-
-        logger.debug(f"Frame saved to '{frame_filename}'.")
-    
+        
+      elif len(frames) != 0:
+        self.frame_paths.append(frames)
+        frames = []
+        
     # リソースの解放
     cap.release()
     
-    logger.info(f"Extracted {len(self.frame_paths)} frames at {self.sampling_sec}-sec intervals and saved to '{out_dir}' directory.")
+    logger.info(f"Extracted {saved_frame_count} frames were saved to '{out_dir}' directory.")
     
     return self.frame_paths
-
-  # 切り出したフレームをトリミング
-  def frame_crop(self, 
-                 selected_rect, 
-                 frames=None, 
-                 out_dir="frames_cropped"
-  ):
-    
-    # 出力ディレクトリの作成
-    os.makedirs(out_dir, exist_ok=True)
-    
-    # 出力ディレクトリ内のファイルを削除
-    clear_directory(out_dir)
-    
-    frames = self.frame_paths if frames is None else frames
-    
-    for frame in frames:
-    
-      # 画像の読み込み
-      if isinstance(frame, str):
-        image = cv2.imread(frame)
-        
-      # 画像が正常に読み込まれたか確認
-      if image is None:
-        logger.error("Error: Could not read image file.")
-        continue
-
-      # 画像の切り取り
-      cropped_frame = self.crop(image, selected_rect)
-
-      # 切り取った画像の保存
-      cropped_frame_path = os.path.join(out_dir, os.path.basename(frame))
-      cv2.imwrite(cropped_frame_path, cropped_frame)
-      self.cropped_frame_paths.append(cropped_frame_path)
-
-    return self.cropped_frame_paths
 
   # 誤認識を許容するために連続したフレームをサンプリングしているのでグループ化する
   def group_frame_paths(self, frames):
@@ -226,7 +184,7 @@ class FrameEditor:
 
       # キー入力(ESC:プログラム終了)
       key = cv2.waitKey(100)
-      if key == ord('y'):  # yキーで選択終了
+      if key == ord('y') and len(self.click_points) == 4:  # yキーで選択終了
         cv2.destroyAllWindows()
         cv2.waitKey(1)
         return self.click_points if len(self.click_points) == 4 else None

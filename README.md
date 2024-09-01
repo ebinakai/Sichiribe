@@ -26,16 +26,16 @@ pip install -r requirements.txt
 
 ## Execution
 
-7セグメント表示器を移した動画から表示内容を解析するには `main.py` を実行する。
+7セグメント表示器を移した動画から表示内容を解析するには `replay.py` を実行する。
 パラメータを設定することができ、そのパラメータは実行時に指定することができる。
 実行例を以下に示す。
 
 ```bash
 # 一番シンプルな例
-python3 main.py test/sample.mp4  
+python3 replay.py test/sample.mp4  
 
 # 諸項目を設定する場合
-python3 main.py test/sample.mp4 --sampling-sec 5 --num-frames 30 --skip-sec 0 --format csv --debug
+python3 replay.py test/sample.mp4 --num-digits 4 --sampling-sec 5 --num-frames 30 --skip-sec 0 --format csv --save-frame --debug
 ```
 
 ### Arguments
@@ -45,10 +45,12 @@ python3 main.py test/sample.mp4 --sampling-sec 5 --num-frames 30 --skip-sec 0 --
 | 引数 | 説明 |  
 | --- | --- |  
 | test/sample.mp4 | 解析する動画のパス |  
+| --num-digits 4 | 7セグメント表示器の桁数 |
 | --sampling-sec 5 | 動画をサンプリングする頻度 |  
 | --num-frames 30 | 一回のサンプリングで何フレーム取得するか |  
 | --skip-sec 0 | 動画の解析を始めるタイミング |  
-| --format csv | 出力フォーマット(csv, json) |  
+| --format csv | 出力形式 (json または csv) |
+| --save-frame | キャプチャしたフレームを保存するか（保存しない場合、メモリの使用量が増加します） |
 | --debug | ログをデバッグモードにする場合は含める |
 
 ## Live Execution
@@ -57,39 +59,60 @@ python3 main.py test/sample.mp4 --sampling-sec 5 --num-frames 30 --skip-sec 0 --
 
 ```bash
 # 短時間解析（6秒）のサンプル
-python live.py --device 1 --num-frames 10 --interval-min 0.03 --total-sampling-min 0.1 --debug --save-frame
+python live.py --device 1 --num-frames 10 --sampling-sec 2 --total-sampling-min 0.1 --format csv --save-frame --debug
 ```
+
+### Arguments
+
+これらの引数はオプションなので、含めずに実行することも可能である。
+
+| 引数 | 説明 |  
+| --- | --- |  
+| --device 1 | カメラデバイスの番号 |
+| --num-digits 4 | 7セグメント表示器の桁数 |
+| --sampling-sec 5 | 動画をサンプリングする頻度 |  
+| --num-frames 10 | 一回のサンプリングで何フレーム取得するか |
+| --total-sampling-min 1 | サンプリングする合計時間（分） |
+| --format csv | 出力形式 (json または csv) |
+| --save-frame | キャプチャしたフレームを保存するかどうか |
+| --debug | ログをデバッグモードにする場合は含める |
 
 ## Program instructions
 
 ### File structure
 
 ```bash
-├── main.py
+├── replay.py
 ├── live.py
-└── utils
-    ├── common.py
-    ├── frameEditor.py
-    ├── detector.py
-    ├── ocr.py
-    ├── cnn.py
-    └── exporter.py
+├── utils
+│   ├── common.py
+│   ├── frameEditor.py
+│   ├── detector.py
+│   ├── ocr.py
+│   ├── cnn.py
+│   └── exporter.py
+└── cnn
+    ├── train.py
 ```
 
 |  ファイル | 説明 |
 | --- | --- |  
-| `main.py` | 動画ファイルから解析 |
+| `replay.py` | 動画ファイルから解析 |
 | `live.py` | 外部カメラからライブ解析 |
-| `common.py` | 汎用的な機能の関数 |
-| `frameEditor.py` |  動画のフレームに関する機能 |
-| `detector.py` | 7セグ表示器から数字を推測するプログラムの親クラス |
-| `ocr.py` | OCRにて画像から数字を取得するプログラム |
-| `cnn.py` | CNNモデルを用いて画像から数字を取得するプログラム |
-| `exporter.py` | 取得した結果を任意の形式で出力・保存する部分 |
+| `utils/common.py` | 汎用的な機能の関数詰め合わせ |
+| `utils/capture.py` | カメラにアクセスする機能 |
+| `utils/frameEditor.py` | 動画のフレームに関する機能及び7セグメント表示器の領域選択機能 |
+| `utils/detector.py` | 7セグ表示器から数字を推測するプログラムの親クラス |
+| `utils/ocr.py` | OCRにて画像から数字を取得するプログラム |
+| `utils/cnn.py` | CNNモデルを用いて画像から数字を取得するプログラム |
+| `utils/exporter.py` | 取得した結果を任意の形式で出力・保存する機能 |
+| `cnn/train.py` | ディープラーニングモデルを学習するプログラム |
 
 ### Process flow configuration
 
 プログラムの処理の流れは以下の通りである。
+
+`replay.py`
 
 1. 指定された引数を元に設定を適用
 2. 動画の読み込み・フレームの分割
