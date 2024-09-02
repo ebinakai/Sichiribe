@@ -7,7 +7,7 @@ warnings.filterwarnings("ignore", category=UserWarning, module='cv2')
 import logging
 formatter = '%(asctime)s - %(name)s - %(levelname)s - %(message)s'
 logging.basicConfig(level=logging.DEBUG, format=formatter)
-logger = logging.getLogger(__name__)
+logger = logging.getLogger('__main__').getChild(__name__)
 
 import argparse
 from utils.frameEditor import FrameEditor
@@ -32,17 +32,18 @@ def get_args():
   return args
 
 def main(video_path, 
-        num_digits,
-        sampling_sec, 
-        num_frames_per_sample, 
-        video_skip_sec,
-        output_format,
-        save_frame,
+         num_digits,
+         sampling_sec, 
+         num_frames, 
+         video_skip_sec,
+         format,
+         save_frame,
+         out_dir='results',
 ):
   # インスタンスの生成
-  fe = FrameEditor(sampling_sec, num_frames_per_sample, num_digits)
+  fe = FrameEditor(sampling_sec, num_frames, num_digits)
   dt = Detector(num_digits)
-  ep = Exporter(method=output_format)
+  ep = Exporter(format, out_dir)
   
   # フレームの切り出し
   frames = fe.frame_devide(video_path, video_skip_sec, save_frame)
@@ -69,13 +70,13 @@ if __name__ == "__main__":
   logger.debug("args: %s", args)
   
   # 実行
-  main(args.video_path, 
-       args.num_digits, 
-       args.sampling_sec, 
-       args.num_frames, 
-       args.skip_sec, 
-       args.format,
-       args.save_frame,
+  main(video_path=args.video_path, 
+       num_digits=args.num_digits, 
+       sampling_sec=args.sampling_sec, 
+       num_frames=args.num_frames, 
+       skip_sec=args.skip_sec, 
+       format=args.format,
+       save_frame=args.save_frame,
       )
   
   logger.info("All Done!")

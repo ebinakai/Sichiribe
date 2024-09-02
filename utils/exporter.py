@@ -15,7 +15,7 @@ class Exporter:
   # クラス変数としてサポートフォーマットを定義
   aveilable_formats = ['csv', 'json']
   
-  def __init__(self, method, base_filename='result', out_dir="results"):
+  def __init__(self, method, out_dir, base_filename='result'):
     self.method = method
     self.base_filename = base_filename
     self.out_dir = out_dir

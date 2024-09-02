@@ -7,7 +7,7 @@ warnings.filterwarnings("ignore", category=UserWarning, module='cv2')
 import logging
 formatter = '%(asctime)s - %(name)s - %(levelname)s - %(message)s'
 logging.basicConfig(level=logging.DEBUG, format=formatter)
-logger = logging.getLogger(__name__)
+logger = logging.getLogger('__main__').getChild(__name__)
 
 import argparse
 from utils.capture import FrameCapture
@@ -39,16 +39,18 @@ def get_args():
 
 def main(device,
         num_digits,
-        format,
         sampling_sec,
-        total_duration_sec,
+        num_frames, 
+        total_sampling_sec,
+        format,
         save_frame,
+        out_dir='results',
 ):
   
   fc = FrameCapture(device_num=device)
   fe = FrameEditor(num_digits=num_digits)
   dt = Detector(num_digits=num_digits)
-  ep = Exporter(method=format)
+  ep = Exporter(format, out_dir)
   
   # 画角を調整するためにカメラフィードを表示
   fc.show_camera_feed()
@@ -58,7 +60,7 @@ def main(device,
   click_points = fe.region_select(frame)
   
   start_time = time.time()
-  end_time = time.time() + total_duration_sec
+  end_time = time.time() + total_sampling_sec
   frame_count = 0
   timestamps = []
   results = []
@@ -66,7 +68,7 @@ def main(device,
     temp_time = time.time()
     frames = []
 
-    for i in range(args.num_frames):
+    for i in range(num_frames):
       frame = fc.capture()
       
       if frame is None:
@@ -122,9 +124,10 @@ if __name__ == "__main__":
   main(
     device=args.device,
     num_digits=args.num_digits,
-    format=args.format,
     sampling_sec=args.sampling_sec,
-    total_duration_sec=args.total_sampling_min * 60,
+    num_frames=args.num_frames,
+    total_sampling_sec=args.total_sampling_min * 60,
+    format=args.format,
     save_frame=args.save_frame,
   )
   

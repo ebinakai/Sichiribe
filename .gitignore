@@ -4,11 +4,18 @@ env/*
 # 環境変数
 .env
 
+# 画像解析機能
 __pycache__
 contents/
 frames/
 frames_*/
 results/
 
+# CNNモデル
 model/
 7segment_digits_dataset/
+
+# GUI & App
+dist/
+build/
+*.spec
