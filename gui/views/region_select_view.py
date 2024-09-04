@@ -5,7 +5,7 @@ from PyQt6.QtGui import QPixmap, QMouseEvent
 from PyQt6.QtCore import Qt, QSize, QTimer
 from gui.utils.screen_manager import ScreenManager
 from cores.frameEditor import FrameEditor
-from gui.utils.common import convert_cv_to_qimage
+from gui.utils.common import convert_cv_to_qimage, resize_image
 
 class ClickableLabel(QLabel):
     # コールバック関数はマウスイベント内で呼び出され、イベントが引き継がれる
@@ -45,8 +45,6 @@ class RegionSelectWindow(QWidget):
         self.target_width = int(screen_rect.width() * 0.8)
         self.target_height = int((screen_rect.height() - 100) * 0.8)
         self.initUI()
-        
-        self.logger.debug('Target width: %d, Target height: %d', self.target_width, self.target_height)
         
     def initUI(self):
         # メインウィジェットの設定
@@ -101,7 +99,7 @@ class RegionSelectWindow(QWidget):
     
     def set_image(self, image: np.ndarray):
         self.image_original = image
-        self.image, self.resize_scale = self.fe.resize_image(image, self.target_width, self.target_height)
+        self.image, self.resize_scale = resize_image(image, self.target_width, self.target_height)
         
         self.update_image(self.image.copy())
         
@@ -193,12 +191,14 @@ class RegionSelectWindow(QWidget):
         prev_screen = self.prev_screen
         self.clear_env()
         QTimer.singleShot(100, lambda: self.screen_manager.show_screen(prev_screen))
+        self.params = None
 
     def switch_next(self):
         if self.prev_screen == 'replay_setting':
             self.screen_manager.get_screen('log').frame_devide_process(self.params)
         else:
             self.screen_manager.get_screen('log').frame_devide_process(self.params)
+        self.params = None
 
     def clear_env(self):
         self.main_label.clear()

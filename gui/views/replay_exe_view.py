@@ -3,7 +3,7 @@ from PyQt6.QtCore import QTimer, Qt, QSize
 from PyQt6.QtGui import QPixmap
 from gui.utils.screen_manager import ScreenManager
 from gui.utils.common import convert_cv_to_qimage, gen_graph
-from gui.workers.detect_worker import DetectWorker
+from gui.workers.replay_detect_worker import DetectWorker
 import logging
 
 class ReplayExeWindow(QWidget):
@@ -42,6 +42,7 @@ class ReplayExeWindow(QWidget):
         
         footer_layout.addStretch()  # スペーサー
         
+        # メインレイアウトに追加
         main_layout.addStretch()
         main_layout.addLayout(graph_layout)
         main_layout.addStretch()
@@ -61,7 +62,7 @@ class ReplayExeWindow(QWidget):
         
         self.params = params
         self.worker = DetectWorker(params)
-        self.worker.proguress.connect(self.show_result)
+        self.worker.progress.connect(self.show_result)
         self.worker.finished.connect(self.detect_finished)
         self.worker.termination.connect(self.detect_termination)
         self.worker.start()
@@ -96,7 +97,9 @@ class ReplayExeWindow(QWidget):
         self.logger.info(f"Results: {results}")
         self.params['results'] = results
         self.params['failed_rates'] = self.failed_rates
-        QTimer.singleShot(1, lambda: self.screen_manager.get_screen('log').export_process(self.params))
+        params = self.params
+        QTimer.singleShot(1, lambda: self.screen_manager.get_screen('log').export_process(params))
+        self.params = None
         
     def detect_termination(self, results):
         self.term_label.setText('中止しました')
@@ -105,5 +108,7 @@ class ReplayExeWindow(QWidget):
         self.params['results'] = results
         self.params['failed_rates'] = self.failed_rates
         self.params['timestamps'] = self.params['timestamps'][:len(self.results)]
-        QTimer.singleShot(1, lambda: self.screen_manager.get_screen('log').export_process(self.params))
+        params = self.params
+        QTimer.singleShot(1, lambda: self.screen_manager.get_screen('log').export_process(params))
+        self.params = None
         

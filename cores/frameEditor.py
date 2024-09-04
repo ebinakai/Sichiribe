@@ -27,28 +27,6 @@ class FrameEditor:
 
     self.logger.debug("Frame Editor loaded.")
 
-  # 画像を規定の大きさにリサイズ
-  def resize_image(self, image: np.ndarray, target_width: int, target_height: int) -> tuple[np.ndarray, float]:
-    
-    self.logger.debug("Resizing image to %dx%d", target_width, target_height)
-    height, width = image.shape[:2]
-    resize_scale_width = float(target_width / width)
-    resize_scale_height = float(target_height / height)
-    aspect_ratio = height / width
-    
-    # リサイズスケールの決定
-    if resize_scale_width < resize_scale_height:
-      resize_scale = resize_scale_width
-      target_height = int(target_width * aspect_ratio)
-    else:
-      resize_scale = resize_scale_height
-      target_width = int(target_height / aspect_ratio)
-    
-    resized_image = cv2.resize(image, (target_width, target_height), interpolation=cv2.INTER_AREA)
-    self.logger.debug(f"Image resized to: {resized_image.shape[1]}x{resized_image.shape[0]}")
-    
-    return resized_image, resize_scale
-
   # 動画をフレームに分割
   def frame_devide(self, 
                    video_path, 

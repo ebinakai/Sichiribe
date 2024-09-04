@@ -16,3 +16,4 @@ class ExportWorker(QThread):
         self.ep.export(data)
         
         self.finished.emit()
+        self.params = None

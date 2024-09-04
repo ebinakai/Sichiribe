@@ -3,7 +3,7 @@ from cores.cnn import CNN as Detector
 import logging
 
 class DetectWorker(QThread):
-    proguress = pyqtSignal(int, float)
+    progress = pyqtSignal(int, float)
     finished = pyqtSignal(list)
     termination = pyqtSignal(list)
 
@@ -23,24 +23,22 @@ class DetectWorker(QThread):
         for frame in self.params['frames']:
             if self._is_terminating: 
                 self.termination.emit(results)
+                self.params = None
                 return
             result, failed_rate = self.dt.detect(frame)
             
-            # すべての桁が8の場合は検出失敗とする
-            if self.is_all_eights(result):
+            # すべての桁(三桁以上)が8の場合はディスプレイが消灯していると判断し、検出失敗とする
+            if str(result) == '8' * self.params['num_digits'] and self.params['num_digits'] > 2:
                 failed_rate = 1.0
             
             results.append(result)
             self.logger.info(f"Detected Result: {result}")
             self.logger.info(f"Failed Rate: {failed_rate}")
-            self.proguress.emit(result, failed_rate)
+            self.progress.emit(result, failed_rate)
             
         self.finished.emit(results)
+        self.params = None
         
     def stop(self):
         self.logger.info("DetectWorker stopping...") 
         self._is_terminating = True  # 停止フラグを設定
-        
-    def is_all_eights(self, number):
-        num_str = str(number)  # 数字を文字列に変換
-        return len(num_str) >= 3 and all(char == '8' for char in num_str)

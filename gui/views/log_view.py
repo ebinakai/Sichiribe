@@ -61,6 +61,7 @@ class LogWindow(QWidget):
         self.params['frames'] = frames
         self.params['timestamps'] = timestamps
         self.screen_manager.get_screen('replay_exe').detect_process(self.params)
+        self.params = None
         
     def export_process(self, params):
         self.params = params
@@ -75,3 +76,4 @@ class LogWindow(QWidget):
         self.screen_manager.show_screen('menu')
         self.screen_manager.resie_defualt()
         self.screen_manager.center()
+        self.params = None
