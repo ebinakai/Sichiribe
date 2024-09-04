@@ -1,11 +1,7 @@
 import logging
 import json
-import datetime
 import os
-from utils.common import get_now_str
-
-# ロガーの設定
-logger = logging.getLogger("__main__").getChild(__name__)
+from cores.common import get_now_str
 
 # クラス外部で使用可能なサポートフォーマットを取得する関数
 def get_supported_formats():
@@ -20,6 +16,9 @@ class Exporter:
     self.base_filename = base_filename
     self.out_dir = out_dir
     
+    # ロガーの設定
+    self.logger = logging.getLogger("__main__").getChild(__name__)
+    
     # 出力ディレクトリが存在しない場合は作成
     os.makedirs(out_dir, exist_ok=True)
     
@@ -27,10 +26,12 @@ class Exporter:
         self.save = self.to_csv
     elif method == 'json':
         self.save = self.to_json
+    elif method == 'dummy':
+        self.save = self.to_dummy
     else:
-      logger.error("Invalid export method.")
+      self.logger.error("Invalid export method.")
         
-    logger.debug("Exporter loaded.")
+    self.logger.debug("Exporter loaded.")
 
   # データを保存
   def export(self, data):
@@ -49,14 +50,18 @@ class Exporter:
       f.write('timestamp,result\n')
       for i, _data in enumerate(data):
         f.write(f"{_data['timestamp']},{_data['value']}\n")
-    logger.debug("Exported data to csv.")
+    self.logger.debug("Exported data to csv.")
   
   # json形式で保存
   def to_json(self, data):
     out_path = self.generate_filepath("json")
     with open(out_path, 'w') as f:
       json.dump(data, f)
-    logger.debug("Exported data to json.")
+    self.logger.debug("Exported data to json.")
+    
+  # 出力しない
+  def to_dummy(self, data):
+    self.logger.debug("No exported data, it's dummy.")
     
   # データを辞書型に整形
   def format(self, data, timestamp):

@@ -2,11 +2,9 @@ import logging
 import cv2
 import numpy as np
 
-logger = logging.getLogger("__main__").getChild(__name__)
-
 class Detector():
   def __init__(self):
-    pass
+    self.logger = logging.getLogger("__main__").getChild(__name__)
   
   def load_image(self, image):
     # imageがNumPy配列（すでにロードされた画像）かどうかを確認
@@ -85,10 +83,11 @@ class Detector():
       return gs_threshold
   
   # 検出失敗率を取得
-  def get_failed_rate(self, data: list):
-    if len(data) == 0:
+  def get_failed_rate(self, data: list, correct_value: float) -> float:
+    total = len(data)
+    if total == 0:
       return 1.0
     
-    failed = data.count(None)
-    total = len(data)
+    correct = data.count(correct_value)
+    failed = total - correct
     return failed / total if total > 0 else 0

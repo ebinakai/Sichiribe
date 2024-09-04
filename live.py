@@ -10,11 +10,11 @@ logging.basicConfig(level=logging.DEBUG, format=formatter)
 logger = logging.getLogger('__main__').getChild(__name__)
 
 import argparse
-from utils.capture import FrameCapture
-from utils.frameEditor import FrameEditor
-from utils.cnn import CNN as Detector
-from utils.exporter import Exporter, get_supported_formats
-from utils.common import get_now_str
+from cores.capture import FrameCapture
+from cores.frameEditor import FrameEditor
+from cores.cnn import CNN as Detector
+from cores.exporter import Exporter, get_supported_formats
+from cores.common import get_now_str
 import time
 from datetime import timedelta
 import os
@@ -51,6 +51,9 @@ def main(device,
   fe = FrameEditor(num_digits=num_digits)
   dt = Detector(num_digits=num_digits)
   ep = Exporter(format, out_dir)
+
+  # モデルの読み込み
+  dt.load()
   
   # 画角を調整するためにカメラフィードを表示
   fc.show_camera_feed()

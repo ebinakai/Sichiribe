@@ -2,13 +2,13 @@ import cv2
 import time
 import logging
 
-logger = logging.getLogger("__main__").getChild(__name__)
-
 class FrameCapture:
   def __init__(
         self, 
         device_num=0,
     ):
+    
+    self.logger = logging.getLogger("__main__").getChild(__name__)
 
     self.cap = cv2.VideoCapture(device_num)
     self.frame_count = 0
@@ -41,7 +41,7 @@ class FrameCapture:
     if ret:
       return frame
     else:
-      logger.error("Failed to capture frame")
+      self.logger.error("Failed to capture frame")
 
   def release(self):
     self.cap.release()

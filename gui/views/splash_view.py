@@ -1,8 +1,9 @@
 from PyQt6.QtWidgets import QApplication, QWidget, QLabel, QVBoxLayout
+from PyQt6.QtGui import QImage
 from PyQt6.QtCore import Qt
 
 class SplashScreen(QWidget):
-    def __init__(self, pixmap):
+    def __init__(self, pixmap: QImage):
         super().__init__()
         self.setWindowFlags(Qt.WindowType.FramelessWindowHint | Qt.WindowType.WindowStaysOnTopHint)
         

@@ -12,7 +12,7 @@ from gui.views.splash_view import SplashScreen
 from gui.views.main_view import MainWindow
         
 def main():
-    splash_ms = 500 # スプラッシュスクリーンを表示する時間（ミリ秒）
+    splash_ms = 2000 # スプラッシュスクリーンを表示する時間（ミリ秒）
     
     # アプリケーションを作成
     app = QApplication([])
@@ -23,7 +23,7 @@ def main():
     splash_window.show()
     window = MainWindow()
 
-    # 3秒後にスプラッシュスクリーンを閉じて、メインウィンドウを表示
+    # 指定時間後にスプラッシュスクリーンを閉じて、メインウィンドウを表示
     QTimer.singleShot(splash_ms, window.show)
     QTimer.singleShot(splash_ms, splash_window.close)
 

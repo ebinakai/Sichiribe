@@ -1,20 +1,20 @@
 from PyQt6.QtWidgets import QApplication, QMainWindow, QStackedWidget
-from gui.utils.router import get_screen_manager
+from gui.utils.router import init_screen_manager
 
 class MainWindow(QMainWindow):
     def __init__(self):
         super().__init__()
         self.setWindowTitle('Sichiribe')
-        self.setGeometry(200, 200, 640, 480)
         
         # スタックウィジェットを作成
         stacked_widget = QStackedWidget()
-        screen_manager = get_screen_manager(stacked_widget)
         self.setCentralWidget(stacked_widget)
         
+        # スクリーンマネージャーを初期化
+        screen_manager = init_screen_manager(stacked_widget, self)
+        screen_manager.resie_defualt()
+        screen_manager.center()
         screen_manager.show_screen('menu')
-        
-        self.center()
 
     def center(self):
         # ディスプレイサイズを取得

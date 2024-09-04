@@ -3,10 +3,7 @@ import cv2
 import logging
 import numpy as np
 from datetime import timedelta
-from utils.common import clear_directory
-
-# ロガーの設定
-logger = logging.getLogger("__main__").getChild(__name__)
+from cores.common import clear_directory
 
 class FrameEditor:
   def __init__(self, 
@@ -17,17 +14,40 @@ class FrameEditor:
                crop_height=100,
   ):
 
-    self.frame_paths = []
-    self.cropped_frame_paths = []
+    self.return_frames = []
     self.sampling_sec = sampling_sec                   # サンプリング間隔（秒）
     self.num_frames_per_sample = num_frames_per_sample # サンプリングするフレーム数
-    self.sampling_count = 0                            # サンプリングした数(フレーム数ではない)
     self.num_digits = num_digits    # 読み取り桁数
     self.crop_width = crop_width    # 1文字ごとのクロップ幅
     self.crop_height = crop_height  # 1文字ごとのクロップ高さ
-    
     self.click_points = [] 
-    logger.debug("Frame Editor loaded.")
+    
+    # ロガーの設定
+    self.logger = logging.getLogger("__main__").getChild(__name__)
+
+    self.logger.debug("Frame Editor loaded.")
+
+  # 画像を規定の大きさにリサイズ
+  def resize_image(self, image: np.ndarray, target_width: int, target_height: int) -> tuple[np.ndarray, float]:
+    
+    self.logger.debug("Resizing image to %dx%d", target_width, target_height)
+    height, width = image.shape[:2]
+    resize_scale_width = float(target_width / width)
+    resize_scale_height = float(target_height / height)
+    aspect_ratio = height / width
+    
+    # リサイズスケールの決定
+    if resize_scale_width < resize_scale_height:
+      resize_scale = resize_scale_width
+      target_height = int(target_width * aspect_ratio)
+    else:
+      resize_scale = resize_scale_height
+      target_width = int(target_height / aspect_ratio)
+    
+    resized_image = cv2.resize(image, (target_width, target_height), interpolation=cv2.INTER_AREA)
+    self.logger.debug(f"Image resized to: {resized_image.shape[1]}x{resized_image.shape[0]}")
+    
+    return resized_image, resize_scale
 
   # 動画をフレームに分割
   def frame_devide(self, 
@@ -36,8 +56,10 @@ class FrameEditor:
                    save_frame=True,
                    out_dir='frames',
                    is_crop=True,
+                   click_points=[],
+                   extract_single_frame=False,
   ):
-    self.click_points = []
+    self.click_points = click_points
     
     # フレーム保存用のディレクトリ
     if save_frame:
@@ -49,29 +71,26 @@ class FrameEditor:
 
     # 動画が正常に読み込まれたか確認
     if not cap.isOpened():
-      logger.error("Error: Could not open video file.")
+      self.logger.error("Error: Could not open video file.")
       exit(1)
 
     fps = cap.get(cv2.CAP_PROP_FPS)
     interval_frames = 1 if self.sampling_sec == 0 else  int(fps * self.sampling_sec)
     skip_frames = fps * skip_sec
-    frame_count = -1
+    frame_count = 0
     saved_frame_count = 0
     frames = []
+    return_frames = []
+    
+    # 指定の開始位置までスキップ
+    cap.set(cv2.CAP_PROP_POS_FRAMES, skip_frames)
 
     while True:
       # フレームの読み込み
       ret, frame = cap.read()
       if not ret:
+        self.logger.debug("Finsish: Could not read frame.")
         break
-      
-      # フレームカウントの更新
-      frame_count += 1
-      
-      # スキップフレーム数に達していない場合はスキップ
-      if frame_count < skip_frames:
-        logger.debug("frame count %d was skipped", frame_count)
-        continue
       
       # サンプリング間隔に基づいてフレームを保存
       if frame_count % interval_frames < self.num_frames_per_sample:
@@ -83,45 +102,44 @@ class FrameEditor:
           # フレームの切り取り
           frame = self.crop(frame, self.click_points)
           
+        # 最初の位置フレームだけ取得
+        if extract_single_frame:
+          return_frames = frame
+          break
+          
         # 保存
         if save_frame:
           frame_filename = os.path.join(out_dir, f'frame_{frame_count:06d}.jpg')
           cv2.imwrite(frame_filename, frame)
-          logger.debug(f"Frame saved to '{frame_filename}'.")
+          self.logger.debug(f"Frame saved to '{frame_filename}'.")
           
           frames.append(frame_filename)
         else :
           frames.append(frame)
         saved_frame_count += 1
 
-        if frame_count % interval_frames == 0:
-          self.sampling_count += 1
-        
       elif len(frames) != 0:
-        self.frame_paths.append(frames)
+        return_frames.append(frames)
         frames = []
+        
+      # フレームカウントの更新
+      frame_count += 1
         
     # リソースの解放
     cap.release()
+    self.logger.debug("Capture resources released.")
     
-    logger.info(f"Extracted {saved_frame_count} frames were saved to '{out_dir}' directory.")
+    if saved_frame_count > 0:
+      self.logger.info(f"Extracted {saved_frame_count} frames were saved to '{out_dir}' directory.")
     
-    return self.frame_paths
-
-  # 誤認識を許容するために連続したフレームをサンプリングしているのでグループ化する
-  def group_frame_paths(self, frames):
-    grouped_frame_paths = [
-      frames[i:i + self.num_frames_per_sample]
-      for i in range(0, len(frames), self.num_frames_per_sample)
-    ]
-    return grouped_frame_paths
+    return return_frames
   
   # 切り出したフレームの間隔からタイムスタンプを生成
-  def generate_timestamp(self):
+  def generate_timestamp(self, n):
     timestamps = []
     
     # タイムスタンプの生成
-    for i in range(0, self.sampling_count):
+    for i in range(0, n):
       timestamp = timedelta(seconds=self.sampling_sec * i)
       # タイムスタンプを "HH:MM:SS" 形式でリストに追加
       timestamps.append(str(timestamp))
@@ -239,9 +257,9 @@ class FrameEditor:
       cv2.circle(
           image, (click_point[0], click_point[1]), 5, (0, 255, 0), -1
       )
-    if len(self.click_points) >= 3:
+    if len(click_points_) >= 3:
       cv2.drawContours(
-          image, [np.array(self.click_points)], -1, (0, 255, 0), 2
+          image, [np.array(click_points_)], -1, (0, 255, 0), 2
       )
     if extract_image is not None:
         for index in range(self.num_digits):

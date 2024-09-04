@@ -10,9 +10,9 @@ logging.basicConfig(level=logging.DEBUG, format=formatter)
 logger = logging.getLogger('__main__').getChild(__name__)
 
 import argparse
-from utils.frameEditor import FrameEditor
-from utils.cnn import CNN as Detector
-from utils.exporter import Exporter, get_supported_formats
+from cores.frameEditor import FrameEditor
+from cores.cnn import CNN as Detector
+from cores.exporter import Exporter, get_supported_formats
 
 def get_args():
   export_formats = get_supported_formats()
@@ -44,10 +44,13 @@ def main(video_path,
   fe = FrameEditor(sampling_sec, num_frames, num_digits)
   dt = Detector(num_digits)
   ep = Exporter(format, out_dir)
+
+  # モデルの読み込み
+  dt.load()
   
   # フレームの切り出し
   frames = fe.frame_devide(video_path, video_skip_sec, save_frame)
-  timestamps = fe.generate_timestamp()
+  timestamps = fe.generate_timestamp(len(frames))
     
   # テキスト検出
   results = []
@@ -74,7 +77,7 @@ if __name__ == "__main__":
        num_digits=args.num_digits, 
        sampling_sec=args.sampling_sec, 
        num_frames=args.num_frames, 
-       skip_sec=args.skip_sec, 
+       video_skip_sec=args.skip_sec, 
        format=args.format,
        save_frame=args.save_frame,
       )
