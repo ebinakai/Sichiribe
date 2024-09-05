@@ -77,7 +77,6 @@ class LiveSettingsWindow(QWidget):
         
         self.next_button = QPushButton('実行')
         self.next_button.setFixedWidth(100)
-        self.next_button.setFocus()  # フォーカスを設定
         self.next_button.setDefault(True)  # 強調表示されるデフォルトボタンに設定
         self.next_button.setAutoDefault(True)  # フォーカス時にエンターキーで実行
         self.next_button.clicked.connect(self.startup)
