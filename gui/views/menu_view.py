@@ -24,14 +24,14 @@ class MenuWindow(QWidget):
         self.live_button = QPushButton('ライブカム')
         self.live_button.setFixedHeight(50)
         self.live_button.setFixedWidth(200)
-        button_layout.addWidget(self.live_button)
         self.live_button.clicked.connect(lambda: self.screen_manager.show_screen('live_setting'))
+        button_layout.addWidget(self.live_button)
 
         self.replay_button = QPushButton('ファイル読み込み')
         self.replay_button.setFixedHeight(50)
         self.replay_button.setFixedWidth(200)
-        button_layout.addWidget(self.replay_button)
         self.replay_button.clicked.connect(lambda: self.screen_manager.show_screen('replay_setting'))
+        button_layout.addWidget(self.replay_button)
         
         # フッター
         self.quit_button = QPushButton('終了')

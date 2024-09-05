@@ -1,8 +1,6 @@
 from PyQt6.QtWidgets import QWidget, QVBoxLayout, QTextEdit
 from PyQt6.QtCore import pyqtSignal, QObject
 from gui.utils.screen_manager import ScreenManager
-from gui.workers.frame_devide_worker import FrameDivideWorker
-from gui.workers.export_worker import ExportWorker
 import logging
 
 # ログをメインスレッドに送信するためのクラス
@@ -46,34 +44,5 @@ class LogWindow(QWidget):
     def append_log(self, message):
         self.log_display.append(message)
 
-    def frame_devide_process(self, params):
-        self.params = params
-        
-        # ワーカーのインスタンスを作成
-        self.screen_manager.show_screen('log')
-        self.worker = FrameDivideWorker(params)
-        self.worker.finished.connect(self.frame_devide_finished)
-        self.worker.start()
-        self.logger.info('Frame Devide started.')
-
-    def frame_devide_finished(self, frames, timestamps):
-        self.logger.info('Frame Devide finished.')
-        self.params['frames'] = frames
-        self.params['timestamps'] = timestamps
-        self.screen_manager.get_screen('replay_exe').detect_process(self.params)
-        self.params = None
-        
-    def export_process(self, params):
-        self.params = params
-        self.screen_manager.show_screen('log')
-        self.worker = ExportWorker(params)
-        self.worker.finished.connect(self.export_finished)
-        self.worker.start()
-        self.logger.info('Export started.')
-        
-    def export_finished(self):
-        self.logger.info('Export finished.')
-        self.screen_manager.show_screen('menu')
-        self.screen_manager.resie_defualt()
-        self.screen_manager.center()
-        self.params = None
+    def clear_log(self):
+        self.log_display.clear()

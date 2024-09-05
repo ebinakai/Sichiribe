@@ -38,45 +38,50 @@ class RegionSelectWindow(QWidget):
         
         self.screen_manager = screen_manager
         screen_manager.add_screen('region_select', self)
+        self.click_points = []
         
         screen = QApplication.primaryScreen()
         screen_rect = screen.availableGeometry()
-        self.click_points = []
         self.target_width = int(screen_rect.width() * 0.8)
         self.target_height = int((screen_rect.height() - 100) * 0.8)
         self.initUI()
         
     def initUI(self):
         # メインウィジェットの設定
-        self.main_layout = QVBoxLayout()
-        self.image_layout = QVBoxLayout()
-        self.extracted_image_layout = QHBoxLayout()
-        self.footer_layout = QHBoxLayout()
-        self.setLayout(self.main_layout)
+        main_layout = QVBoxLayout()
+        header_layout = QVBoxLayout()
+        image_layout = QVBoxLayout()
+        extracted_image_layout = QHBoxLayout()
+        footer_layout = QHBoxLayout()
+        self.setLayout(main_layout)
         
-        self.extracted_image_layout.setAlignment(Qt.AlignmentFlag.AlignCenter)
-        self.image_layout.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        header_layout.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        image_layout.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        extracted_image_layout.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        
+        # ヘッダーレイアウト
+        self.header_description = QLabel("7セグメント領域として4点を選択してください")
+        header_layout.addWidget(self.header_description)
         
         # 画像を表示するためのラベル
         self.main_label = ClickableLabel(self, self.label_clicked)
-        
         # サイズポリシーを設定して、ラベルが画像サイズに合わせて変わるようにする
         self.main_label.setSizePolicy(QSizePolicy.Policy.Fixed, QSizePolicy.Policy.Fixed)
-        self.image_layout.addWidget(self.main_label)
+        image_layout.addWidget(self.main_label)
         
         # 選択領域表示用レイアウト
         self.extracted_label = QLabel()
         self.extracted_label.setMinimumHeight(100)
-        self.extracted_image_layout.addWidget(self.extracted_label)
+        extracted_image_layout.addWidget(self.extracted_label)
         
         # フッターレイアウト
         # 「戻る」ボタン
         self.back_button = QPushButton('戻る')
         self.back_button.setFixedWidth(100)
-        self.back_button.clicked.connect(self.switch_back)
-        self.footer_layout.addWidget(self.back_button)
+        self.back_button.clicked.connect(self.cancel_select)
+        footer_layout.addWidget(self.back_button)
 
-        self.footer_layout.addStretch()  # スペーサーを追加してボタンを右寄せ
+        footer_layout.addStretch()  # スペーサーを追加してボタンを右寄せ
 
         # 次へボタンとコンファームテキスト
         footer_right_layout = QHBoxLayout()
@@ -91,11 +96,13 @@ class RegionSelectWindow(QWidget):
         self.next_button.clicked.connect(self.finish_select)
         footer_right_layout.addWidget(self.next_button)  # 次へボタンを追加
 
-        self.footer_layout.addLayout(footer_right_layout)  # フッターレイアウトに追加
+        footer_layout.addLayout(footer_right_layout)  # フッターレイアウトに追加
         
-        self.main_layout.addLayout(self.image_layout)
-        self.main_layout.addLayout(self.extracted_image_layout)
-        self.main_layout.addLayout(self.footer_layout)
+        # メインレイアウトに追加
+        main_layout.addLayout(header_layout)
+        main_layout.addLayout(image_layout)
+        main_layout.addLayout(extracted_image_layout)
+        main_layout.addLayout(footer_layout)
     
     def set_image(self, image: np.ndarray):
         self.image_original = image
@@ -154,24 +161,19 @@ class RegionSelectWindow(QWidget):
     def startup(self, params, prev_screen):
         self.params = params
         self.prev_screen = prev_screen
+        self.fe = FrameEditor(num_digits=params['num_digits'])
+        
+        # 表示画像サイズを計算
+        screen = QApplication.primaryScreen()
+        screen_rect = screen.availableGeometry()
+        self.target_width = int(screen_rect.width() * 0.8)
+        self.target_height = int((screen_rect.height() - 100) * 0.8)
         
         # ウィンドウの位置とサイズを保存
-        self.window_pos = self.window().pos()
-        self.window_size = self.window().size()
-        self.window().setGeometry(self.window_pos.x(), 10, self.window_size.width(), self.window_size.height())
-        self.window().resize(10, 10)
+        window_pos, window_size = self.screen_manager.save_screen_size()
+        self.window().setGeometry(window_pos.x(), 0, window_size.width(), window_size.height())
         
-        # インスタンスを作成
-        self.fe = FrameEditor(params['sampling_sec'], params['num_frames'], params['num_digits'])
-        first_frame = self.fe.frame_devide(params['video_path'], 
-                        params['video_skip_sec'],
-                        save_frame=False,
-                        is_crop=False,
-                        extract_single_frame=True)        
-        
-        self.set_image(first_frame)
-        
-        # ここで、画像のサイズに合わせてウィンドウサイズを最小化し、余白をなくす
+        self.set_image(params['first_frame'])
         self.screen_manager.show_screen('region_select')
         
     def finish_select(self):
@@ -186,33 +188,38 @@ class RegionSelectWindow(QWidget):
 
         # ウィンドウサイズの適用を待ってから次の画面に遷移
         QTimer.singleShot(10, self.switch_next)
-
-    def switch_back(self):
-        prev_screen = self.prev_screen
+    
+    def cancel_select(self):
+        params = self.params
         self.clear_env()
-        QTimer.singleShot(100, lambda: self.screen_manager.show_screen(prev_screen))
-        self.params = None
+        QTimer.singleShot(100, lambda: self.switch_back(params))
+    
+    def switch_back(self, params):
+        self.logger.debug("Switching to back screen(%s).", self.prev_screen)
+        if self.prev_screen == 'replay_exe':
+            self.screen_manager.show_screen('replay_setting')
+        elif self.prev_screen == 'live_feed':
+            self.screen_manager.get_screen('live_feed').startup(params)
+        self.prev_screen = None
 
     def switch_next(self):
-        if self.prev_screen == 'replay_setting':
-            self.screen_manager.get_screen('log').frame_devide_process(self.params)
-        else:
-            self.screen_manager.get_screen('log').frame_devide_process(self.params)
-        self.params = None
+        self.logger.debug("Switching to next screen(%s).", self.prev_screen)
+        if self.prev_screen == 'replay_exe':
+            self.screen_manager.get_screen('replay_exe').frame_devide_process(self.params)
+        elif self.prev_screen == 'live_feed':
+            self.screen_manager.get_screen('live_exe').startup(self.params)
+        self.prev_screen = None
 
     def clear_env(self):
         self.main_label.clear()
         self.extracted_label.clear()
+        self.target_width = None
+        self.target_height = None
         self.image = None
         self.image_original = None
         self.click_points = []
-        self.prev_screen = None
         self.confirm_txt.setText('')
         self.fe = None
 
         # ウィンドウサイズを元に戻す
-        QTimer.singleShot(1, lambda: self.window().setGeometry(self.window_pos.x(), 
-                                     self.window_pos.y(), 
-                                     self.window_size.width(), 
-                                     self.window_size.height(),
-                                    ))
+        QTimer.singleShot(1, self.screen_manager.restore_screen_size)

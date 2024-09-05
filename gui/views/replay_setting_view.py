@@ -77,7 +77,7 @@ class ReplaySettingsWindow(QWidget):
         self.next_button.setFocus()  # フォーカスを設定
         self.next_button.setDefault(True)  # 強調表示されるデフォルトボタンに設定
         self.next_button.setAutoDefault(True)  # フォーカス時にエンターキーで実行
-        self.next_button.clicked.connect(self.start_processing)
+        self.next_button.clicked.connect(self.startup)
         footer_layout.addWidget(self.next_button)
         
         # メインレイアウトに追加
@@ -93,7 +93,7 @@ class ReplaySettingsWindow(QWidget):
         self.confirm_txt.setText('')
         self.screen_manager.show_screen('menu')
         
-    def start_processing(self):
+    def startup(self):
         self.confirm_txt.setText('')
         
         if self.video_path.text() == '':
@@ -112,5 +112,5 @@ class ReplaySettingsWindow(QWidget):
             'out_dir': os.path.dirname(self.video_path.text())
         }
         
-        self.screen_manager.get_screen('region_select').startup(params, 'replay_setting')
+        self.screen_manager.get_screen('replay_exe').startup(params)
         

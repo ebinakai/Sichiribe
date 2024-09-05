@@ -5,14 +5,14 @@ import logging
 class DetectWorker(QThread):
     progress = pyqtSignal(int, float)
     finished = pyqtSignal(list)
-    termination = pyqtSignal(list)
+    cancelled = pyqtSignal(list)
 
     def __init__(self, params):
         super().__init__()
         self.params = params
         self.dt = Detector(params['num_digits'])
         self.logger = logging.getLogger('__main__').getChild(__name__)
-        self._is_terminating = False  # 停止フラグ
+        self._is_cancelled = False  # 停止フラグ
 
     def run(self):
         self.logger.info("DetectWorker started.")
@@ -21,8 +21,8 @@ class DetectWorker(QThread):
         # テキスト検出
         results = []
         for frame in self.params['frames']:
-            if self._is_terminating: 
-                self.termination.emit(results)
+            if self._is_cancelled: 
+                self.cancelled.emit(results)
                 self.params = None
                 return
             result, failed_rate = self.dt.detect(frame)
@@ -39,6 +39,6 @@ class DetectWorker(QThread):
         self.finished.emit(results)
         self.params = None
         
-    def stop(self):
-        self.logger.info("DetectWorker stopping...") 
-        self._is_terminating = True  # 停止フラグを設定
+    def cancel(self):
+        self.logger.info("DetectWorker terminating...") 
+        self._is_cancelled = True  # 停止フラグを設定

@@ -15,7 +15,7 @@ class FrameCapture:
     
     # カメラに接続するまで待機
     time.sleep(0.1)
-    
+
   def show_camera_feed(self):
 
     while True:
@@ -46,3 +46,13 @@ class FrameCapture:
   def release(self):
     self.cap.release()
     cv2.destroyAllWindows()
+    
+  def set_cap_size(self, width, height):
+    self.cap.set(cv2.CAP_PROP_FRAME_WIDTH, width)
+    self.cap.set(cv2.CAP_PROP_FRAME_HEIGHT, height)
+    self.logger.debug("set_cap_size called: {0} x {1}".format(self.cap.get(cv2.CAP_PROP_FRAME_WIDTH), self.cap.get(cv2.CAP_PROP_FRAME_HEIGHT)))
+    width = self.cap.get(cv2.CAP_PROP_FRAME_WIDTH)
+    height = self.cap.get(cv2.CAP_PROP_FRAME_HEIGHT)
+    self.logger.debug("set to {0} x {1}".format(width, height))
+    return width, height
+    

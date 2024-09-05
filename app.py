@@ -12,7 +12,7 @@ from gui.views.splash_view import SplashScreen
 from gui.views.main_view import MainWindow
         
 def main():
-    splash_ms = 2000 # スプラッシュスクリーンを表示する時間（ミリ秒）
+    splash_ms = 200 # スプラッシュスクリーンを表示する時間（ミリ秒）
     
     # アプリケーションを作成
     app = QApplication([])

@@ -15,7 +15,7 @@ result_*.json
 
 # CNNモデル
 model/
-7segment_digits_dataset/
+datasets/
 
 # GUI & App
 dist/

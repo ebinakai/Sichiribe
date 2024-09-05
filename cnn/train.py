@@ -17,10 +17,10 @@ import time
 #2 各種設定  
 # https://child-programmer.com/download/seven-segment-digits-ocr-original-model-dataset/
 # からデータセットをダウンロードして解凍し、train_data_pathにフォルダ名を入力してください。
-train_data_path = '7segment_digits_dataset' # zipファイルを解凍後の、データセットのフォルダ名
+train_data_path = 'datasets' # zipファイルを解凍後の、データセットのフォルダ名
 
-image_width = 28   # ここを変更。必要に応じて変更してください。「28」を指定した場合、縦の高さ28ピクセルの画像に変換します。
-image_height = 28  # ここを変更。必要に応じて変更してください。「28」を指定した場合、横の幅28ピクセルの画像に変換します。
+image_width = 100   # ここを変更。必要に応じて変更してください。「28」を指定した場合、縦の高さ28ピクセルの画像に変換します。
+image_height = 100  # ここを変更。必要に応じて変更してください。「28」を指定した場合、横の幅28ピクセルの画像に変換します。
                                 # 画像のサイズは、原寸大や長方形などでも試してみましたが、少ない学習回数で実際の正解率が高いのは28*28の正方形でした。
 color_setting = 1     #ここを変更。データセット画像のカラー指定：「1」はモノクロ・グレースケール。「3」はカラーとして画像を処理。
 
@@ -35,7 +35,7 @@ X_image = []
 Y_label = [] 
 for index, name in enumerate(folder):
   read_data = train_data_path + '/' + name
-  files = glob.glob(read_data + '/*.png') # ここを変更。png形式のファイルを利用する場合のサンプルです。
+  files = glob.glob(read_data + '/*.jpg') # ここを変更。png形式のファイルを利用する場合のサンプルです。
   print('--- 読み込んだデータセットは', read_data, 'です。')
 
   for i, file in enumerate(files):  
@@ -86,7 +86,7 @@ start_time = time.time()
 
 # ここを変更。必要に応じて「batch_size=」（バッチサイズ：重みとバイアスの更新を行う間隔の数）「epochs=」（学習回数）の数字を変更してみてください。
 # モノクロ・グレースケールでは「batch_size=4, epochs=10」カラーでは「batch_size=4, epochs=20」程度でも比較的良い成績が得られました。
-history = model.fit(x_train, y_train, batch_size=3, epochs=10, verbose=1, validation_data=(x_test, y_test))
+history = model.fit(x_train, y_train, batch_size=3, epochs=4, verbose=1, validation_data=(x_test, y_test))
 
 plt.plot(history.history['accuracy'])
 plt.plot(history.history['val_accuracy'])
@@ -114,6 +114,6 @@ print('Computation time（計算時間）:{0:.3f} sec（秒）'.format(time.time
 
 # 学習済みモデル（モデル構造と学習済みの重み）の保存
 
-model.save('model/model.keras') 
+model.save('model/model_100x100.keras') 
 #model.save('keras_cnn_7segment_digits_gray28*28_model.keras')  #名前は自分がわかりやすい名前にしてください。モノクロ・グレー形式の学習済みモデルの例：color_setting = 1 にした場合  
 #model.save('keras_cnn_7segment_digits_color28*28_model.keras')  #カラー形式の学習済みモデルの例：color_setting = 3 にした場合  
