@@ -56,12 +56,10 @@ def gen_graph(x_val, y_val1, y_val2, title, xlabel, ylabel1, ylabel2, dark_theme
     plt.style.use('dark_background')
     title_color = 'white'
     label_color = 'white'
-    grid_color = '#555555'
     bg_color = '#323232'
   else:
     title_color = 'black'
     label_color = 'black'
-    grid_color = 'lightgray'
     bg_color = '#ECECEC'
 
   # FigureとAxesを作成
@@ -71,6 +69,7 @@ def gen_graph(x_val, y_val1, y_val2, title, xlabel, ylabel1, ylabel2, dark_theme
   line1, = ax1.plot(x_val, y_val1, marker='o', color='royalblue', label=ylabel1)
   ax1.set_xlabel(xlabel, color=label_color)
   ax1.tick_params(axis='y', labelcolor='royalblue')
+  ax1.set_ylim(-0.2, 1)
 
   # 右側のY軸を作成して別のデータセットをプロット
   ax2 = ax1.twinx()

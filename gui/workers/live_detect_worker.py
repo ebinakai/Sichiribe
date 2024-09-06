@@ -25,6 +25,9 @@ class DetectWorker(QThread):
     def run(self):
         self.logger.info("DetectWorker started.")
         
+        if self.params['save_frame']:
+          os.makedirs(os.path.join(self.params['out_dir'], 'frames'), exist_ok=True)
+        
         self.fc = FrameCapture(device_num=self.params['device_num'])
         self.fc.set_cap_size(self.params['cap_size'][0], self.params['cap_size'][1])
         
@@ -61,7 +64,7 @@ class DetectWorker(QThread):
             
             # フレームを保存
             if self.params['save_frame']:
-              frame_filename = os.path.join(self.params['out_dir'], f"frame_{frame_count}.jpg")
+              frame_filename = os.path.join(self.params['out_dir'], 'frames', f"frame_{frame_count}.jpg")
               cv2.imwrite(frame_filename, cropped_frame)
               self.logger.debug(f"Frame {frame_count} has been saved as: {frame_filename}")
               frame_count += 1

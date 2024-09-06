@@ -46,7 +46,6 @@ class LiveFeedWindow(QWidget):
         
         self.next_button = QPushButton('次へ')
         self.next_button.setFixedWidth(100)
-
         self.next_button.setDefault(True)  # 強調表示されるデフォルトボタンに設定
         self.next_button.setAutoDefault(True)  # フォーカス時にエンターキーで実行
         self.next_button.clicked.connect(self.next)

@@ -16,6 +16,7 @@ class ScreenManager:
     def show_screen(self, name):
         if name in self.screens:
             self.stacked_widget.setCurrentWidget(self.screens[name])
+            self.main_window.setFocus()
         else:
             self.logger.error(f"Screen '{name}' not found")
             

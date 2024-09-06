@@ -12,7 +12,7 @@ class ExportWorker(QThread):
         self.logger = logging.getLogger('__main__').getChild(__name__)
 
     def run(self):
-        data = self.ep.format(self.params['results'], self.params['timestamps'])
+        data = self.ep.format(self.params['results'], self.params['failed_rates'], self.params['timestamps'])
         self.ep.export(data)
         
         self.finished.emit()

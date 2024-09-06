@@ -2,7 +2,9 @@ from PyQt6.QtWidgets import QWidget, QHBoxLayout, QVBoxLayout, QFormLayout, QPus
 from PyQt6.QtCore import QTimer
 from gui.utils.screen_manager import ScreenManager
 from cores.exporter import get_supported_formats
+from cores.common import get_now_str
 import logging
+import os
 
 class LiveSettingsWindow(QWidget):
     def __init__(self, screen_manager: ScreenManager):
@@ -22,27 +24,34 @@ class LiveSettingsWindow(QWidget):
 
         self.device_num = QSpinBox()
         self.device_num.setValue(0)
+        self.device_num.setFixedWidth(50)
         form_layout.addRow('カメラID：', self.device_num)
 
         self.num_digits = QSpinBox()
         self.num_digits.setValue(4)
+        self.num_digits.setFixedWidth(50)
         self.num_digits.setMinimum(1)
         form_layout.addRow('7セグ表示機の桁数：', self.num_digits)
 
         self.sampling_sec = QSpinBox()
         self.sampling_sec.setValue(10)
+        self.sampling_sec.setFixedWidth(50)
         self.sampling_sec.setMinimum(3)
+        self.sampling_sec.valueChanged.connect(self.calc_max_frames)
         form_layout.addRow('動画をサンプリングする頻度(秒)：', self.sampling_sec)
 
         self.num_frames = QSpinBox()
         self.num_frames.setValue(10)
+        self.num_frames.setFixedWidth(50)
         self.num_frames.setMinimum(1)
         self.num_frames.setMaximum(60)
         form_layout.addRow('1回のサンプリング取得するフレーム数：', self.num_frames)
 
         self.total_sampling_min = QSpinBox()
         self.total_sampling_min.setValue(1)
+        self.total_sampling_min.setFixedWidth(50)
         self.total_sampling_min.setMinimum(1)
+        self.total_sampling_min.setMaximum(600)
         form_layout.addRow('総サンプリング時間(分)：', self.total_sampling_min)
 
         self.format = QComboBox()
@@ -92,6 +101,10 @@ class LiveSettingsWindow(QWidget):
         if folder_path:
             self.out_dir.setText(folder_path)
             
+    def calc_max_frames(self):
+        sampling_sec = self.sampling_sec.value()
+        self.num_frames.setMaximum(sampling_sec * 30 - 10)
+            
     def startup(self):
         if self.out_dir.text() == '':
             self.confirm_txt.setText('動画ファイルを選択してください')
@@ -104,7 +117,7 @@ class LiveSettingsWindow(QWidget):
             'total_sampling_sec': self.total_sampling_min.value() * 60,
             'format': self.format.currentText(),
             'save_frame': self.save_frame.isChecked(),
-            'out_dir': self.out_dir.text()
+            'out_dir': os.path.join(self.out_dir.text(), get_now_str())
         }
     
         self.logger.debug("Starting live feed with params: %s", params)

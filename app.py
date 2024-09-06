@@ -22,7 +22,6 @@ def main():
     splash_window = SplashScreen(pixmap)
     splash_window.show()
     window = MainWindow()
-    window.setFocus()
 
     # 指定時間後にスプラッシュスクリーンを閉じて、メインウィンドウを表示
     QTimer.singleShot(splash_ms, window.show)

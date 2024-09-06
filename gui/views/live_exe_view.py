@@ -1,5 +1,5 @@
 from PyQt6.QtWidgets import QWidget, QHBoxLayout, QVBoxLayout, QFormLayout, QPushButton, QLabel, QSlider
-from PyQt6.QtCore import QTimer, Qt, QSize
+from PyQt6.QtCore import QTimer, Qt
 from PyQt6.QtGui import QPixmap
 from gui.utils.screen_manager import ScreenManager
 from gui.utils.common import convert_cv_to_qimage, gen_graph
@@ -186,8 +186,7 @@ class LiveExeWindow(QWidget):
 
     def export_finished(self):
         self.logger.info('Export finished.')
-        self.screen_manager.show_screen('menu')
-        self.screen_manager.get_screen('log').clear_log()
+        self.screen_manager.get_screen('finish').startup(self.params)
         self.screen_manager.resie_defualt()
         self.screen_manager.center()
         self.worker = None

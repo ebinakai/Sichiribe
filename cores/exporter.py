@@ -1,5 +1,6 @@
 import logging
 import json
+import csv
 import os
 from cores.common import get_now_str
 
@@ -45,15 +46,22 @@ class Exporter:
 
   # csv形式で保存
   def to_csv(self, data):
+    if not data:
+        self.logger.debug("No data to export.")
+        return
     out_path = self.generate_filepath("csv")
-    with open(out_path, 'w') as f:
-      f.write('timestamp,result\n')
-      for i, _data in enumerate(data):
-        f.write(f"{_data['timestamp']},{_data['value']}\n")
+    keys = data[0].keys()
+    with open(out_path, 'w', newline='') as f:
+        dict_writer = csv.DictWriter(f, fieldnames=keys)
+        dict_writer.writeheader()
+        dict_writer.writerows(data)
     self.logger.debug("Exported data to csv.")
   
   # json形式で保存
   def to_json(self, data):
+    if not data:
+        self.logger.debug("No data to export.")
+        return
     out_path = self.generate_filepath("json")
     with open(out_path, 'w') as f:
       json.dump(data, f)
@@ -68,4 +76,12 @@ class Exporter:
     formatted_data = []
     for data, timestamp in zip(data, timestamp):
       formatted_data.append({"timestamp": timestamp, "value": data})
+    self.logger.debug("formatted data: %s", formatted_data)
+    return formatted_data
+  
+  def format(self, data, data2, timestamp):
+    formatted_data = []
+    for data, data2, timestamp in zip(data, data2, timestamp):
+      formatted_data.append({"timestamp": timestamp, "value": data, "failed": data2})
+    self.logger.debug("formatted data: %s", formatted_data)
     return formatted_data

@@ -1,6 +1,6 @@
 from PyQt6.QtWidgets import *
-from PyQt6.QtCore import Qt
 from gui.utils.screen_manager import ScreenManager
+from cores.common import get_now_str
 import os
 
 class ReplaySettingsWindow(QWidget):
@@ -31,24 +31,28 @@ class ReplaySettingsWindow(QWidget):
         # 7セグメント表示器の桁数
         self.num_digits = QSpinBox()
         self.num_digits.setValue(4)
+        self.num_digits.setFixedWidth(50)
         self.num_digits.setMinimum(1)
         form_layout.addRow('7セグメント表示器の桁数：', self.num_digits)
 
         # 動画をサンプリングする頻度
         self.sampling_sec = QSpinBox()
         self.sampling_sec.setValue(5)
+        self.sampling_sec.setFixedWidth(50)
         self.sampling_sec.setMinimum(1)
         form_layout.addRow('動画をサンプリングする頻度 (秒)：', self.sampling_sec)
 
         # 一回のサンプリングで何フレーム取得するか
         self.num_frames = QSpinBox()
         self.num_frames.setValue(30)
+        self.num_frames.setFixedWidth(50)
         self.num_frames.setMinimum(1)
         form_layout.addRow('一回のサンプリングで何フレーム取得するか：', self.num_frames)
 
         # 動画の解析を始めるタイミング
         self.video_skip_sec = QSpinBox()
         self.video_skip_sec.setValue(0)
+        self.video_skip_sec.setFixedWidth(50)
         form_layout.addRow('動画の解析を始めるタイミング (秒)：', self.video_skip_sec)
 
         # 出力形式
@@ -109,7 +113,7 @@ class ReplaySettingsWindow(QWidget):
             'video_skip_sec': self.video_skip_sec.value(),
             'format': self.format.currentText(),
             'save_frame': self.save_frame.isChecked(),
-            'out_dir': os.path.dirname(self.video_path.text())
+            'out_dir': os.path.join(os.path.dirname(self.video_path.text()), get_now_str())
         }
         
         self.screen_manager.get_screen('replay_exe').startup(params)
