@@ -1,15 +1,16 @@
-from PyQt6.QtCore import pyqtSignal, QThread
+from PySide6.QtCore import Signal, QThread
 from cores.exporter import Exporter
 from cores.capture import FrameCapture
 import logging
 import numpy as np
 
 class CaptureFeedWorker(QThread):
-    cap_size = pyqtSignal(tuple)
-    progress = pyqtSignal(np.ndarray)
-    finished = pyqtSignal(np.ndarray)
-    cancelled = pyqtSignal()
-    error = pyqtSignal()
+    cap_size = Signal(tuple)
+    progress = Signal(np.ndarray)
+    finished = Signal(np.ndarray)
+    cancelled = Signal()
+    error = Signal()
+    end = Signal()
 
     def __init__(self, params, width, height):
         super().__init__()
@@ -44,6 +45,8 @@ class CaptureFeedWorker(QThread):
             
             self.progress.emit(frame)
         fc.release()
+        self.end.emit()
+        
             
     def stop(self):
         self.logger.info("Capture Feed stopping...") 

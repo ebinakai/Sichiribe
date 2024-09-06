@@ -1,5 +1,4 @@
-from PyQt6.QtWidgets import QWidget, QHBoxLayout, QVBoxLayout, QFormLayout, QPushButton, QComboBox, QSpinBox, QCheckBox, QLineEdit, QFileDialog, QLabel
-from PyQt6.QtCore import QTimer
+from PySide6.QtWidgets import QWidget, QHBoxLayout, QVBoxLayout, QFormLayout, QPushButton, QComboBox, QSpinBox, QCheckBox, QLineEdit, QFileDialog, QLabel
 from gui.utils.screen_manager import ScreenManager
 from cores.exporter import get_supported_formats
 from cores.common import get_now_str
@@ -57,7 +56,7 @@ class LiveSettingsWindow(QWidget):
         self.format = QComboBox()
         for fmt in get_supported_formats():
             self.format.addItem(fmt)
-        form_layout.addRow('ファイルフォーマット：', self.format)
+        form_layout.addRow('出力フォーマット：', self.format)
         
         self.save_frame = QCheckBox()
         form_layout.addRow('フレームを保存する：', self.save_frame)
@@ -103,7 +102,7 @@ class LiveSettingsWindow(QWidget):
             
     def calc_max_frames(self):
         sampling_sec = self.sampling_sec.value()
-        self.num_frames.setMaximum(sampling_sec * 30 - 10)
+        self.num_frames.setMaximum(sampling_sec * 5)
             
     def startup(self):
         if self.out_dir.text() == '':

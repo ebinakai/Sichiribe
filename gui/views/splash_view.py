@@ -1,15 +1,16 @@
-from PyQt6.QtWidgets import QApplication, QWidget, QLabel, QVBoxLayout
-from PyQt6.QtGui import QImage
-from PyQt6.QtCore import Qt
+from PySide6.QtWidgets import QApplication, QWidget, QLabel, QVBoxLayout
+from PySide6.QtGui import QPixmap
+from PySide6.QtCore import Qt
 
 class SplashScreen(QWidget):
-    def __init__(self, pixmap: QImage):
+    def __init__(self):
         super().__init__()
         self.setWindowFlags(Qt.WindowType.FramelessWindowHint | Qt.WindowType.WindowStaysOnTopHint)
         
         # スプラッシュスクリーンのレイアウトを設定
         layout = QVBoxLayout()
         label = QLabel()
+        pixmap = QPixmap("gui/images/splash_image.png")
         pixmap = pixmap.scaledToWidth(640, Qt.TransformationMode.SmoothTransformation)
         label.setPixmap(pixmap)
         layout.addWidget(label)

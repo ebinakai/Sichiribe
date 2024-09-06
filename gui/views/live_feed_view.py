@@ -1,6 +1,6 @@
-from PyQt6.QtWidgets import QWidget, QHBoxLayout, QVBoxLayout, QPushButton, QLabel
-from PyQt6.QtCore import QTimer, Qt
-from PyQt6.QtGui import QPixmap
+from PySide6.QtWidgets import QWidget, QHBoxLayout, QVBoxLayout, QPushButton, QLabel
+from PySide6.QtCore import QTimer, Qt
+from PySide6.QtGui import QPixmap
 from gui.utils.screen_manager import ScreenManager
 from gui.utils.common import convert_cv_to_qimage, resize_image
 from gui.workers.capture_feed_worker import CaptureFeedWorker
@@ -89,6 +89,7 @@ class LiveFeedWindow(QWidget):
         self.worker.progress.connect(self.show_feed)
         self.worker.finished.connect(self.feed_finished)
         self.worker.cancelled.connect(self.feed_cancelled)
+        self.worker.end.connect(self.clear_env)  # スレッドが終了後に環境をクリア
         self.worker.error.connect(self.feed_error)
         self.worker.start()
         self.logger.info('Feed started.')
@@ -106,17 +107,14 @@ class LiveFeedWindow(QWidget):
         self.logger.info('Feed finished.')
         self.params['first_frame'] = first_frame
         params = self.params
-        self.clear_env()
         QTimer.singleShot(1, lambda: self.screen_manager.get_screen('region_select').startup(params, 'live_feed'))
     
     def feed_cancelled(self):
         self.logger.info('Feed cancelled.')
-        self.clear_env()
         QTimer.singleShot(1, lambda: self.screen_manager.show_screen('live_setting'))
         
     def feed_error(self):
         self.logger.error('Feed missing frame.')
-        self.clear_env()
         QTimer.singleShot(1, lambda: self.screen_manager.show_screen('live_setting'))
         
     def clear_env(self):

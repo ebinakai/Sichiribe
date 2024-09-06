@@ -4,6 +4,13 @@
 
 7セグメント表示器が示したデータをシリアル等で読み取れない場合のために、メータの表示状態を録画し、そこからデータを取り出すためのプログラムを作成した。
 
+## Requirements
+
+- Python 3.10.5 or later
+OpenCV 3.4.2 or Later
+Tensorflow 2.17.0 or Later
+matplotlib 3.3.2 or Later
+
 ## Features
 
 - 動画を入力して、その動画を解析する
@@ -28,6 +35,9 @@ source ./env/bin/activate
 # ライブラリのインストール
 python3 -m pip install --upgrade pip
 pip install -r requirements.txt
+
+# macosの場合
+pip install tensorflow-metal
 ```
 
 ## GUI Execution
@@ -108,6 +118,7 @@ python live.py --device 1 --num-frames 10 --sampling-sec 2 --total-sampling-min 
 | `cores/cnn.py` | CNNモデルを用いて画像から数字を取得するプログラム |
 | `cores/exporter.py` | 取得した結果を任意の形式で出力・保存する機能 |
 | `cnn/train.py` | ディープラーニングモデルを学習するプログラム |
+| `cnn/conv_keras2tf.py` | Kerasモデルをtflite形式に変換するプログラム |
 | `gui/utils/common.py` | GUI用の汎用的な機能の関数詰め合わせ |
 | `gui/utils/router.py` | GUIの各ページのルーティング |
 | `gui/utils/screen_manager.py` | GUIの各ページの管理クラス |
@@ -165,7 +176,11 @@ CNNモデルを学習させるためには以下のプログラムを実行す�
 上記サイトからデータセットも落としてこれるので、学習前にダウンロードしたあとに zip を解凍してプロジェクトフォルダに追加すること。また、カスタムデータセットを作成した際は、一文字ごとに分割して PNG形式で保存するとプログラムを改変せずに実行できる。  
 
 ```bash
+# 学習(ファイル内のパラメーターを調整してから実行)
 python cnn/train.py
+
+# 軽量モデルに変換
+python cnn/conv_keras2tf.py
 ```
 
 ## References

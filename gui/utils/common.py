@@ -3,7 +3,7 @@ import logging
 logging.getLogger('PIL').setLevel(logging.ERROR)
 logging.getLogger('matplotlib').setLevel(logging.ERROR)
 
-from PyQt6.QtGui import QImage
+from PySide6.QtGui import QImage
 import matplotlib.pyplot as plt
 import numpy as np
 from PIL import Image

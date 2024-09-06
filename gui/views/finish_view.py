@@ -1,6 +1,7 @@
-from PyQt6.QtWidgets import QWidget, QVBoxLayout, QHBoxLayout, QLabel, QPushButton
-from PyQt6.QtCore import Qt
+from PySide6.QtWidgets import QWidget, QVBoxLayout, QHBoxLayout, QLabel, QPushButton
+from PySide6.QtCore import Qt
 from gui.utils.screen_manager import ScreenManager
+from cores.exporter import Exporter
 import logging
 
 class FinishWindow(QWidget):
@@ -53,5 +54,12 @@ class FinishWindow(QWidget):
         self.parmas = None
         
     def startup(self, params):
+        self.params = params
         self.contents.setText(params['out_dir'])
         self.screen_manager.show_screen('finish')
+        self.export_params()
+        
+    def export_params(self):
+        ep = Exporter(method='json', out_dir=self.params['out_dir'], base_filename='parameters')
+        filtered_params = ep.filter_dict(self.params, ['results', 'failed_rates', 'timestamps', 'first_frame', ])
+        ep.export(filtered_params)

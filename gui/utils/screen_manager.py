@@ -1,5 +1,5 @@
-from PyQt6.QtWidgets import QApplication, QStackedWidget, QWidget, QMainWindow
-from PyQt6.QtGui import QPalette
+from PySide6.QtWidgets import QApplication, QStackedWidget, QWidget, QMainWindow
+from PySide6.QtGui import QPalette
 import logging
 
 class ScreenManager:

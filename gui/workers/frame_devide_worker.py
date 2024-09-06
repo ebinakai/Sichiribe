@@ -1,10 +1,10 @@
-from PyQt6.QtCore import pyqtSignal, QThread
+from PySide6.QtCore import Signal, QThread
 from cores.frameEditor import FrameEditor
 import os
 import logging
 
 class   FrameDivideWorker(QThread):
-    finished = pyqtSignal(list, list)
+    finished = Signal(list, list)
 
     def __init__(self, params):
         super().__init__()

@@ -1,6 +1,7 @@
-from PyQt6.QtWidgets import *
+from PySide6.QtWidgets import *
 from gui.utils.screen_manager import ScreenManager
 from cores.common import get_now_str
+from cores.exporter import get_supported_formats
 import os
 
 class ReplaySettingsWindow(QWidget):
@@ -57,8 +58,9 @@ class ReplaySettingsWindow(QWidget):
 
         # 出力形式
         self.format = QComboBox()
-        self.format.addItems(['json', 'csv'])
-        form_layout.addRow('出力形式：', self.format)
+        for fmt in get_supported_formats():
+            self.format.addItem(fmt)
+        form_layout.addRow('出力フォーマット：', self.format)
 
         # キャプチャしたフレームを保存するか
         self.save_frame = QCheckBox()

@@ -12,14 +12,19 @@ frames_*/
 results/
 result_*.csv
 result_*.json
+test_*.py
 
 # CNNモデル
 model/
 datasets/
 
-# GUI & App
+# Pyinstaller
 dist/
 build/
 *.spec
 
-test_*.py
+# Nuitka
+*.build
+*.dist
+*.app
+nuitka-crash-report.xml

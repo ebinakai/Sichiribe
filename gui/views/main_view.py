@@ -1,4 +1,4 @@
-from PyQt6.QtWidgets import QMainWindow, QStackedWidget
+from PySide6.QtWidgets import QMainWindow, QStackedWidget
 from gui.utils.router import init_screen_manager
 
 class MainWindow(QMainWindow):

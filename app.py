@@ -3,23 +3,21 @@ formatter = '%(asctime)s - %(name)s - %(levelname)s - %(message)s'
 logging.basicConfig(level=logging.DEBUG, format=formatter)
 
 import sys
-from PyQt6.QtWidgets import QApplication
-from PyQt6.QtGui import QPixmap
-from PyQt6.QtCore import QTimer
+from PySide6.QtWidgets import QApplication
+from PySide6.QtCore import QTimer
 
 # メインウィンドウを読み込むのには時間がかかるので、ここでインポート
 from gui.views.splash_view import SplashScreen
 from gui.views.main_view import MainWindow
         
 def main():
-    splash_ms = 200 # スプラッシュスクリーンを表示する時間（ミリ秒）
+    splash_ms = 2000 # スプラッシュスクリーンを表示する時間（ミリ秒）
     
     # アプリケーションを作成
     app = QApplication([])
     
     # スプラッシュスクリーン用の画像を読み込む
-    pixmap = QPixmap("gui/images/splash_image.png")
-    splash_window = SplashScreen(pixmap)
+    splash_window = SplashScreen()
     splash_window.show()
     window = MainWindow()
 

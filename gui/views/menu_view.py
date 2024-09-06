@@ -1,5 +1,5 @@
-from PyQt6.QtWidgets import QWidget, QHBoxLayout, QVBoxLayout, QPushButton
-from PyQt6.QtCore import Qt
+from PySide6.QtWidgets import QWidget, QHBoxLayout, QVBoxLayout, QPushButton
+from PySide6.QtCore import Qt
 from gui.utils.screen_manager import ScreenManager
 
 class MenuWindow(QWidget):

@@ -1,11 +1,11 @@
-from PyQt6.QtWidgets import QWidget, QVBoxLayout, QTextEdit
-from PyQt6.QtCore import pyqtSignal, QObject
+from PySide6.QtWidgets import QWidget, QVBoxLayout, QTextEdit
+from PySide6.QtCore import Signal, QObject
 from gui.utils.screen_manager import ScreenManager
 import logging
 
 # ログをメインスレッドに送信するためのクラス
 class LogEmitter(QObject):
-    new_log = pyqtSignal(str)
+    new_log = Signal(str)
 
 class QTextEditLogger(logging.Handler):
     def __init__(self, emitter: LogEmitter):

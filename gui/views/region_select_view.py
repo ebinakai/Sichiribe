@@ -1,8 +1,8 @@
 import logging
 import numpy as np
-from PyQt6.QtWidgets import QApplication, QLabel, QVBoxLayout, QHBoxLayout, QWidget, QPushButton, QSizePolicy
-from PyQt6.QtGui import QPixmap, QMouseEvent
-from PyQt6.QtCore import Qt, QSize, QTimer
+from PySide6.QtWidgets import QApplication, QLabel, QVBoxLayout, QHBoxLayout, QWidget, QPushButton, QSizePolicy
+from PySide6.QtGui import QPixmap, QMouseEvent
+from PySide6.QtCore import Qt, QSize, QTimer
 from gui.utils.screen_manager import ScreenManager
 from cores.frameEditor import FrameEditor
 from gui.utils.common import convert_cv_to_qimage, resize_image
@@ -170,17 +170,18 @@ class RegionSelectWindow(QWidget):
         
         # ウィンドウの位置とサイズを保存
         window_pos, window_size = self.screen_manager.save_screen_size()
-        self.window().setGeometry(window_pos.x(), 0, window_size.width(), window_size.height())
         
         self.set_image(params['first_frame'])
         self.screen_manager.show_screen('region_select')
+        QTimer.singleShot(50, lambda: self.window().move(window_pos.x(), 0))
         
     def finish_select(self):
         if len(self.click_points) != 4:
             self.confirm_txt.setText('7セグメント領域を囲ってください')
             return
         
-        self.params['click_points'] = np.array(self.click_points) / self.resize_scale
+        click_points = np.array(self.click_points) / self.resize_scale
+        self.params['click_points'] = click_points.tolist()
         
         # 現在のページのウィジェットの設定をリセット
         self.clear_env()

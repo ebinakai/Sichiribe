@@ -1,4 +1,4 @@
-from PyQt6.QtWidgets import QStackedWidget, QMainWindow
+from PySide6.QtWidgets import QStackedWidget, QMainWindow
 from gui.utils.screen_manager import ScreenManager
 from gui.views.menu_view import MenuWindow
 from gui.views.log_view import LogWindow

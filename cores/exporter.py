@@ -76,12 +76,16 @@ class Exporter:
     formatted_data = []
     for data, timestamp in zip(data, timestamp):
       formatted_data.append({"timestamp": timestamp, "value": data})
-    self.logger.debug("formatted data: %s", formatted_data)
     return formatted_data
   
   def format(self, data, data2, timestamp):
     formatted_data = []
     for data, data2, timestamp in zip(data, data2, timestamp):
       formatted_data.append({"timestamp": timestamp, "value": data, "failed": data2})
-    self.logger.debug("formatted data: %s", formatted_data)
     return formatted_data
+  
+  # 指定されたキーを除外してフィルタリングされた辞書型を返す
+  def filter_dict(self, dic:dict, excluded_keys) -> dict:
+    filtered_params = {k: v for k, v in dic.items() if k not in excluded_keys}
+    return filtered_params
+  

@@ -1,11 +1,11 @@
-from PyQt6.QtCore import pyqtSignal, QThread
-from cores.cnn import CNN as Detector
+from PySide6.QtCore import Signal, QThread
+from cores.cnn_lite import CNNLite as Detector
 import logging
 
 class DetectWorker(QThread):
-    progress = pyqtSignal(int, float)
-    finished = pyqtSignal(list)
-    cancelled = pyqtSignal(list)
+    progress = Signal(int, float)
+    finished = Signal(list)
+    cancelled = Signal(list)
 
     def __init__(self, params):
         super().__init__()

@@ -1,9 +1,9 @@
-from PyQt6.QtCore import pyqtSignal, QThread
+from PySide6.QtCore import Signal, QThread
 from cores.exporter import Exporter
 import logging
 
 class ExportWorker(QThread):
-    finished = pyqtSignal()
+    finished = Signal()
 
     def __init__(self, params):
         super().__init__()
@@ -15,5 +15,5 @@ class ExportWorker(QThread):
         data = self.ep.format(self.params['results'], self.params['failed_rates'], self.params['timestamps'])
         self.ep.export(data)
         
-        self.finished.emit()
         self.params = None
+        self.finished.emit()

@@ -1,4 +1,4 @@
-from cores.detector import Detector
+from cores.cnn import CNN
 import os
 import logging
 import cv2 
@@ -9,48 +9,39 @@ os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
 logging.getLogger('tensorflow').setLevel(logging.ERROR)
 logging.getLogger('h5py').setLevel(logging.ERROR)
 
-class CNN(Detector):
+class CNNLite(CNN):
   def __init__(self, num_digits):
-    self.num_digits = num_digits
-    self.model_path = 'model/model_100x100.keras'
-    
-    self.logger = logging.getLogger("__main__").getChild(__name__)
-    
-    # 画像の各種設定
-    self.folder = np.array(['0', '1', '2', '3', '4', '5', '6', '7', '8', '9', ''])  # 空白の表示に対応させるため、blankのところを「' '」で空白に設定
-    self.image_width = 100        # 使用する学習済みモデルと同じwidth（横幅）を指定
-    self.image_height = 100       # 使用する学習済みモデルと同じheight（縦の高さ）を指定
-    self.color_setting = 1        # 学習済みモデルと同じ画像のカラー設定にする。モノクロ・グレースケールの場合は「1」。カラーの場合は「3」
-    self.cv2_color_setting = 0    # 学習済みモデルと同じ画像のカラー設定にする。cv2.imreadではモノクロ・グレースケールの場合は「0」。カラーの場合は「1」
-    self.crop_size = 100          # 画像をトリミングするサイズ
-    self.model = None
-    
+    super().__init__(num_digits)
+    self.logger = logging.getLogger('__main__').getChild(__name__)
+    self.model_path = 'model/model_100x100.tflite'
+
   def load(self):
     if self.model is None:
-      from tensorflow.keras.models import load_model
-      self.model = load_model(self.model_path)
-    self.logger.info("CNN Model loaded.")
-  
-  # 各桁を一度に処理できるように画像を準備
-  def preprocess_image(self, image: np.ndarray) -> np.ndarray:
-    images = []
-    for index in range(self.num_digits):
-      # 画像を一桁にトリミング
-      img = image[0:self.crop_size, index * self.crop_size:(index + 1) * self.crop_size]
-      img = cv2.resize(img, (self.image_width, self.image_height))
-      img_ = img.reshape(self.image_width, self.image_height, self.color_setting).astype('float32') / 255
-      images.append(img_)
-    return np.array(images, dtype=np.float32)
+      import tensorflow as tf
+      # TensorFlow Lite モデルの読み込み
+      self.model = tf.lite.Interpreter(model_path=self.model_path)
+      self.model.allocate_tensors()
+      self.input_details = self.model.get_input_details()
+      self.output_details = self.model.get_output_details()
+      self.logger.info("TFLite Model loaded.")
   
   # 画像から数字を推論
   def inference_7seg_classifier(self, image: np.ndarray) -> list:
-    # 各桁を一度に処理できるように画像を準備
-    images = self.preprocess_image(image)
+    # 各桁に分割
+    preprocessed_images = self.preprocess_image(image)
     
-    # モデルに一度に入力して推論
-    predictions = self.model.predict(np.array(images), verbose=0) # verbose=0: ログ出力を抑制
-
+    predictions = []
+    for preprocessed_image in preprocessed_images:
+      img_ = np.expand_dims(preprocessed_image, axis=0)  # バッチサイズの次元を追加
+      
+      # 推論
+      self.model.set_tensor(self.input_details[0]['index'], img_)
+      self.model.invoke()
+      output_data = self.model.get_tensor(self.output_details[0]['index'])
+      predictions.append(output_data)
+      
     # 結果を処理
+    predictions = np.array(predictions).squeeze()  # (num_digits, num_classes) 形状に変換
     argmax_indices = predictions.argmax(axis=1)  # 各行に対して最大値のインデックスを取得
 
     return argmax_indices

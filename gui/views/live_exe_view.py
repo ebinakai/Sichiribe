@@ -1,6 +1,6 @@
-from PyQt6.QtWidgets import QWidget, QHBoxLayout, QVBoxLayout, QFormLayout, QPushButton, QLabel, QSlider
-from PyQt6.QtCore import QTimer, Qt
-from PyQt6.QtGui import QPixmap
+from PySide6.QtWidgets import QWidget, QHBoxLayout, QVBoxLayout, QFormLayout, QPushButton, QLabel, QSlider
+from PySide6.QtCore import QTimer, Qt
+from PySide6.QtGui import QPixmap
 from gui.utils.screen_manager import ScreenManager
 from gui.utils.common import convert_cv_to_qimage, gen_graph
 from gui.workers.live_detect_worker import DetectWorker
