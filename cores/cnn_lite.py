@@ -13,17 +13,23 @@ class CNNLite(CNN):
   def __init__(self, num_digits):
     super().__init__(num_digits)
     self.logger = logging.getLogger('__main__').getChild(__name__)
-    self.model_path = 'model/model_100x100.tflite'
+    self.model_path = '/Users/kaiebina/develop/pyworks/Sichiribe/model/model_100x100.tflite'
 
   def load(self):
+    self.logger.debug('Load model path: %s' % self.model_path)
+    if not os.path.exists(self.model_path):
+      self.logger.error('Model file not found.')
+      return False
+    
     if self.model is None:
-      from tensorflow import lite as tflite
+      import tflite_runtime.interpreter as tflite
       # TensorFlow Lite モデルの読み込み
       self.model = tflite.Interpreter(model_path=self.model_path)
       self.model.allocate_tensors()
       self.input_details = self.model.get_input_details()
       self.output_details = self.model.get_output_details()
       self.logger.info("TFLite Model loaded.")
+    return True
   
   # 画像から数字を推論
   def inference_7seg_classifier(self, image: np.ndarray) -> list:
@@ -83,7 +89,8 @@ class CNNLite(CNN):
     
     # 最後にラベルに対応させる
     result_digits = self.folder[result.astype(int)]
-    result_int = int(''.join(result_digits)) if len(result_digits) > 0 else 0
+    result_str = ''.join(result_digits)
+    result_int = int(result_str) if result_str != "" else 0
     
     # 誤検知率を取得
     failed_rate = np.mean(errors_per_digit)

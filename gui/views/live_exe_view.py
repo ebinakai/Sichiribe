@@ -97,6 +97,7 @@ class LiveExeWindow(QWidget):
         self.update_graph(self.results[-1], self.failed_rates[-1], self.timestamps[-1])
     
     def startup(self, params):
+        self.logger.info('Starting LiveExeWindow.')
         self.screen_manager.get_screen('log').clear_log()
         self.screen_manager.show_screen('log')
         
@@ -119,8 +120,15 @@ class LiveExeWindow(QWidget):
         self.worker.send_image.connect(self.display_extract_image)
         self.worker.end.connect(self.detect_finished)
         self.worker.cancelled.connect(self.detect_cancelled)
+        self.worker.model_not_found.connect(self.model_not_found)
         self.worker.start()
         self.logger.info('Detect started.')
+        
+    def model_not_found(self):
+        self.term_label.setText('モデルが見つかりません')
+        self.logger.error('Model not found.')
+        self.clear_env()
+        QTimer.singleShot(1, lambda: self.screen_manager.show_screen('menu'))
         
     def update_graph(self, result, failed_rate, timestamp):
         self.screen_manager.show_screen('live_exe')
@@ -190,7 +198,8 @@ class LiveExeWindow(QWidget):
         self.graph_results = None
         self.graph_failed_rates = None
         self.graph_timestamps = None
+        self.logger.debug("Environment cleared.")
         
         # ウィンドウサイズを元に戻す
-        QTimer.singleShot(1, self.screen_manager.restore_screen_size)
+        # QTimer.singleShot(1, self.screen_manager.restore_screen_size)
     

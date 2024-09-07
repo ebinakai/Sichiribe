@@ -68,6 +68,7 @@ class LiveFeedWindow(QWidget):
             self.worker.stop()  # ワーカーに停止を指示
         
     def startup(self, params):
+        self.logger.info("Starting LiveFeedWindow.")
         self.feed_label.setText("読込中...")
         self.screen_manager.show_screen('live_feed')
         self.logger.info('Capture Feed starting...')
@@ -124,5 +125,5 @@ class LiveFeedWindow(QWidget):
         self.target_width = None
         self.target_height = None
         self.params = None
-        QTimer.singleShot(1, self.screen_manager.restore_screen_size)
         self.logger.info('Environment cleared.')
+        # QTimer.singleShot(1, self.screen_manager.restore_screen_size)

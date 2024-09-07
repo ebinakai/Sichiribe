@@ -52,12 +52,15 @@ class ScreenManager:
         self.window_pos = self.main_window.frameGeometry().topLeft()
         self.window_size = self.main_window.size()
         self.logger.debug("Saved screen position: %s" % self.window_pos)
+        self.logger.debug("Saved screen size: %s" % self.window_size)
         return self.window_pos, self.window_size
     
     def restore_screen_size(self):
+        self.logger.debug("Screen geometry restoring...")
         if self.window_pos is not None and self.window_size is not None:
             self.main_window.move(self.window_pos)
             self.main_window.resize(self.window_size)
+            self.logger.debug("Restored screen position: %s" % self.window_pos)
             self.logger.debug("Restored screen size: %s" % self.window_size)
             self.window_pos = None
             self.window_size = None

@@ -5,6 +5,9 @@ logging.getLogger('matplotlib').setLevel(logging.ERROR)
 
 from PySide6.QtGui import QImage
 import matplotlib.pyplot as plt
+from matplotlib import use as plt_use
+plt_use('Qt5Agg')  # バックグランドエンジンをQtに設定
+
 import numpy as np
 from PIL import Image
 import cv2

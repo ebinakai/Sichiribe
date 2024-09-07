@@ -15,6 +15,7 @@ class DetectWorker(QThread):
     send_image = Signal(np.ndarray)
     end = Signal()
     cancelled = Signal()
+    model_not_found = Signal()
 
     def __init__(self, params):
         super().__init__()
@@ -35,7 +36,10 @@ class DetectWorker(QThread):
         
         self.fe = FrameEditor(num_digits=self.params['num_digits'])
         self.dt = Detector(self.params['num_digits'])
-        self.dt.load()
+        if not self.dt.load():
+          self.logger.error("Failed to load the model.")
+          self.model_not_found.emit()
+          return None
         
         start_time = time.time()
         end_time = time.time() + self.params['total_sampling_sec']

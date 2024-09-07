@@ -10,7 +10,7 @@ class SplashScreen(QWidget):
         # スプラッシュスクリーンのレイアウトを設定
         layout = QVBoxLayout()
         label = QLabel()
-        pixmap = QPixmap("gui/images/splash_image.png")
+        pixmap = QPixmap("/Users/kaiebina/develop/pyworks/Sichiribe/gui/images/splash_image.png")
         pixmap = pixmap.scaledToWidth(640, Qt.TransformationMode.SmoothTransformation)
         label.setPixmap(pixmap)
         layout.addWidget(label)
