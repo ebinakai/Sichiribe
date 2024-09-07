@@ -4,7 +4,7 @@ import logging
 
 class DetectWorker(QThread):
     progress = Signal(int, float)
-    finished = Signal(list)
+    end = Signal(list)
     cancelled = Signal(list)
 
     def __init__(self, params):
@@ -36,8 +36,8 @@ class DetectWorker(QThread):
             self.logger.info(f"Failed Rate: {failed_rate}")
             self.progress.emit(result, failed_rate)
             
-        self.finished.emit(results)
-        self.params = None
+        self.end.emit(results)
+        return None
         
     def cancel(self):
         self.logger.info("DetectWorker terminating...") 

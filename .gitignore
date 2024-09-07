@@ -28,3 +28,5 @@ build/
 *.dist
 *.app
 nuitka-crash-report.xml
+Resources/
+Info.plist

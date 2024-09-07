@@ -51,11 +51,14 @@ class FinishWindow(QWidget):
         
     def next(self):
         self.screen_manager.show_screen('menu')
-        self.parmas = None
+        self.screen_manager.resie_defualt()
+        self.screen_manager.center()
+        self.params = None
         
     def startup(self, params):
         self.params = params
-        self.contents.setText(params['out_dir'])
+        self.logger.debug('params.out_dir = %s', self.params['out_dir'])
+        self.contents.setText(self.params['out_dir'])
         self.screen_manager.show_screen('finish')
         self.export_params()
         

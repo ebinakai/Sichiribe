@@ -12,7 +12,7 @@ logging.getLogger('h5py').setLevel(logging.ERROR)
 class CNN(Detector):
   def __init__(self, num_digits):
     self.num_digits = num_digits
-    self.model_path = 'model/model_100x100.keras'
+    # self.model_path = 'model/model_100x100.keras'
     
     self.logger = logging.getLogger("__main__").getChild(__name__)
     
@@ -26,9 +26,9 @@ class CNN(Detector):
     self.model = None
     
   def load(self):
-    if self.model is None:
-      from tensorflow.keras.models import load_model
-      self.model = load_model(self.model_path)
+    # if self.model is None:
+    #   from tensorflow.keras.models import load_model
+    #   self.model = load_model(self.model_path)
     self.logger.info("CNN Model loaded.")
   
   # 各桁を一度に処理できるように画像を準備

@@ -83,7 +83,7 @@ class ReplayExeWindow(QWidget):
         
         # ワーカーのインスタンスを作成
         self.worker = FrameDivideWorker(params)
-        self.worker.finished.connect(self.frame_devide_finished)
+        self.worker.end.connect(self.frame_devide_finished)
         self.worker.start()
         self.logger.info('Frame Devide started.')
 
@@ -97,7 +97,7 @@ class ReplayExeWindow(QWidget):
     def detect_process(self):
         self.worker = DetectWorker(self.params)
         self.worker.progress.connect(self.show_result)
-        self.worker.finished.connect(self.detect_finished)
+        self.worker.end.connect(self.detect_finished)
         self.worker.cancelled.connect(self.detect_cancelled)
         self.worker.start()
         self.logger.info('Detect started.')
@@ -146,9 +146,6 @@ class ReplayExeWindow(QWidget):
 
     def export_finished(self):
         self.logger.info('Export finished.')
-        self.screen_manager.show_screen('menu')
-        self.screen_manager.get_screen('log').clear_log()
-        self.screen_manager.resie_defualt()
-        self.screen_manager.center()
+        self.screen_manager.get_screen('finish').startup(self.params)
         self.params = None
    

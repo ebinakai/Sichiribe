@@ -133,7 +133,7 @@ python live.py --device 1 --num-frames 10 --sampling-sec 2 --total-sampling-min 
 | `gui/views/replay_setting_view.py` | 動画ファイル解析の設定画面 |
 | `gui/views/replay_exe_view.py` | 動画ファイル解析の処理画面。推論結果のグラフが表示される |
 | `gui/views/finish.py` | 解析終了画面 |
-| `gui/workers/capture_feed_worker.py` | ライブ解析のカメラ画角確認のバックグランド処理 |
+| `gui/workers/live_feed_worker.py` | ライブ解析のカメラ画角確認のバックグランド処理 |
 | `gui/workers/live_detect_worker.py` | ライブ解析の推論のバックグランド処理 |
 | `gui/workers/frame_devide_worker.py` | 動画ファイル解析のフレーム分割のバックグランド処理 |
 | `gui/workers/replay_detect_worker.py` | 動画ファイル解析の推論のバックグランド処理 |

@@ -173,7 +173,7 @@ class RegionSelectWindow(QWidget):
         
         self.set_image(params['first_frame'])
         self.screen_manager.show_screen('region_select')
-        QTimer.singleShot(50, lambda: self.window().move(window_pos.x(), 0))
+        QTimer.singleShot(1, lambda: self.window().move(window_pos.x(), 0))
         
     def finish_select(self):
         if len(self.click_points) != 4:
@@ -192,7 +192,7 @@ class RegionSelectWindow(QWidget):
     def cancel_select(self):
         params = self.params
         self.clear_env()
-        QTimer.singleShot(100, lambda: self.switch_back(params))
+        QTimer.singleShot(10, lambda: self.switch_back(params))
     
     def switch_back(self, params):
         self.logger.debug("Switching to back screen(%s).", self.prev_screen)

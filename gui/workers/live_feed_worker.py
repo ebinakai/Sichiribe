@@ -1,5 +1,4 @@
 from PySide6.QtCore import Signal, QThread
-from cores.exporter import Exporter
 from cores.capture import FrameCapture
 import logging
 import numpy as np
@@ -7,10 +6,9 @@ import numpy as np
 class CaptureFeedWorker(QThread):
     cap_size = Signal(tuple)
     progress = Signal(np.ndarray)
-    finished = Signal(np.ndarray)
+    end = Signal(np.ndarray)
     cancelled = Signal()
     error = Signal()
-    end = Signal()
 
     def __init__(self, params, width, height):
         super().__init__()
@@ -40,12 +38,12 @@ class CaptureFeedWorker(QThread):
                 break
             
             if self._is_finished:
-                self.finished.emit(frame)
+                self.end.emit(frame)
                 break
             
             self.progress.emit(frame)
         fc.release()
-        self.end.emit()
+        return None
         
             
     def stop(self):

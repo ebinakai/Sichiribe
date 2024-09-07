@@ -17,9 +17,9 @@ class CNNLite(CNN):
 
   def load(self):
     if self.model is None:
-      import tensorflow as tf
+      from tensorflow import lite as tflite
       # TensorFlow Lite モデルの読み込み
-      self.model = tf.lite.Interpreter(model_path=self.model_path)
+      self.model = tflite.Interpreter(model_path=self.model_path)
       self.model.allocate_tensors()
       self.input_details = self.model.get_input_details()
       self.output_details = self.model.get_output_details()

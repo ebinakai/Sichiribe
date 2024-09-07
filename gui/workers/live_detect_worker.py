@@ -13,7 +13,7 @@ import numpy as np
 class DetectWorker(QThread):
     progress = Signal(int, float, str)
     send_image = Signal(np.ndarray)
-    finished = Signal()
+    end = Signal()
     cancelled = Signal()
 
     def __init__(self, params):
@@ -47,8 +47,7 @@ class DetectWorker(QThread):
           
           if self._is_cancelled:
             self.cancelled.emit()
-            self.clear_env()
-            return
+            return None
 
           # タイムスタンプを "HH:MM:SS" 形式で生成
           elapsed_time = int(time.time() - start_time)
@@ -93,8 +92,8 @@ class DetectWorker(QThread):
             self.logger.debug(f"Waiting for {time_to_wait:.2f}s")
             time.sleep(time_to_wait)
         
-        self.clear_env()
-        self.finished.emit()
+        self.end.emit()
+        return None
         
     def cancel(self):
         self.logger.info("DetectWorker terminating...") 
@@ -113,9 +112,3 @@ class DetectWorker(QThread):
           image_bin = self.dt.preprocess_binarization(cropped_frame, self.binarize_th)
           self.send_image.emit(image_bin)
         
-    def clear_env(self):
-        self.fc.release()
-        self.fc = None
-        self.dt = None
-        self.fe = None
-        self.logger.info("Clear environment.")

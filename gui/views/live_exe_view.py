@@ -99,6 +99,9 @@ class LiveExeWindow(QWidget):
     def startup(self, params):
         self.screen_manager.get_screen('log').clear_log()
         self.screen_manager.show_screen('log')
+        
+        # ウィンドウの位置とサイズを保存
+        window_pos, window_size = self.screen_manager.save_screen_size()
      
         # 初期化
         self.binarize_th.setValue(0)
@@ -114,7 +117,7 @@ class LiveExeWindow(QWidget):
         self.worker = DetectWorker(self.params)
         self.worker.progress.connect(self.update_graph)
         self.worker.send_image.connect(self.display_extract_image)
-        self.worker.finished.connect(self.detect_finished)
+        self.worker.end.connect(self.detect_finished)
         self.worker.cancelled.connect(self.detect_cancelled)
         self.worker.start()
         self.logger.info('Detect started.')
@@ -139,19 +142,6 @@ class LiveExeWindow(QWidget):
         q_image = convert_cv_to_qimage(graph)
         self.graph_label.setPixmap(QPixmap.fromImage(q_image))
         
-    def clear_env(self):
-        self.graph_label.clear()
-        self.extracted_label.clear()
-        self.term_label.setText('')
-        self.params = None
-        self.results = None
-        self.failed_rates = None
-        self.timestamps = None
-        self.graph_results = None
-        self.graph_failed_rates = None
-        self.graph_timestamps = None
-        self.worker = None
-    
     def display_extract_image(self, image: np.ndarray):
         q_image = convert_cv_to_qimage(image)
         self.extracted_label.setPixmap(QPixmap.fromImage(q_image))
@@ -187,8 +177,20 @@ class LiveExeWindow(QWidget):
     def export_finished(self):
         self.logger.info('Export finished.')
         self.screen_manager.get_screen('finish').startup(self.params)
-        self.screen_manager.resie_defualt()
-        self.screen_manager.center()
-        self.worker = None
         self.params = None
    
+    def clear_env(self):
+        self.graph_label.clear()
+        self.extracted_label.clear()
+        self.term_label.setText('')
+        self.params = None
+        self.results = None
+        self.failed_rates = None
+        self.timestamps = None
+        self.graph_results = None
+        self.graph_failed_rates = None
+        self.graph_timestamps = None
+        
+        # ウィンドウサイズを元に戻す
+        QTimer.singleShot(1, self.screen_manager.restore_screen_size)
+    

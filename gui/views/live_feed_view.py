@@ -3,7 +3,7 @@ from PySide6.QtCore import QTimer, Qt
 from PySide6.QtGui import QPixmap
 from gui.utils.screen_manager import ScreenManager
 from gui.utils.common import convert_cv_to_qimage, resize_image
-from gui.workers.capture_feed_worker import CaptureFeedWorker
+from gui.workers.live_feed_worker import CaptureFeedWorker
 import logging
 
 class LiveFeedWindow(QWidget):
@@ -87,9 +87,8 @@ class LiveFeedWindow(QWidget):
         self.worker = CaptureFeedWorker(params, self.target_width, self.target_height)  # できるだけ小さな画像で処理
         self.worker.cap_size.connect(self.recieve_cap_size)
         self.worker.progress.connect(self.show_feed)
-        self.worker.finished.connect(self.feed_finished)
+        self.worker.end.connect(self.feed_finished)
         self.worker.cancelled.connect(self.feed_cancelled)
-        self.worker.end.connect(self.clear_env)  # スレッドが終了後に環境をクリア
         self.worker.error.connect(self.feed_error)
         self.worker.start()
         self.logger.info('Feed started.')
@@ -107,21 +106,23 @@ class LiveFeedWindow(QWidget):
         self.logger.info('Feed finished.')
         self.params['first_frame'] = first_frame
         params = self.params
-        QTimer.singleShot(1, lambda: self.screen_manager.get_screen('region_select').startup(params, 'live_feed'))
+        self.clear_env()
+        QTimer.singleShot(10, lambda: self.screen_manager.get_screen('region_select').startup(params, 'live_feed'))
     
     def feed_cancelled(self):
-        self.logger.info('Feed cancelled.')
+        self.clear_env()
         QTimer.singleShot(1, lambda: self.screen_manager.show_screen('live_setting'))
+        self.logger.info('Feed cancelled.')
         
     def feed_error(self):
-        self.logger.error('Feed missing frame.')
+        self.clear_env()
         QTimer.singleShot(1, lambda: self.screen_manager.show_screen('live_setting'))
+        self.logger.error('Feed missing frame.')
         
     def clear_env(self):
         self.feed_label.clear()
         self.target_width = None
         self.target_height = None
-        self.worker = None
         self.params = None
-        self.logger.info('Environment cleared.')
         QTimer.singleShot(1, self.screen_manager.restore_screen_size)
+        self.logger.info('Environment cleared.')
