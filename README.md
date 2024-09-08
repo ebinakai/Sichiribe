@@ -6,20 +6,18 @@
 
 ## Requirements
 
-- Python 3.10.5 or later
-OpenCV 3.4.2 or Later
-Tensorflow 2.17.0 or Later
-matplotlib 3.3.2 or Later
+- Python 3.9
 
 ## Features
 
 - 動画を入力して、その動画を解析する
 - カメラを接続して、リアルタイムで解析する
 - 上記に項目をCLI及び、GUIで実行する
+- プログラムのExe化
 
 ## Init
 
-仮想環境の作成等はLinuxに準拠するため、Windowsで実行する際などは適宜読み替えてほしい。
+仮想環境の作成等はLinuxに準拠するため、Windowsで実行する際などは適宜読み替えてほしい。  
 
 ```bash
 # リポジトリのクローン
@@ -45,7 +43,7 @@ pip install tensorflow-metal
 GUIでの諸項目の実行を行うには以下のコマンドを実行する。
 
 ```bash
-python app.py
+python Sichiribe.py
 ```
 
 ## REPLAY Execution
@@ -107,7 +105,7 @@ python live.py --device 1 --num-frames 10 --sampling-sec 2 --total-sampling-min 
 
 |  ファイル | 説明 |
 | --- | --- |  
-| `app.py` | GUIアプリケーションの起動 |
+| `Sichiribe.py` | GUIアプリケーションの起動 |
 | `live.py` | 外部カメラからライブ解析 |
 | `replay.py` | 動画ファイルから解析 |
 | `cores/common.py` | コアな汎用的な機能の関数詰め合わせ |
