@@ -3,6 +3,7 @@ import os
 import logging
 import cv2 
 import numpy as np
+from pathlib import Path
 
 # TensorFlow と h5py のログを無効にする
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3' 
@@ -13,7 +14,12 @@ class CNNLite(CNN):
   def __init__(self, num_digits):
     super().__init__(num_digits)
     self.logger = logging.getLogger('__main__').getChild(__name__)
-    self.model_path = '/Users/kaiebina/develop/pyworks/Sichiribe/model/model_100x100.tflite'
+    
+    # 学習済みモデルの絶対パスを取得
+    current_dir = Path(__file__).resolve().parent
+    model_path = current_dir / '..' / 'model' / 'model_100x100.tflite'
+    model_path = model_path.resolve()
+    self.model_path = str(model_path)
 
   def load(self):
     self.logger.debug('Load model path: %s' % self.model_path)

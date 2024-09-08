@@ -51,8 +51,8 @@ class FinishWindow(QWidget):
         
     def next(self):
         self.screen_manager.show_screen('menu')
-        self.screen_manager.resie_defualt()
-        self.screen_manager.center()
+        # self.screen_manager.resie_defualt()
+        # self.screen_manager.center()
         self.params = None
         
     def startup(self, params):
@@ -64,5 +64,5 @@ class FinishWindow(QWidget):
         
     def export_params(self):
         ep = Exporter(method='json', out_dir=self.params['out_dir'], base_filename='parameters')
-        filtered_params = ep.filter_dict(self.params, ['results', 'failed_rates', 'timestamps', 'first_frame', ])
+        filtered_params = ep.filter_dict(self.params, ['results', 'failed_rates', 'timestamps', 'first_frame', 'frames'])
         ep.export(filtered_params)

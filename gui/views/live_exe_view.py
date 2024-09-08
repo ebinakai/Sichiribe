@@ -1,5 +1,5 @@
 from PySide6.QtWidgets import QWidget, QHBoxLayout, QVBoxLayout, QFormLayout, QPushButton, QLabel, QSlider
-from PySide6.QtCore import QTimer, Qt
+from PySide6.QtCore import Qt
 from PySide6.QtGui import QPixmap
 from gui.utils.screen_manager import ScreenManager
 from gui.utils.common import convert_cv_to_qimage, gen_graph
@@ -128,7 +128,7 @@ class LiveExeWindow(QWidget):
         self.term_label.setText('モデルが見つかりません')
         self.logger.error('Model not found.')
         self.clear_env()
-        QTimer.singleShot(1, lambda: self.screen_manager.show_screen('menu'))
+        self.screen_manager.show_screen('menu')
         
     def update_graph(self, result, failed_rate, timestamp):
         self.screen_manager.show_screen('live_exe')
@@ -156,28 +156,27 @@ class LiveExeWindow(QWidget):
         
     def detect_finished(self):
         self.logger.info('Detect finished.')
-        self.logger.info(f"Results: {self.results}")
         self.params['results'] = self.results
         self.params['failed_rates'] = self.failed_rates
         self.params['timestamps'] = self.timestamps
         params = self.params
         self.clear_env()
-        QTimer.singleShot(1, lambda: self.export_process(params))
+        self.export_process(params)
         
     def detect_cancelled(self):
-        self.term_label.setText('中止しました')
         self.logger.info('Detect cancelled.')
-        self.logger.info(f"Results: {self.results}")
+        self.term_label.setText('中止しました')
         self.params['results'] = self.results
         self.params['failed_rates'] = self.failed_rates
         self.params['timestamps'] = self.timestamps
         params = self.params
         self.clear_env()
-        QTimer.singleShot(1, lambda: self.export_process(params))
+        self.export_process(params)
 
     def export_process(self, params):
-        self.params = params
         self.logger.info('Export started.')
+        self.screen_manager.show_screen('log')
+        self.params = params
         self.worker = ExportWorker(self.params)
         self.worker.finished.connect(self.export_finished)
         self.worker.start()
@@ -198,8 +197,6 @@ class LiveExeWindow(QWidget):
         self.graph_results = None
         self.graph_failed_rates = None
         self.graph_timestamps = None
-        self.logger.debug("Environment cleared.")
-        
-        # ウィンドウサイズを元に戻す
-        # QTimer.singleShot(1, self.screen_manager.restore_screen_size)
+        self.logger.info("Environment cleared.")
+        self.screen_manager.restore_screen_size()
     

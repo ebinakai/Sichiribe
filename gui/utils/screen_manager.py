@@ -1,5 +1,6 @@
 from PySide6.QtWidgets import QApplication, QStackedWidget, QWidget, QMainWindow
 from PySide6.QtGui import QPalette
+from PySide6.QtCore import QEventLoop, QTimer
 import logging
 
 class ScreenManager:
@@ -56,8 +57,15 @@ class ScreenManager:
         return self.window_pos, self.window_size
     
     def restore_screen_size(self):
-        self.logger.debug("Screen geometry restoring...")
+        QApplication.processEvents()
+        self.logger.info("Screen geometry restoring...")
         if self.window_pos is not None and self.window_size is not None:
+            
+            # 現在の画面内のオブジェクトが処理を終えるまで10ms待つ
+            loop = QEventLoop()
+            QTimer.singleShot(10, loop.quit)
+            loop.exec_()
+            
             self.main_window.move(self.window_pos)
             self.main_window.resize(self.window_size)
             self.logger.debug("Restored screen position: %s" % self.window_pos)

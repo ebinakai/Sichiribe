@@ -174,7 +174,7 @@ class RegionSelectWindow(QWidget):
         
         self.set_image(params['first_frame'])
         self.screen_manager.show_screen('region_select')
-        QTimer.singleShot(1, lambda: self.window().move(window_pos.x(), 0))
+        QTimer.singleShot(1, lambda: self.window().move(window_pos.x(), 1))
         
     def finish_select(self):
         if len(self.click_points) != 4:
@@ -208,7 +208,7 @@ class RegionSelectWindow(QWidget):
     def switch_next(self):
         self.logger.debug("Switching to next screen(%s).", self.prev_screen)
         if self.prev_screen == 'replay_exe':
-            self.screen_manager.get_screen('replay_exe').frame_devide_process(self.params)
+            self.screen_manager.get_screen('replay_threshold').startup(self.params)
         elif self.prev_screen == 'live_feed':
             self.screen_manager.get_screen('live_exe').startup(self.params)
         self.prev_screen = None
@@ -225,6 +225,4 @@ class RegionSelectWindow(QWidget):
         self.confirm_txt.setText('')
         self.fe = None
         self.logger.info('Environment cleared.')
-
-        # ウィンドウサイズを元に戻す
-        # QTimer.singleShot(1, self.screen_manager.restore_screen_size)
+        self.screen_manager.restore_screen_size()

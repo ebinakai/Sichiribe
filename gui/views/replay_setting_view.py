@@ -100,11 +100,11 @@ class ReplaySettingsWindow(QWidget):
         self.screen_manager.show_screen('menu')
         
     def startup(self):
-        self.confirm_txt.setText('')
-        
         if self.video_path.text() == '':
             self.confirm_txt.setText('動画ファイルを選択してください')
             return
+        else:
+            self.confirm_txt.setText('')
         
         # 必要なパラメータを設定
         params = {

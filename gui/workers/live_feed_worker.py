@@ -3,7 +3,7 @@ from cores.capture import FrameCapture
 import logging
 import numpy as np
 
-class CaptureFeedWorker(QThread):
+class LiveFeedWorker(QThread):
     cap_size = Signal(tuple)
     progress = Signal(np.ndarray)
     end = Signal(np.ndarray)

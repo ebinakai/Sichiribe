@@ -3,7 +3,7 @@ from PySide6.QtCore import QTimer, Qt
 from PySide6.QtGui import QPixmap
 from gui.utils.screen_manager import ScreenManager
 from gui.utils.common import convert_cv_to_qimage, resize_image
-from gui.workers.live_feed_worker import CaptureFeedWorker
+from gui.workers.live_feed_worker import LiveFeedWorker
 import logging
 
 class LiveFeedWindow(QWidget):
@@ -40,21 +40,21 @@ class LiveFeedWindow(QWidget):
         self.back_button = QPushButton('戻る')
         self.back_button.setFixedWidth(100)
         self.back_button.clicked.connect(self.back)
-        footer_layout.addWidget(self.back_button)
-
-        footer_layout.addStretch()  # スペーサーを追加してボタンを右寄せ
         
         self.next_button = QPushButton('次へ')
         self.next_button.setFixedWidth(100)
         self.next_button.setDefault(True)  # 強調表示されるデフォルトボタンに設定
         self.next_button.setAutoDefault(True)  # フォーカス時にエンターキーで実行
         self.next_button.clicked.connect(self.next)
+
+        footer_layout.addWidget(self.back_button)
+        footer_layout.addStretch()  # スペーサーを追加してボタンを右寄せ
         footer_layout.addWidget(self.next_button)
 
         # メインレイアウトに追加
         main_layout.addLayout(header_layout)
-        main_layout.addStretch()
         main_layout.addLayout(feed_layout)
+        main_layout.addStretch()
         main_layout.addLayout(footer_layout)
         
     def back(self):
@@ -85,7 +85,7 @@ class LiveFeedWindow(QWidget):
         self.logger.debug('window width: %d window height: %d' % (window_rect.width(), window_rect.height()))
                 
         self.params = params
-        self.worker = CaptureFeedWorker(params, self.target_width, self.target_height)  # できるだけ小さな画像で処理
+        self.worker = LiveFeedWorker(params, self.target_width, self.target_height)  # できるだけ小さな画像で処理
         self.worker.cap_size.connect(self.recieve_cap_size)
         self.worker.progress.connect(self.show_feed)
         self.worker.end.connect(self.feed_finished)
@@ -126,4 +126,5 @@ class LiveFeedWindow(QWidget):
         self.target_height = None
         self.params = None
         self.logger.info('Environment cleared.')
-        # QTimer.singleShot(1, self.screen_manager.restore_screen_size)
+        self.screen_manager.restore_screen_size()
+        

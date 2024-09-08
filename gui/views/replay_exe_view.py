@@ -59,10 +59,12 @@ class ReplayExeWindow(QWidget):
     def startup(self, params):
         # 初期化
         self.term_label.setText('')
-        self.graph_label.setFixedSize(420, 500) 
+        self.params = params
         self.results = []
         self.failed_rates = []
-        self.params = params
+        self.graph_results = []
+        self.graph_failed_rates = []
+        self.graph_timestamps = []
 
         # 最初のフレームを取得
         self.fe = FrameEditor(self.params['sampling_sec'], self.params['num_frames'], self.params['num_digits'])
@@ -96,49 +98,55 @@ class ReplayExeWindow(QWidget):
    
     def detect_process(self):
         self.worker = DetectWorker(self.params)
-        self.worker.progress.connect(self.show_result)
+        self.worker.progress.connect(self.update_graph)
         self.worker.end.connect(self.detect_finished)
         self.worker.cancelled.connect(self.detect_cancelled)
         self.worker.start()
         self.logger.info('Detect started.')
         
-    def show_result(self, result, failed_rate):
+    def update_graph(self, result, failed_rate, timestamp):
         self.screen_manager.show_screen('replay_exe')
         self.results.append(result)
         self.failed_rates.append(failed_rate)
+        
+        # グラフの更新
+        self.graph_results.append(result)
+        self.graph_failed_rates.append(failed_rate)
+        self.graph_timestamps.append(timestamp)
         
         # グラフの更新
         title = 'Results'
         xlabel = 'Frame'
         ylabel1 = 'Failed Rate'
         ylabel2 = 'Detected results'
-        graph = gen_graph(self.params['timestamps'][:len(self.results)], self.failed_rates, self.results, title, xlabel, ylabel1, ylabel2, self.screen_manager.check_if_dark_mode())
+        graph = gen_graph(self.graph_timestamps, self.graph_failed_rates, self.graph_results, title, xlabel, ylabel1, ylabel2, self.screen_manager.check_if_dark_mode())
 
-        # QLabel に画像を設定
         q_image = convert_cv_to_qimage(graph)
-        pixmap = QPixmap.fromImage(q_image)
-        scaled_pixmap = pixmap.scaled(self.graph_label.size(), Qt.AspectRatioMode.KeepAspectRatio, Qt.TransformationMode.SmoothTransformation)
-        self.graph_label.setPixmap(scaled_pixmap)
+        self.graph_label.setPixmap(QPixmap.fromImage(q_image))
         
-    def detect_finished(self, results):
-        self.graph_label.setFixedSize(QSize(10, 10))  # サイズの固定を解除
+    def detect_finished(self):
         self.graph_label.clear()
         self.logger.info('Detect finished.')
-        self.logger.info(f"Results: {results}")
-        self.params['results'] = results
+        self.logger.info(f"Results: {self.results}")
+        self.params['results'] = self.results
         self.params['failed_rates'] = self.failed_rates
-        QTimer.singleShot(1, self.export_process)
+        params = self.params
+        self.clear_env()
+        self.export_process(params)
         
-    def detect_cancelled(self, results):
+    def detect_cancelled(self):
         self.term_label.setText('中止しました')
         self.logger.info('Detect cancelled.')
-        self.logger.info(f"Results: {results}")
-        self.params['results'] = results
+        self.logger.info(f"Results: {self.results}")
+        self.params['results'] = self.results
         self.params['failed_rates'] = self.failed_rates
         self.params['timestamps'] = self.params['timestamps'][:len(self.results)]
-        QTimer.singleShot(1, self.export_process)
+        params = self.params
+        self.clear_env()
+        self.export_process(params)
 
-    def export_process(self):
+    def export_process(self, params):
+        self.params = params
         self.logger.info('Export started.')
         self.worker = ExportWorker(self.params)
         self.worker.finished.connect(self.export_finished)
@@ -149,3 +157,16 @@ class ReplayExeWindow(QWidget):
         self.screen_manager.get_screen('finish').startup(self.params)
         self.params = None
    
+    def clear_env(self):
+        self.graph_label.clear()
+        self.term_label.setText('')
+        self.params = None
+        self.results = None
+        self.failed_rates = None
+        self.graph_results = None
+        self.graph_failed_rates = None
+        self.graph_timestamps = None
+        self.fe = None
+        self.logger.info('Environment cleared.')
+        self.screen_manager.restore_screen_size()
+        

@@ -106,8 +106,11 @@ class LiveSettingsWindow(QWidget):
             
     def startup(self):
         if self.out_dir.text() == '':
-            self.confirm_txt.setText('動画ファイルを選択してください')
+            self.confirm_txt.setText('保存場所を選択してください')
             return
+        else:
+            self.confirm_txt.setText('')
+        
         params = {
             'device_num': self.device_num.value(),
             'num_digits': self.num_digits.value(),
