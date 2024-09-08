@@ -46,6 +46,10 @@ GUIでの諸項目の実行を行うには以下のコマンドを実行する�
 python Sichiribe.py
 ```
 
+階層構造及び画面フローを以下に示す。
+
+![Sichiribe drawio](https://github.com/user-attachments/assets/2fd9e63e-ee8f-48d0-8029-18967d18aa0e)
+
 ## REPLAY Execution
 
 7セグメント表示器を移した動画から表示内容を解析するには `replay.py` を実行する。
