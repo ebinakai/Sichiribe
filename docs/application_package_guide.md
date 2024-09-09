@@ -28,36 +28,6 @@ pip install PySide6_Essentials
 しかし、問題は推論機能のみが含まれる `tflite-runtime` は、エッジデバイス向けに linux 向けのビルドしか配布されていない。その他のプラットフォーム用には自分でビルドする必要があった。  
 詳しい内容に方法については、 [公式サイト](https://www.tensorflow.org/lite/guide/build_cmake_pip?hl=ja) を参照してほしいが、とりあえず簡単に流れを説明しよう。  
 
-### tflite-runtime のビルド
-
-cmakeやbazel等のビルドツールを事前にインストールしておくこと。上記の公式サイトでその方法を確認することができる。  
-また理由は不明だが、私の環境ではcmakeでのビルドは失敗したのでbazelでのビルドを行った。
-
-```bash
-# tensorflowのリポジトリを取得
-git clone https://github.com/tensorflow/tensorflow.git
-cd tensorflow 
-
-# ビルド環境を作成
-python -m venv env 
-source ./env/bin/activate
-pip install --upgrade pip
-pip install pybind11 wheel
-
-# MacOS用にビルドを実行
-CUSTOM_BAZEL_FLAGS=--macos_cpus=arm64 PYTHON=[クローンしたフォルダ]/env/bin/python CI_BUILD_PYTHON=[クローンしたフォルダ]/env/bin/python tensorflow/lite/tools/pip_package/build_pip_package_with_bazel.sh
-```
-
-すると、以下のパスにwhlファイルが作成される。  
-
-`tensorflow/lite/tools/pip_package/gen/tflite_pip/python3/dist/`  
-
-**そのファイルをコピーしてプロジェクトフォルダのexternalsにコピーして以下のコマンドを実行すると**、ビルドした `tflite` がインストールされる。
-
-```bash
-pip install externals/ビルドされたファイル名.whl
-```
-
 ## アプリのビルド
 
 次にアプリのビルドに移る。ビルドする前に、きちんとライブラリと必要なモデル等をすべて認識し、実行可能かどうかの確認を忘れずに。  
@@ -66,13 +36,6 @@ Nuitkaを使ってビルドするには以下のライブラリが必要なの�
 
 ```bash
 pip install nuitka zstandard orderedset
-```
-
-また、Macosへの対応は完全ではないためか、アプリ名の指定が効かなかったので、`app.py` を `Sichiribe.py` にリネームした。
-ビルド用のスクリプトは `make.sh` である。brewでインストールしたライブラリ用の変数も含むが、各自必要なら編集して実行してほしい。
-
-```bash
-source make.sh
 ```
 
 以上。
