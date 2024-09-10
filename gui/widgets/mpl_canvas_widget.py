@@ -107,6 +107,9 @@ class MplCanvas(FigureCanvasQTAgg):
         labels = [x_val[i] for i in range(0, len(x_val), step)]
         self.axes1.set_xticks(ticks)
         self.axes1.set_xticklabels(labels)
+
+        # グラフのレイアウトを調整
+        self.figure.tight_layout()
         
         # 描画を更新
         self.draw()

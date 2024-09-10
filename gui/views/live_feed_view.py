@@ -53,6 +53,7 @@ class LiveFeedWindow(QWidget):
 
         # メインレイアウトに追加
         main_layout.addLayout(header_layout)
+        main_layout.addStretch()
         main_layout.addLayout(feed_layout)
         main_layout.addStretch()
         main_layout.addLayout(footer_layout)

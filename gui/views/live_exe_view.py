@@ -108,7 +108,7 @@ class LiveExeWindow(QWidget):
         # 初期化
         self.graph_label.gen_graph(
                     title='Results', 
-                    xlabel='Frame', 
+                    xlabel='Timestamp', 
                     ylabel1='Failed Rate', 
                     ylabel2='Detected results', 
                     dark_theme=self.screen_manager.check_if_dark_mode())
