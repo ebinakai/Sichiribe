@@ -30,3 +30,6 @@ build/
 nuitka-crash-report.xml
 Resources/
 Info.plist
+
+# create-dmg
+*.dmg
