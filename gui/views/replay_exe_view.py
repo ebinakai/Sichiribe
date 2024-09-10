@@ -1,8 +1,6 @@
 from PySide6.QtWidgets import QWidget, QHBoxLayout, QVBoxLayout, QPushButton, QLabel
-from PySide6.QtCore import QTimer, Qt, QSize
-from PySide6.QtGui import QPixmap
+from PySide6.QtCore import Qt
 from gui.utils.screen_manager import ScreenManager
-from gui.utils.common import convert_cv_to_qimage
 from gui.widgets.mpl_canvas_widget import MplCanvas
 from gui.workers.frame_devide_worker import FrameDivideWorker
 from gui.workers.replay_detect_worker import DetectWorker
