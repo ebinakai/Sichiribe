@@ -34,9 +34,18 @@ source ./env/bin/activate
 python3 -m pip install --upgrade pip
 pip install -r requirements.txt
 
-# macosの場合
-pip install tensorflow-metal
+# 以下のいずれかのtensorflowをインストールする
+pip install tensorflow # フルバージョンのtensorflowを用いる場合
+
+pip install tflite-runtime # linux環境でモデルの学習をしない場合
+
+pip install tensorflow # macosの場合
+pip install tensorflow-metal # macosでGPUを用いる場合はこれも
 ```
+
+## Install model
+
+学習済モデルは、[Github | Release v0.1.2](https://github.com/EbinaKai/Sichiribe/releases/tag/v0.1.2) においてあるので、そこからダウンロードして `model/` フォルダを作成して設置する。
 
 ## GUI Execution
 
@@ -133,6 +142,7 @@ python live.py --device 1 --num-frames 10 --sampling-sec 2 --total-sampling-min 
 | `gui/views/live_feed_view.py` | ライブ解析のカメラ画角確認画面 |
 | `gui/views/live_exe_view.py` | ライブ解析の処理画面。推論結果のグラフと7セグ画像が表示される |
 | `gui/views/replay_setting_view.py` | 動画ファイル解析の設定画面 |
+| `gui/views/replay_threshold_view.py` | ２値化のしきい値を設定 |
 | `gui/views/replay_exe_view.py` | 動画ファイル解析の処理画面。推論結果のグラフが表示される |
 | `gui/views/finish.py` | 解析終了画面 |
 | `gui/workers/live_feed_worker.py` | ライブ解析のカメラ画角確認のバックグランド処理 |
