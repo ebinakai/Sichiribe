@@ -18,15 +18,24 @@ nuitka \
     --macos-app-protected-resource="NSCameraUsageDescription:Camera access" \
     Sichiribe.py
 
-# パッケージング
-rm -f Sichiribe.dmg
-echo "Creating DMG..."
-create-dmg --window-size 920 660 \
-           --background "script/background.png" \
-           --icon "Sichiribe.app" 200 240 \
-           --app-drop-link 550 240 \
-           Sichiribe.dmg \
-           Sichiribe.app
+# Nuitkaのビルドが成功したかどうかを確認
+if [ $? -eq 0 ]; then
+    echo "Nuitka build successful."
+
+    # パッケージング
+    rm -f Sichiribe.dmg
+    echo "DMG creating..."
+    create-dmg --window-size 920 660 \
+               --background "script/background.png" \
+               --icon "Sichiribe.app" 200 240 \
+               --app-drop-link 550 240 \
+               Sichiribe.dmg \
+               Sichiribe.app
+
+    echo "DMG created!"
+else
+    echo "Nuitka build failed. DMG creation aborted."
+fi
 
 # 不要なファイルを削除
 rm -rf Sichiribe.app
