@@ -1,6 +1,6 @@
 import logging
 formatter = '%(asctime)s - %(name)s - %(levelname)s - %(message)s'
-logging.basicConfig(level=logging.WARN, format=formatter)
+logging.basicConfig(level=logging.DEBUG, format=formatter)
 
 import sys
 from PySide6.QtWidgets import QApplication
