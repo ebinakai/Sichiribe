@@ -1,8 +1,9 @@
 from PySide6.QtWidgets import QWidget, QHBoxLayout, QVBoxLayout, QFormLayout, QPushButton, QLabel, QSlider
 from PySide6.QtCore import Qt
 from PySide6.QtGui import QPixmap
+from gui.widgets.mpl_canvas_widget import MplCanvas
 from gui.utils.screen_manager import ScreenManager
-from gui.utils.common import convert_cv_to_qimage, gen_graph
+from gui.utils.common import convert_cv_to_qimage
 from gui.workers.live_detect_worker import DetectWorker
 from gui.workers.export_worker import ExportWorker
 import logging
@@ -33,7 +34,7 @@ class LiveExeWindow(QWidget):
         form_layout.setAlignment(Qt.AlignmentFlag.AlignCenter)
         
         # グラフの設定
-        self.graph_label = QLabel()
+        self.graph_label = MplCanvas(self)
         graph_layout.addWidget(self.graph_label)
         
         # 選択領域表示用レイアウト
@@ -105,6 +106,12 @@ class LiveExeWindow(QWidget):
         window_pos, window_size = self.screen_manager.save_screen_size()
      
         # 初期化
+        self.graph_label.gen_graph(
+                    title='Results', 
+                    xlabel='Frame', 
+                    ylabel1='Failed Rate', 
+                    ylabel2='Detected results', 
+                    dark_theme=self.screen_manager.check_if_dark_mode())
         self.binarize_th.setValue(0)
         self.binarize_th_label.setText('自動設定')
         self.term_label.setText('')
@@ -116,7 +123,7 @@ class LiveExeWindow(QWidget):
         self.graph_failed_rates = []
         self.graph_timestamps = []
         self.worker = DetectWorker(self.params)
-        self.worker.progress.connect(self.update_graph)
+        self.worker.progress.connect(self.detect_progress)
         self.worker.send_image.connect(self.display_extract_image)
         self.worker.end.connect(self.detect_finished)
         self.worker.cancelled.connect(self.detect_cancelled)
@@ -130,25 +137,18 @@ class LiveExeWindow(QWidget):
         self.clear_env()
         self.screen_manager.show_screen('menu')
         
-    def update_graph(self, result, failed_rate, timestamp):
+    def detect_progress(self, result, failed_rate, timestamp):
         self.screen_manager.show_screen('live_exe')
         self.results.append(result)
         self.failed_rates.append(failed_rate)
         self.timestamps.append(timestamp)
+        self.update_graph(result, failed_rate, timestamp)
         
-        # グラフの更新
+    def update_graph(self, result, failed_rate, timestamp):
         self.graph_results.append(result)
         self.graph_failed_rates.append(failed_rate)
         self.graph_timestamps.append(timestamp)
-        title = 'Results'
-        xlabel = 'Frame'
-        ylabel1 = 'Failed Rate'
-        ylabel2 = 'Detected results'
-        graph = gen_graph(self.graph_timestamps, self.graph_failed_rates, self.graph_results, title, xlabel, ylabel1, ylabel2, self.screen_manager.check_if_dark_mode())
-
-        # QLabel に画像を設定
-        q_image = convert_cv_to_qimage(graph)
-        self.graph_label.setPixmap(QPixmap.fromImage(q_image))
+        self.graph_label.update_existing_plot(self.graph_timestamps, self.graph_failed_rates, self.graph_results)
         
     def display_extract_image(self, image: np.ndarray):
         q_image = convert_cv_to_qimage(image)
@@ -199,4 +199,3 @@ class LiveExeWindow(QWidget):
         self.graph_timestamps = None
         self.logger.info("Environment cleared.")
         self.screen_manager.restore_screen_size()
-    

@@ -2,7 +2,8 @@ from PySide6.QtWidgets import QWidget, QHBoxLayout, QVBoxLayout, QPushButton, QL
 from PySide6.QtCore import QTimer, Qt, QSize
 from PySide6.QtGui import QPixmap
 from gui.utils.screen_manager import ScreenManager
-from gui.utils.common import convert_cv_to_qimage, gen_graph
+from gui.utils.common import convert_cv_to_qimage
+from gui.widgets.mpl_canvas_widget import MplCanvas
 from gui.workers.frame_devide_worker import FrameDivideWorker
 from gui.workers.replay_detect_worker import DetectWorker
 from gui.workers.export_worker import ExportWorker
@@ -30,7 +31,7 @@ class ReplayExeWindow(QWidget):
         graph_layout.setAlignment(Qt.AlignmentFlag.AlignCenter)
         
         # グラフの設定
-        self.graph_label = QLabel()
+        self.graph_label = MplCanvas()
         graph_layout.addWidget(self.graph_label)
         
         # フッター
@@ -58,6 +59,12 @@ class ReplayExeWindow(QWidget):
         
     def startup(self, params):
         # 初期化
+        self.graph_label.gen_graph(
+                    title='Results', 
+                    xlabel='Frame', 
+                    ylabel1='Failed Rate', 
+                    ylabel2='Detected results', 
+                    dark_theme=self.screen_manager.check_if_dark_mode())
         self.term_label.setText('')
         self.params = params
         self.results = []
@@ -98,31 +105,23 @@ class ReplayExeWindow(QWidget):
    
     def detect_process(self):
         self.worker = DetectWorker(self.params)
-        self.worker.progress.connect(self.update_graph)
+        self.worker.progress.connect(self.detect_progress)
         self.worker.end.connect(self.detect_finished)
         self.worker.cancelled.connect(self.detect_cancelled)
         self.worker.start()
         self.logger.info('Detect started.')
         
-    def update_graph(self, result, failed_rate, timestamp):
+    def detect_progress(self, result, failed_rate, timestamp):
         self.screen_manager.show_screen('replay_exe')
         self.results.append(result)
         self.failed_rates.append(failed_rate)
+        self.update_graph(result, failed_rate, timestamp)
         
-        # グラフの更新
+    def update_graph(self, result, failed_rate, timestamp):
         self.graph_results.append(result)
         self.graph_failed_rates.append(failed_rate)
         self.graph_timestamps.append(timestamp)
-        
-        # グラフの更新
-        title = 'Results'
-        xlabel = 'Frame'
-        ylabel1 = 'Failed Rate'
-        ylabel2 = 'Detected results'
-        graph = gen_graph(self.graph_timestamps, self.graph_failed_rates, self.graph_results, title, xlabel, ylabel1, ylabel2, self.screen_manager.check_if_dark_mode())
-
-        q_image = convert_cv_to_qimage(graph)
-        self.graph_label.setPixmap(QPixmap.fromImage(q_image))
+        self.graph_label.update_existing_plot(self.graph_timestamps, self.graph_failed_rates, self.graph_results)
         
     def detect_finished(self):
         self.graph_label.clear()
