@@ -69,10 +69,11 @@ pip install nuitka zstandard orderedset
 ```
 
 また、Macosへの対応は完全ではないためか、アプリ名の指定が効かなかったので、`app.py` を `Sichiribe.py` にリネームした。
-ビルド用のスクリプトは `make.sh` である。brewでインストールしたライブラリ用の変数も含むが、各自必要なら編集して実行してほしい。
+ビルド用のスクリプトは `make.sh` である。brewでインストールしたライブラリ用の変数も含むが、各自必要なら編集して実行してほしい。また、dmg形式にパッケージしてくれる
 
 ```bash
-source make.sh
+# ビルド＆パッケージング
+source script/make.sh
 ```
 
 以上。
