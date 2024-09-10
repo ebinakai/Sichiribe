@@ -35,7 +35,11 @@ pip install PySide6_Essentials
 Nuitkaを使ってビルドするには以下のライブラリが必要なのでインストールする。  
 
 ```bash
+# ライブラリのインストール
 pip install nuitka zstandard orderedset
+
+# ビルド
+source script/make.sh
 ```
 
 以上。
