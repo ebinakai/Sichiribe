@@ -1,12 +1,11 @@
+# ログの設定
 import logging
 formatter = '%(asctime)s - %(name)s - %(levelname)s - %(message)s'
 logging.basicConfig(level=logging.DEBUG, format=formatter)
 
 import sys
-from PySide6.QtWidgets import QApplication
+from PySide6.QtWidgets import QApplication, QMessageBox
 from PySide6.QtCore import QTimer
-
-# メインウィンドウを読み込むのには時間がかかるので、ここでインポート
 from gui.views.splash_view import SplashScreen
 from gui.views.main_view import MainWindow
         

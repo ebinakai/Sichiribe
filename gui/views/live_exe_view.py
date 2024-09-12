@@ -4,8 +4,8 @@ from PySide6.QtGui import QPixmap
 from gui.widgets.mpl_canvas_widget import MplCanvas
 from gui.utils.screen_manager import ScreenManager
 from gui.utils.common import convert_cv_to_qimage
+from gui.utils.exporter import export_result, export_params
 from gui.workers.live_detect_worker import DetectWorker
-from gui.workers.export_worker import ExportWorker
 import logging
 import numpy as np
 
@@ -146,7 +146,7 @@ class LiveExeWindow(QWidget):
         self.update_graph(result, failed_rate, timestamp)
         
     def detect_error(self):
-        self.term_label.setText('エラーが発生しました')
+        self.screen_manager.popup("カメラにアクセスできませんでした。")
         
     def update_graph(self, result, failed_rate, timestamp):
         self.graph_results.append(result)
@@ -178,18 +178,18 @@ class LiveExeWindow(QWidget):
         self.export_process(params)
 
     def export_process(self, params):
-        self.logger.info('Export started.')
-        self.screen_manager.show_screen('log')
-        self.params = params
-        self.worker = ExportWorker(self.params)
-        self.worker.finished.connect(self.export_finished)
-        self.worker.start()
+        self.logger.info('Data exporting...')
+        
+        # 結果出力
+        export_result(params)
+        
+        # 設定パラメータを出力
+        export_params(params)
 
-    def export_finished(self):
-        self.logger.info('Export finished.')
-        self.screen_manager.get_screen('finish').startup(self.params)
-        self.params = None
-   
+        # 完了ポップアップウィンドウを表示
+        self.screen_manager.popup(f"保存場所：{params['out_dir']}")
+        self.screen_manager.show_screen('menu')
+
     def clear_env(self):
         self.graph_label.clear()
         self.extracted_label.clear()

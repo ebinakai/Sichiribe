@@ -36,11 +36,9 @@ pip install -r requirements.txt
 
 # 以下のいずれかのtensorflowをインストールする
 pip install tensorflow # フルバージョンのtensorflowを用いる場合
+pip install tensorflow-metal # macosでGPUを用いる場合はこれも
 
 pip install tflite-runtime # linux環境でモデルの学習をしない場合
-
-pip install tensorflow # macosの場合
-pip install tensorflow-metal # macosでGPUを用いる場合はこれも
 ```
 
 ## Install model
@@ -131,7 +129,7 @@ python live.py --device 1 --num-frames 10 --sampling-sec 2 --total-sampling-min 
 | `cnn/train.py` | ディープラーニングモデルを学習するプログラム |
 | `cnn/conv_keras2tf.py` | Kerasモデルをtflite形式に変換するプログラム |
 | `gui/utils/common.py` | GUI用の汎用的な機能の関数詰め合わせ |
-| `gui/utils/router.py` | GUIの各ページのルーティング |
+| `gui/utils/router.py` | GUIの各ページのルーティング関数 |
 | `gui/utils/screen_manager.py` | GUIの各ページの管理クラス |
 | `gui/views/splash_view.py` | GUI起動後のスプラッシュ画像 |
 | `gui/views/main_view.py` | メインページ。この中に各ページをラップする |
@@ -144,12 +142,11 @@ python live.py --device 1 --num-frames 10 --sampling-sec 2 --total-sampling-min 
 | `gui/views/replay_setting_view.py` | 動画ファイル解析の設定画面 |
 | `gui/views/replay_threshold_view.py` | ２値化のしきい値を設定 |
 | `gui/views/replay_exe_view.py` | 動画ファイル解析の処理画面。推論結果のグラフが表示される |
-| `gui/views/finish.py` | 解析終了画面 |
 | `gui/workers/live_feed_worker.py` | ライブ解析のカメラ画角確認のバックグランド処理 |
 | `gui/workers/live_detect_worker.py` | ライブ解析の推論のバックグランド処理 |
 | `gui/workers/frame_devide_worker.py` | 動画ファイル解析のフレーム分割のバックグランド処理 |
 | `gui/workers/replay_detect_worker.py` | 動画ファイル解析の推論のバックグランド処理 |
-| `gui/workers/export_worker.py` | 解析結果保存のバックグランド処理 |
+| `gui/widgets/mpl_canvas_widget.py` | グラフを表示するウィジェット |
 | `test/something` | テスト用ファイル |
 
 ### Process flow configuration

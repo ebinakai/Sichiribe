@@ -1,10 +1,10 @@
 from PySide6.QtWidgets import QWidget, QHBoxLayout, QVBoxLayout, QPushButton, QLabel
 from PySide6.QtCore import Qt
 from gui.utils.screen_manager import ScreenManager
+from gui.utils.exporter import export_result, export_params
 from gui.widgets.mpl_canvas_widget import MplCanvas
 from gui.workers.frame_devide_worker import FrameDivideWorker
 from gui.workers.replay_detect_worker import DetectWorker
-from gui.workers.export_worker import ExportWorker
 from cores.frameEditor import FrameEditor
 import logging
 
@@ -150,17 +150,18 @@ class ReplayExeWindow(QWidget):
         self.export_process(params)
 
     def export_process(self, params):
-        self.params = params
-        self.logger.info('Export started.')
-        self.worker = ExportWorker(self.params)
-        self.worker.finished.connect(self.export_finished)
-        self.worker.start()
+        self.logger.info('Data exporting...')
+        
+        # 結果出力
+        export_result(params)
+        
+        # 設定パラメータを出力
+        export_params(params)
 
-    def export_finished(self):
-        self.logger.info('Export finished.')
-        self.screen_manager.get_screen('finish').startup(self.params)
-        self.params = None
-   
+        # 完了ポップアップウィンドウを表示
+        self.screen_manager.popup(f"保存場所：{params['out_dir']}")
+        self.screen_manager.show_screen('menu')
+
     def clear_env(self):
         self.graph_label.clear()
         self.term_label.setText('')

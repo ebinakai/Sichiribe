@@ -9,7 +9,6 @@ from gui.views.replay_threshold_view import ReplayThresholdWindow
 from gui.views.live_setting_view import LiveSettingsWindow
 from gui.views.live_feed_view import LiveFeedWindow
 from gui.views.live_exe_view import LiveExeWindow
-from gui.views.finish_view import FinishWindow
         
 def init_screen_manager(stacked_widget: QStackedWidget, main_window: QMainWindow) -> ScreenManager:
   
@@ -25,7 +24,6 @@ def init_screen_manager(stacked_widget: QStackedWidget, main_window: QMainWindow
     live_setting_window = LiveSettingsWindow(screen_manager)
     live_feed_window = LiveFeedWindow(screen_manager)
     live_exe_window = LiveExeWindow(screen_manager)
-    finish_window = FinishWindow(screen_manager)
     
     # ビューをスタックウィジェットに追加
     stacked_widget.addWidget(menu_window)
@@ -37,6 +35,5 @@ def init_screen_manager(stacked_widget: QStackedWidget, main_window: QMainWindow
     stacked_widget.addWidget(live_setting_window)
     stacked_widget.addWidget(live_feed_window)
     stacked_widget.addWidget(live_exe_window)
-    stacked_widget.addWidget(finish_window)
     
     return screen_manager

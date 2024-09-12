@@ -1,4 +1,4 @@
-from PySide6.QtWidgets import QApplication, QStackedWidget, QWidget, QMainWindow
+from PySide6.QtWidgets import QApplication, QStackedWidget, QWidget, QMainWindow, QMessageBox
 from PySide6.QtGui import QPalette
 from PySide6.QtCore import QEventLoop, QTimer
 import logging
@@ -75,3 +75,16 @@ class ScreenManager:
             
         else: 
             self.logger.error("No screen size saved")
+
+    def popup(self, message: str, is_modal=False):
+        self.logger.debug("Popup message: %s" % message)
+        
+        msg_box = QMessageBox(self.main_window)
+        msg_box.setText(message)
+        msg_box.setStandardButtons(QMessageBox.Ok)
+        
+        # 同期処理または非同期処理
+        if is_modal:
+            msg_box.exec()
+        else:
+            msg_box.show()

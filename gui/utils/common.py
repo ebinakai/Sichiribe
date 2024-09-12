@@ -3,9 +3,8 @@ from PySide6.QtGui import QImage
 import numpy as np
 import cv2
 
-
+# Convert a CV image (numpy array) to QImage.
 def convert_cv_to_qimage(cv_img: np.ndarray) -> QImage:
-    """Convert a CV image (numpy array) to QImage."""
     height, width, channels = cv_img.shape
     
     # 画像が BGR 形式の場合
@@ -23,7 +22,7 @@ def convert_cv_to_qimage(cv_img: np.ndarray) -> QImage:
     else:
         raise ValueError("Unsupported number of channels: {}".format(channels))
 
-  # 画像を規定の大きさにリサイズ
+# 画像を規定の大きさにリサイズ
 def resize_image(image: np.ndarray, target_width: int, target_height: int) -> tuple[np.ndarray, float]:
   
   height, width = image.shape[:2]

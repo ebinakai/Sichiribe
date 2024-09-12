@@ -118,6 +118,7 @@ class LiveFeedWindow(QWidget):
         
     def feed_error(self):
         self.clear_env()
+        self.screen_manager.popup("カメラにアクセスできませんでした。")
         QTimer.singleShot(1, lambda: self.screen_manager.show_screen('live_setting'))
         self.logger.error('Feed missing frame.')
         
