@@ -170,12 +170,6 @@ class LiveExeWindow(QWidget):
     def detect_cancelled(self):
         self.logger.info('Detect cancelled.')
         self.term_label.setText('中止しました')
-        self.params['results'] = self.results
-        self.params['failed_rates'] = self.failed_rates
-        self.params['timestamps'] = self.timestamps
-        params = self.params
-        self.clear_env()
-        self.export_process(params)
 
     def export_process(self, params):
         self.logger.info('Data exporting...')

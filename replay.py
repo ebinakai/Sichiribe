@@ -11,7 +11,7 @@ logger = logging.getLogger('__main__').getChild(__name__)
 
 import argparse
 from cores.frameEditor import FrameEditor
-from cores.cnn import CNN as Detector
+from cores.cnn_lite import CNNLite as Detector
 from cores.exporter import Exporter, get_supported_formats
 
 def get_args():
@@ -54,14 +54,16 @@ def main(video_path,
     
   # テキスト検出
   results = []
+  failed_rates = []
   for frame in frames:
     result, failed_rate = dt.detect(frame)
     results.append(result)
+    failed_rates.append(failed_rate)
     logger.info(f"Detected Result: {result}")
     logger.info(f"Failed Rate: {failed_rate}")
 
   # 結果のエクスポート
-  data = ep.format(results, timestamps)
+  data = ep.format(results, failed_rates, timestamps)
   ep.export(data)
 
 

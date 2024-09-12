@@ -12,7 +12,7 @@ logger = logging.getLogger('__main__').getChild(__name__)
 import argparse
 from cores.capture import FrameCapture
 from cores.frameEditor import FrameEditor
-from cores.cnn import CNN as Detector
+from cores.cnn_lite import CNNLite as Detector
 from cores.exporter import Exporter, get_supported_formats
 from cores.common import get_now_str
 import time
@@ -67,6 +67,7 @@ def main(device,
   frame_count = 0
   timestamps = []
   results = []
+  failed_rates = []
   while time.time() < end_time:
     temp_time = time.time()
     frames = []
@@ -92,6 +93,7 @@ def main(device,
       value, failed_rate = dt.detect(frames)
       logger.info(f"Detected: {value}, Failed rate: {failed_rate}")
       results.append(value)
+      failed_rates.append(failed_rate)
       
       # タイムスタンプを "HH:MM:SS" 形式で生成
       elapsed_time = int(time.time() - start_time)
@@ -108,7 +110,7 @@ def main(device,
   fc.release()
   
   # 結果のエクスポート
-  data = ep.format(results, timestamps)
+  data = ep.format(results, failed_rates, timestamps)
   ep.export(data)
 
 if __name__ == "__main__":

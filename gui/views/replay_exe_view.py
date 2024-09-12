@@ -141,13 +141,7 @@ class ReplayExeWindow(QWidget):
     def detect_cancelled(self):
         self.term_label.setText('中止しました')
         self.logger.info('Detect cancelled.')
-        self.logger.info(f"Results: {self.results}")
-        self.params['results'] = self.results
-        self.params['failed_rates'] = self.failed_rates
         self.params['timestamps'] = self.params['timestamps'][:len(self.results)]
-        params = self.params
-        self.clear_env()
-        self.export_process(params)
 
     def export_process(self, params):
         self.logger.info('Data exporting...')
