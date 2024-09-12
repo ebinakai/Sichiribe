@@ -55,7 +55,7 @@ python Sichiribe.py
 
 階層構造及び画面フローを以下に示す。
 
-![Sichiribe drawio](https://github.com/user-attachments/assets/2fd9e63e-ee8f-48d0-8029-18967d18aa0e)
+![Sichiribe drawio](https://github.com/user-attachments/assets/08b820b5-ddd2-4d14-b90c-1dde6255575c)
 
 ## REPLAY Execution
 
@@ -128,7 +128,7 @@ python live.py --device 1 --num-frames 10 --sampling-sec 2 --total-sampling-min 
 | `cores/cnn.py` | CNNモデルをTensorflowのフルバージョン(.kerasモデル)で動かす場合 |
 | `cores/cnn_lite.py` | CNNモデルをtflite-runtime(.tfliteモデル)で動かす場合 |
 | `cores/exporter.py` | 取得した結果を任意の形式で出力・保存する機能 |
-| `cnn/train.py` | ディープラーニングモデルを学習するプログラム |
+| `cnn/train.py` | CNNモデルを学習させるプログラム |
 | `cnn/conv_keras2tf.py` | Kerasモデルをtflite形式に変換するプログラム |
 | `gui/utils/common.py` | GUI用の汎用的な機能の関数詰め合わせ |
 | `gui/utils/router.py` | GUIの各ページのルーティング関数 |
