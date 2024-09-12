@@ -84,21 +84,19 @@ class MplCanvas(FigureCanvasQTAgg):
         self.line1.set_data(x_val_num, y_val1)
         self.line2.set_data(x_val_num, y_val2)
 
-        # 軸の再設定
-        self.axes2.relim()
-        self.axes2.autoscale_view()
-
-        # x軸の範囲設定
-        self.axes1.set_xlim(x_val_num[0], x_val_num[-1])
         
         # x軸を時間形式に設定
         self.axes1.xaxis.set_major_formatter(mdates.DateFormatter('%H:%M:%S'))
         
-        # データの範囲に余裕を持たせる
+        # x軸の範囲設定
         if len(x_val_num) > 1:
             x_min, x_max = x_val_num[0], x_val_num[-1]
             x_margin = (x_max - x_min) * 0.05  # データの5%を余裕として設定
             self.axes1.set_xlim(x_min - x_margin, x_max + x_margin)
+
+        # axes2軸の再設定
+        self.axes2.relim()
+        self.axes2.autoscale_view()
         
         # 表示するラベルの数を制限
         max_labels = 5
