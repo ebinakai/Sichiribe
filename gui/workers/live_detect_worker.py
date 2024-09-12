@@ -1,5 +1,4 @@
 from PySide6.QtCore import Signal, QThread
-# from cores.cnn import CNN as Detector
 from cores.cnn_lite import CNNLite as Detector
 from cores.capture import FrameCapture
 from cores.frameEditor import FrameEditor
@@ -13,9 +12,9 @@ import numpy as np
 class DetectWorker(QThread):
     progress = Signal(int, float, str)
     send_image = Signal(np.ndarray)
-    end = Signal()
     cancelled = Signal()
     model_not_found = Signal()
+    error = Signal()
 
     def __init__(self, params):
         super().__init__()
@@ -28,23 +27,28 @@ class DetectWorker(QThread):
     def run(self):
         self.logger.info("DetectWorker started.")
         
+        # フレーム保存用ディレクトリの作成
         if self.params['save_frame']:
           os.makedirs(os.path.join(self.params['out_dir'], 'frames'), exist_ok=True)
         
         self.fc = FrameCapture(device_num=self.params['device_num'])
         self.fc.set_cap_size(self.params['cap_size'][0], self.params['cap_size'][1])
-        
         self.fe = FrameEditor(num_digits=self.params['num_digits'])
         self.dt = Detector(self.params['num_digits'])
+        
+        # モデルのロード
         if not self.dt.load():
           self.logger.error("Failed to load the model.")
           self.model_not_found.emit()
           return None
         
+        # 初期化
         start_time = time.time()
         end_time = time.time() + self.params['total_sampling_sec']
         frame_count = 0
         timestamps = []
+        
+        # キャプチャ開始
         while time.time() < end_time:
           temp_time = time.time()
           frames = []   
@@ -64,7 +68,8 @@ class DetectWorker(QThread):
             frame = self.fc.capture()
             
             if frame is None:
-              continue
+              self.error.emit()
+              return None
             
             # 推論処理
             cropped_frame = self.fe.crop(frame, self.params['click_points'])
@@ -96,7 +101,6 @@ class DetectWorker(QThread):
             self.logger.debug(f"Waiting for {time_to_wait:.2f}s")
             time.sleep(time_to_wait)
         
-        self.end.emit()
         return None
         
     def cancel(self):

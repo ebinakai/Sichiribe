@@ -104,10 +104,17 @@ class ReplayExeWindow(QWidget):
     def detect_process(self):
         self.worker = DetectWorker(self.params)
         self.worker.progress.connect(self.detect_progress)
-        self.worker.end.connect(self.detect_finished)
+        self.worker.finished.connect(self.detect_finished)
         self.worker.cancelled.connect(self.detect_cancelled)
+        self.worker.model_not_found.connect(self.model_not_found)
         self.worker.start()
         self.logger.info('Detect started.')
+        
+    def model_not_found(self):
+        self.term_label.setText('モデルが見つかりません')
+        self.logger.error('Model not found.')
+        self.clear_env()
+        self.screen_manager.show_screen('menu')
         
     def detect_progress(self, result, failed_rate, timestamp):
         self.screen_manager.show_screen('replay_exe')

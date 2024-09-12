@@ -4,8 +4,8 @@ import logging
 
 class DetectWorker(QThread):
     progress = Signal(int, float, str)
-    end = Signal()
     cancelled = Signal()
+    model_not_found = Signal()
 
     def __init__(self, params):
         super().__init__()
@@ -16,25 +16,27 @@ class DetectWorker(QThread):
 
     def run(self):
         self.logger.info("DetectWorker started.")
-        self.dt.load()
+        
+        # モデルのロード
+        if not self.dt.load():
+          self.logger.error("Failed to load the model.")
+          self.model_not_found.emit()
+          return None
         
         # テキスト検出
         for frame, timestamp in zip(self.params['frames'], self.params['timestamps']):
+            # 途中終了
             if self._is_cancelled: 
                 self.cancelled.emit()
                 self.params = None
-                return
+                return None
+            
+            # 推論処理
             result, failed_rate = self.dt.detect(frame, binarize_th=self.params['threshold'])
-            
-            # すべての桁(三桁以上)が8の場合はディスプレイが消灯していると判断し、検出失敗とする
-            if str(result) == '8' * self.params['num_digits'] and self.params['num_digits'] > 2:
-                failed_rate = 1.0
-            
             self.logger.info(f"Detected Result: {result}")
             self.logger.info(f"Failed Rate: {failed_rate}")
             self.progress.emit(result, failed_rate, timestamp)
             
-        self.end.emit()
         return None
         
     def cancel(self):

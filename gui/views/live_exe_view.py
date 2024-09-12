@@ -125,9 +125,10 @@ class LiveExeWindow(QWidget):
         self.worker = DetectWorker(self.params)
         self.worker.progress.connect(self.detect_progress)
         self.worker.send_image.connect(self.display_extract_image)
-        self.worker.end.connect(self.detect_finished)
+        self.worker.finished.connect(self.detect_finished)
         self.worker.cancelled.connect(self.detect_cancelled)
         self.worker.model_not_found.connect(self.model_not_found)
+        self.worker.error.connect(self.detect_error)
         self.worker.start()
         self.logger.info('Detect started.')
         
@@ -143,6 +144,9 @@ class LiveExeWindow(QWidget):
         self.failed_rates.append(failed_rate)
         self.timestamps.append(timestamp)
         self.update_graph(result, failed_rate, timestamp)
+        
+    def detect_error(self):
+        self.term_label.setText('エラーが発生しました')
         
     def update_graph(self, result, failed_rate, timestamp):
         self.graph_results.append(result)

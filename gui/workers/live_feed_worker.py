@@ -27,6 +27,7 @@ class LiveFeedWorker(QThread):
         self.cap_size.emit((cap_width, cap_height))
 
         while True:
+            # キャンセルフラグを確認
             if self._is_cancelled:
                 self.cancelled.emit()
                 break
@@ -37,6 +38,7 @@ class LiveFeedWorker(QThread):
                 self.error.emit()
                 break
             
+            # 終了フラグを確認
             if self._is_finished:
                 self.end.emit(frame)
                 break
@@ -44,7 +46,6 @@ class LiveFeedWorker(QThread):
             self.progress.emit(frame)
         fc.release()
         return None
-        
             
     def stop(self):
         self.logger.info("Capture Feed stopping...") 
