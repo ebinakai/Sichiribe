@@ -114,7 +114,7 @@ python live.py --device 1 --num-frames 10 --sampling-sec 2 --total-sampling-min 
 
 ### File structure
 
-|  ファイル | 説明 |
+| ファイル | 説明 |
 | --- | --- |  
 | `Sichiribe.py` | GUIアプリケーションの起動 |
 | `live.py` | 外部カメラからライブ解析 |
