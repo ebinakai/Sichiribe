@@ -5,7 +5,7 @@
       width="100"
    >
    <h1>Sichiribe</h1>
-   <p>7Segment Detector for JunLab 2024</p>
+   <p>7-Segment display Analyzer for JunLab 2024</p>
 
    <a href="https://github.com/ebinakai/Sichiribe/releases/">Releases</a> ･ 
    <a href="#features">Features</a> ･ 
@@ -72,7 +72,7 @@ python app.py
 
 階層構造及び画面フローを以下に示す。
 
-![screen flow](https://github.com/user-attachments/assets/f745140d-4aa5-4c10-8c24-a6f6f9fe97f0)
+![screen flow](https://github.com/user-attachments/assets/44a09f86-2325-4a2d-bc8b-db9eba29fe86)
 
 ## REPLAY Execution
 
