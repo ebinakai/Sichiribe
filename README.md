@@ -67,12 +67,12 @@ pip install tflite-runtime # linux環境でモデルの学習をしない場合
 GUIでの諸項目の実行を行うには以下のコマンドを実行する。
 
 ```bash
-python Sichiribe.py
+python app.py
 ```
 
 階層構造及び画面フローを以下に示す。
 
-![Sichiribe drawio](https://github.com/user-attachments/assets/08b820b5-ddd2-4d14-b90c-1dde6255575c)
+![screen flow](https://github.com/user-attachments/assets/f745140d-4aa5-4c10-8c24-a6f6f9fe97f0)
 
 ## REPLAY Execution
 
@@ -130,7 +130,7 @@ python live.py --device 1 --num-frames 10 --sampling-sec 2 --total-sampling-min 
 
 | ファイル | 説明 |
 | --- | --- |  
-| `Sichiribe.py` | GUIアプリケーションの起動 |
+| `app.py` | GUIアプリケーションの起動 |
 | `live.py` | 外部カメラからライブ解析 |
 | `replay.py` | 動画ファイルから解析 |
 | `cores/common.py` | コアな汎用的な機能の関数詰め合わせ |
