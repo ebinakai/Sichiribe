@@ -1,4 +1,20 @@
-# 7Segment detector
+<div align="center">
+   <img
+      src="script/Sichiribe_icon.png"
+      alt="Reminders MenuBar"
+      width="100"
+   >
+   <h1>Sichiribe</h1>
+   <p>7Segment Detector for JunLab 2024</p>
+
+   <a href="https://github.com/ebinakai/Sichiribe/releases/">Releases</a> ･ 
+   <a href="#features">Features</a> ･ 
+   <a href="#init">Installation</a> ･ 
+   <a href="#references">References</a> ･ 
+   <a href="#license">License</a>
+</p>
+
+</div>
 
 ## Description
 
@@ -13,11 +29,12 @@
 - 動画を入力して、その動画を解析する
 - カメラを接続して、リアルタイムで解析する
 - 上記に項目をCLI及び、GUIで実行する
-- プログラムのExe化
+- [MacOS用のビルド](https://github.com/EbinaKai/Sichiribe/releases/tag/v0.1.5)
 
 ## Init
 
-仮想環境の作成等はLinuxに準拠するため、Windowsで実行する際などは適宜読み替えてほしい。  
+仮想環境の作成等はMacOS・Linuxに準拠するため、Windowsで実行する際などは適宜読み替えてほしい。  
+また、Linux環境以外で `tflite-runtime` を用いたい場合は [about_tensorflow.md](./docs/about_tensorflow.md) を参照するとよい。
 
 ```bash
 # リポジトリのクローン
@@ -59,9 +76,8 @@ python Sichiribe.py
 
 ## REPLAY Execution
 
-7セグメント表示器を移した動画から表示内容を解析するには `replay.py` を実行する。
-パラメータを設定することができ、そのパラメータは実行時に指定することができる。
-実行例を以下に示す。
+7セグメント表示器を撮影した動画から表示内容を解析するには `replay.py` を実行する。  
+パラメータを設定することができ、実行時に指定できる。実行例を以下に示す。
 
 ```bash
 # 一番シンプルな例
@@ -71,7 +87,7 @@ python3 replay.py test/sample.mp4
 python3 replay.py test/sample.mp4 --num-digits 4 --sampling-sec 5 --num-frames 30 --skip-sec 0 --format csv --save-frame --debug
 ```
 
-### Arguments
+### replay.py Arguments
 
 これらの引数は動画のパス以外はオプションなので、含めずに実行することも可能である。
 
@@ -88,16 +104,14 @@ python3 replay.py test/sample.mp4 --num-digits 4 --sampling-sec 5 --num-frames 3
 
 ## Live Execution
 
-カメラを接続して、ライブで解析する場合
+カメラを接続して、ライブで解析する場合は、`live.py` を実行する。  
 
 ```bash
 # 短時間解析（6秒）のサンプル
 python live.py --device 1 --num-frames 10 --sampling-sec 2 --total-sampling-min 0.1 --format csv --save-frame --debug
 ```
 
-### Arguments
-
-これらの引数はオプションなので、含めずに実行することも可能である。
+### live.py Arguments
 
 | 引数 | 説明 |  
 | --- | --- |  
@@ -198,3 +212,7 @@ python cnn/conv_keras2tf.py
 
 - [子供プログラマー](https://child-programmer.com/seven-segment-digits-ocr-original-model/ "【7セグメント編】オリジナル学習済みモデルの作成方法：連続デジタル数字画像認識プログラミング入門（Python・OpenCV・Keras・CNN）")
 - [Github | Kazuhito00/7segment-display-reader](https://github.com/Kazuhito00/7segment-display-reader "Kazuhito00/7segment-display-reader")
+
+## License
+
+このプロジェクトは MIT ライセンスのもとで公開されています。詳細については、[LICENSE.txt](LICENSE.txt) ファイルをご覧ください。
