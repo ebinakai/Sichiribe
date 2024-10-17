@@ -1,4 +1,4 @@
-# REPLAY Execution
+# CLIによる動画ファイルの解析のやり方
 
 7セグメント表示器を撮影した動画から表示内容を解析するには `replay.py` を実行する。  
 パラメータを設定することができ、実行時に指定できる。実行例を以下に示す。
@@ -11,7 +11,7 @@ python3 replay.py test/sample.mp4
 python3 replay.py test/sample.mp4 --num-digits 4 --sampling-sec 5 --num-frames 30 --skip-sec 0 --format csv --save-frame --debug
 ```
 
-## Arguments of replay.py
+## 引数
 
 動画のパス以外はオプションなので、含めずに実行することも可能である。
 
@@ -26,7 +26,7 @@ python3 replay.py test/sample.mp4 --num-digits 4 --sampling-sec 5 --num-frames 3
 | --save-frame | キャプチャしたフレームを保存するか（保存しない場合、メモリの使用量が増加します） |
 | --debug | ログをデバッグモードにする場合は含める |
 
-## Process Flow Configuration of replay.py
+## 処理の流れ
 
 1. 指定された引数を元に設定を適用
 2. カメラ画角の確認

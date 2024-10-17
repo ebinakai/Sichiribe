@@ -1,4 +1,4 @@
-# Live Execution
+# CLIによるカメラ映像のリアルタイム解析のやり方
 
 カメラを接続して、ライブで解析する場合は、`live.py` を実行する。  
 
@@ -7,7 +7,7 @@
 python live.py --device 1 --num-frames 10 --sampling-sec 2 --total-sampling-min 0.1 --format csv --save-frame --debug
 ```
 
-## Arguments of live.py
+## 引数
 
 | 引数 | 説明 |  
 | --- | --- |  
@@ -20,7 +20,7 @@ python live.py --device 1 --num-frames 10 --sampling-sec 2 --total-sampling-min 
 | --save-frame | キャプチャしたフレームを保存するかどうか |
 | --debug | ログをデバッグモードにする場合は含める |
 
-## Process Flow Configuration of live.py
+## 処理の流れ
 
 1. 指定された引数を元に設定を適用
 2. 動画の読み込み・フレームの分割

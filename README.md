@@ -83,12 +83,16 @@ pip install -r requirements.txt
 
 ## モデルの用意
 
-学習済モデルは、[Github | Release v0.1.2](https://github.com/EbinaKai/Sichiribe/releases/tag/v0.1.2) においてあるので、そこからダウンロードして `model/` フォルダを作成して設置する。
+学習済モデルは、[Github | Release v0.1.1](https://github.com/EbinaKai/Sichiribe/releases/tag/v0.1.1) または [Github | Release v0.1.2](https://github.com/EbinaKai/Sichiribe/releases/tag/v0.1.2) においてあるので、そこからダウンロードして `model/` フォルダを作成して設置する。
 
 ```bash
 mkdir model
 
-curl https://github.com/EbinaKai/Sichiribe/releases/download/v0.1.2/model_100x100.tflite -o model/model_100x100.tflite
+# tensorflow を使用する場合
+curl -L -o model/model_100x100.keras https://github.com/EbinaKai/Sichiribe/releases/download/v0.1.1/model_100x100.keras
+
+# tflite-runtime を使用する場合
+curl -L -o model/model_100x100.tflite https://github.com/EbinaKai/Sichiribe/releases/download/v0.1.2/model_100x100.tflite
 ```
 
 ## 使い方
