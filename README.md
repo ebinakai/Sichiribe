@@ -16,22 +16,26 @@
 
 </div>
 
-## Description
+---  
+
+![Python](https://img.shields.io/badge/python-3.9-blue)
+[![Tensorflow](https://img.shields.io/badge/tensorflow-2.17.0-green)](https://github.com/tensorflow/tensorflow/tree/v2.17.0)
+[![PySide](https://img.shields.io/badge/PySide-6-green)](https://pypi.org/project/PySide6/6.7.2/)
+[![opencv](https://img.shields.io/badge/opencv-4.10-green)](https://pypi.org/project/opencv-python/4.10.0.84/)
+[![License](https://img.shields.io/badge/lisence-MIT-blue)](https://github.com/EbinaKai/Sichiribe/blob/main/LICENSE.txt)
+
+## 概要
 
 7セグメント表示器が示したデータをシリアル等で読み取れない場合のために、メータの表示状態を録画し、そこからデータを取り出すためのプログラムを作成した。
 
-## Requirements
-
-- Python 3.9
-
-## Features
+### 仕様
 
 - 動画を入力して、その動画を解析する
 - カメラを接続して、リアルタイムで解析する
 - 上記に項目をCLI及び、GUIで実行する
-- [MacOS用のビルド](https://github.com/EbinaKai/Sichiribe/releases/tag/v0.1.5)
+- [MacOS用のビルド(署名なし)](https://github.com/EbinaKai/Sichiribe/releases/tag/v0.1.5)
 
-## Init
+## インストール
 
 仮想環境の作成等はMacOS・Linuxに準拠するため、Windowsで実行する際などは適宜読み替えてほしい。  
 また、Linux環境以外で `tflite-runtime` を用いたい場合は [about_tensorflow.md](./docs/about_tensorflow.md) を参照するとよい。
@@ -50,112 +54,50 @@ source ./env/bin/activate
 # ライブラリのインストール
 python3 -m pip install --upgrade pip
 pip install -r requirements.txt
-
-# 以下のいずれかのtensorflowをインストールする
-pip install tensorflow # フルバージョンのtensorflowを用いる場合
-pip install tensorflow-metal # macosでGPUを用いる場合はこれも
-
-pip install tflite-runtime # linux環境かつモデルの学習をしない場合
 ```
 
-## Install model
+### TensorFlowのインストール
+
+環境に応じて、以下のいずれかの方法でTensorFlowをインストールしてほしい。
+
+1. フルバージョンのTensorFlow (MacOS/Linux/Windows向け)  
+   フル機能を備えたTensorFlowを利用する場合:
+
+   ```bash
+   pip install tensorflow==2.17.0
+   ```
+
+2. TensorFlow Metal (MacOSでGPUを使用する場合は追加で必要)  
+   MacOSでMetal APIを利用してGPU加速を行う場合:
+
+   ```bash
+   pip install tensorflow-metal
+   ```
+
+3. TensorFlow Lite Runtime (Linux環境、推論のみの場合)  
+   軽量でモデルの推論のみを行い、学習をしない場合:
+
+   ```bash
+   pip install tflite-runtime
+   ```
+
+## モデルの用意
 
 学習済モデルは、[Github | Release v0.1.2](https://github.com/EbinaKai/Sichiribe/releases/tag/v0.1.2) においてあるので、そこからダウンロードして `model/` フォルダを作成して設置する。
 
 ```bash
 mkdir model
+
 curl https://github.com/EbinaKai/Sichiribe/releases/download/v0.1.2/model_100x100.tflite -o model/model_100x100.tflite
 ```
 
-## Execution
+## 使い方
 
-### GUI Execution
+- [GUIアプリの使い方](docs/execution_gui.md)
+- [CLIによるカメラ映像のリアルタイム解析のやり方](docs/execution_live.md)
+- [CLIによる動画ファイルの解析のやり方](docs/execution_replay.md)
 
-GUIでの諸項目の実行を行うには以下のコマンドを実行する。
-
-```bash
-python app.py
-```
-
-階層構造及び画面フローを以下に示す。
-
-![screen flow](https://github.com/user-attachments/assets/70d2a21f-0cb9-4074-a5c2-0449ed2b64eb)
-
-### REPLAY Execution
-
-7セグメント表示器を撮影した動画から表示内容を解析するには `replay.py` を実行する。  
-パラメータを設定することができ、実行時に指定できる。実行例を以下に示す。
-
-```bash
-# 一番シンプルな例
-python3 replay.py test/sample.mp4  
-
-# 諸項目を設定する場合
-python3 replay.py test/sample.mp4 --num-digits 4 --sampling-sec 5 --num-frames 30 --skip-sec 0 --format csv --save-frame --debug
-```
-
-#### Arguments of replay.py
-
-動画のパス以外はオプションなので、含めずに実行することも可能である。
-
-| 引数 | 説明 |  
-| --- | --- |  
-| test/sample.mp4 | 解析する動画のパス |  
-| --num-digits 4 | 7セグメント表示器の桁数 |
-| --sampling-sec 5 | 動画をサンプリングする頻度 |  
-| --num-frames 30 | 一回のサンプリングで何フレーム取得するか |  
-| --skip-sec 0 | 動画の解析を始めるタイミング |  
-| --format csv | 出力形式 (json または csv) |
-| --save-frame | キャプチャしたフレームを保存するか（保存しない場合、メモリの使用量が増加します） |
-| --debug | ログをデバッグモードにする場合は含める |
-
-#### Process Flow Configuration of replay.py
-
-1. 指定された引数を元に設定を適用
-2. カメラ画角の確認
-3. 7セグメント表示器が写っている部分をクロップする
-   1. クロップ部分を選択後、確認のウィンドウが立ち上がるが小さい場合があるので注意
-   2. 確認ウィンドウがアクティブな状態で y/n のどちらかを押下する
-4. クロップした部分を解析して表示内容を読み取る
-   1. 設定された頻度でサンプリングを行う
-   2. 設定された解析時間を超えた場合にサンプリングを終了
-5. 読み取った内容を外部ファイル等に出力する
-
-### Live Execution
-
-カメラを接続して、ライブで解析する場合は、`live.py` を実行する。  
-
-```bash
-# 短時間解析（6秒）のサンプル
-python live.py --device 1 --num-frames 10 --sampling-sec 2 --total-sampling-min 0.1 --format csv --save-frame --debug
-```
-
-#### Arguments of live.py
-
-| 引数 | 説明 |  
-| --- | --- |  
-| --device 1 | カメラデバイスの番号 |
-| --num-digits 4 | 7セグメント表示器の桁数 |
-| --sampling-sec 5 | 動画をサンプリングする頻度 |  
-| --num-frames 10 | 一回のサンプリングで何フレーム取得するか |
-| --total-sampling-min 1 | サンプリングする合計時間（分） |
-| --format csv | 出力形式 (json または csv) |
-| --save-frame | キャプチャしたフレームを保存するかどうか |
-| --debug | ログをデバッグモードにする場合は含める |
-
-#### Process Flow Configuration of live.py
-
-1. 指定された引数を元に設定を適用
-2. 動画の読み込み・フレームの分割
-   1. すでに分割済みのファイルがある場合は、再度分割するかの確認がされる
-   2. 読み込み動画やサンプリングに関する変数等を変更した場合は再分割するを選択すると良い
-3. 7セグメント表示器が写っている部分をクロップする
-   1. クロップ部分を選択後、確認のウィンドウが立ち上がるが小さい場合があるので注意
-   2. 確認ウィンドウがアクティブな状態で y/n のどちらかを押下する
-4. クロップした部分を解析して表示内容を読み取る
-5. 読み取った内容を外部ファイル等に出力する
-
-## File structure
+## ファイル構造
 
 | ファイル | 説明 |
 | --- | --- |  
@@ -192,9 +134,9 @@ python live.py --device 1 --num-frames 10 --sampling-sec 2 --total-sampling-min 
 | `gui/workers/frame_devide_worker.py` | 動画ファイル解析のフレーム分割のバックグランド処理 |
 | `gui/workers/replay_detect_worker.py` | 動画ファイル解析の推論のバックグランド処理 |
 | `gui/widgets/mpl_canvas_widget.py` | グラフを表示するウィジェット |
-| `test/something` | テスト用ファイル |
+| `test/*` | テスト用ファイル |
 
-## Model Training
+## モデル学習
 
 CNNモデルを学習させるためには以下のプログラムを実行する。
 参考にしたサイトは [ここ](https://child-programmer.com/seven-segment-digits-ocr-original-model/ "【7セグメント編】オリジナル学習済みモデルの作成方法：連続デジタル数字画像認識プログラミング入門（Python・OpenCV・Keras・CNN）") 。  
@@ -208,11 +150,11 @@ python cnn/train.py
 python cnn/conv_keras2tf.py
 ```
 
-## References
+## 参考資料
 
 - [子供プログラマー](https://child-programmer.com/seven-segment-digits-ocr-original-model/ "【7セグメント編】オリジナル学習済みモデルの作成方法：連続デジタル数字画像認識プログラミング入門（Python・OpenCV・Keras・CNN）")
 - [Github | Kazuhito00/7segment-display-reader](https://github.com/Kazuhito00/7segment-display-reader "Kazuhito00/7segment-display-reader")
 
-## License
+## ライセンス
 
 このプロジェクトは MIT ライセンスのもとで公開されています。詳細については、[LICENSE.txt](LICENSE.txt) ファイルをご覧ください。
