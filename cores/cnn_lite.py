@@ -1,7 +1,6 @@
 from cores.cnn_core import CNNCore
 import os
 import logging
-import cv2 
 import numpy as np
 from pathlib import Path
 
@@ -11,13 +10,13 @@ logging.getLogger('tensorflow').setLevel(logging.ERROR)
 logging.getLogger('h5py').setLevel(logging.ERROR)
 
 class CNNLite(CNNCore):
-  def __init__(self, num_digits):
+  def __init__(self, num_digits, model_filename='model_100x100.tflite'):
     super().__init__(num_digits)
     self.logger = logging.getLogger('__main__').getChild(__name__)
     
     # 学習済みモデルの絶対パスを取得
     current_dir = Path(__file__).resolve().parent
-    model_path = current_dir / '..' / 'model' / 'model_100x100.tflite'
+    model_path = current_dir / '..' / 'model' / model_filename
     model_path = model_path.resolve()
     self.model_path = str(model_path)
 

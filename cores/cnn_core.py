@@ -25,6 +25,12 @@ class CNNCore(Detector):
     self.crop_size = 100          # 画像をトリミングするサイズ
     self.model = None
   
+  def inference_7seg_classifier(self, image_bin):
+    raise NotImplementedError("This method must be implemented in the subclass")
+  
+  def load(self):
+    raise NotImplementedError("This method must be implemented in the subclass")
+    
   # 各桁を一度に処理できるように画像を準備
   def preprocess_image(self, image: np.ndarray) -> np.ndarray:
     images = []
@@ -47,7 +53,7 @@ class CNNCore(Detector):
     if not isinstance(images, list):
       images = [images]
     
-    for i, image in enumerate(images):
+    for image in images:
       
       # 画像を読み込む
       image_gs = self.load_image(image)
@@ -100,3 +106,19 @@ class CNNCore(Detector):
       result.append(mode_value)
       errors_per_digit.append(error_rate)
     return np.array(result), np.array(errors_per_digit)
+
+def select_cnn_model()->CNNCore:
+  logger = logging.getLogger("__main__").getChild(__name__)
+  try:
+    # tflite-runtime のインポートを試みる
+    from tflite_runtime.interpreter import Interpreter
+    
+    # インポートに成功した場合は、TFLiteモデルを使用する
+    from cores.cnn_lite import CNNLite
+    logger.info("TFLite model selected.")  
+    return CNNLite
+  except ImportError:
+    # インポートに失敗した場合は、通常のKerasモデルを使用する
+    from cores.cnn import CNN
+    logger.info("Keras model selected.")
+    return CNN

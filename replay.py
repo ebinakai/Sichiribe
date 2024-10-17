@@ -11,8 +11,11 @@ logger = logging.getLogger('__main__').getChild(__name__)
 
 import argparse
 from cores.frameEditor import FrameEditor
-from cores.cnn_lite import CNNLite as Detector
 from cores.exporter import Exporter, get_supported_formats
+
+# モデルを読み込む
+from cores.cnn_core import select_cnn_model
+Detector = select_cnn_model()
 
 def get_args():
   export_formats = get_supported_formats()

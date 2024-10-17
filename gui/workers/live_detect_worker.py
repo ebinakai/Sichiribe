@@ -1,5 +1,4 @@
 from PySide6.QtCore import Signal, QThread
-from cores.cnn_lite import CNNLite as Detector
 from cores.capture import FrameCapture
 from cores.frameEditor import FrameEditor
 import logging
@@ -8,6 +7,10 @@ from datetime import timedelta
 import os
 import cv2
 import numpy as np
+
+# モデルを読み込む
+from cores.cnn_core import select_cnn_model
+Detector = select_cnn_model()
 
 class DetectWorker(QThread):
     progress = Signal(int, float, str)
