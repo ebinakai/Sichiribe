@@ -1,3 +1,10 @@
+'''
+アプリケーション起動後に表示されるメニュー画面のViewクラス
+
+1. リアルタイム処理とファイル読み込み処理の選択ができる
+2. 処理が終わった場合はこの画面に戻って来る
+'''
+
 from PySide6.QtWidgets import QWidget, QHBoxLayout, QVBoxLayout, QPushButton
 from PySide6.QtCore import Qt
 from gui.utils.screen_manager import ScreenManager
@@ -10,8 +17,8 @@ class MenuWindow(QWidget):
         screen_manager.add_screen('menu', self)
         self.initUI()
 
+    # レイアウトを作成
     def initUI(self):
-        # レイアウトを作成
         main_layout = QVBoxLayout()
         button_layout = QVBoxLayout()
         footer_layout = QHBoxLayout()

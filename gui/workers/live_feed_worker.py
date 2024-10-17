@@ -1,3 +1,12 @@
+'''
+カメラの画角をキャプチャするためのワーカークラス
+
+1. キャプチャデバイスを設定し、キャプチャサイズを取得する
+2. キャプチャデバイスからフレームを取得し、進捗を通知する
+3. キャンセルフラグが立った場合は、キャンセルを通知し、キャプチャを終了する
+4. 終了フラグが立った場合は、終了を通知し、キャプチャを終了する
+'''
+
 from PySide6.QtCore import Signal, QThread
 from cores.capture import FrameCapture
 import logging

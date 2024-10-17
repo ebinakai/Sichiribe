@@ -1,3 +1,16 @@
+'''
+動画ファイル解析を行うViewクラス
+
+1. 実際のフレーム分割・推論処理はDetectWorkerクラスで行う
+2. 以下の処理を行う
+    - 最初のフレームを7セグ領域切り取り画面に渡す
+    - 7セグ領域切り取り画面からのパラメータを受け取り、フレーム分割を行う
+    - 分割フレームを受け取り、解析を行う
+    - 結果を MplCanvas のグラフに表示する
+    - 結果をファイルに出力する
+    - メニュー画面に戻る
+'''
+
 from PySide6.QtWidgets import QWidget, QHBoxLayout, QVBoxLayout, QPushButton, QLabel
 from PySide6.QtCore import Qt
 from gui.utils.screen_manager import ScreenManager
@@ -18,8 +31,8 @@ class ReplayExeWindow(QWidget):
         self.logger = logging.getLogger('__main__').getChild(__name__)
         self.initUI()
 
+    # レイアウトを作成
     def initUI(self):
-        # レイアウトを作成
         main_layout = QVBoxLayout()
         graph_layout = QVBoxLayout()
         footer_layout = QHBoxLayout()

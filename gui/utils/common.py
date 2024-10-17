@@ -1,4 +1,7 @@
-import logging
+'''
+雑多な関数をまとめたモジュール
+'''
+
 from PySide6.QtGui import QImage
 import numpy as np
 import cv2

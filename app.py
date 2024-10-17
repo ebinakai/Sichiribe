@@ -1,3 +1,8 @@
+'''
+GUIアプリケーションを起動するためのメインプログラムこのスクリプトを実行することで、GUIアプリケーションが起動する
+詳細については、docs/execution_gui.mdを参照
+'''
+
 # ログの設定
 import logging
 formatter = '%(asctime)s - %(name)s - %(levelname)s - %(message)s'

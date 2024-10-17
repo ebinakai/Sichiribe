@@ -1,3 +1,10 @@
+'''
+動画ファイルからフレームを切り出す処理を行うワーカークラス
+
+1. スレッド処理によって、GUIがフリーズしないようにする
+2. FrameEditorクラスを使用してフレームの切り出し処理を行う
+'''
+
 from PySide6.QtCore import Signal, QThread
 from cores.frameEditor import FrameEditor
 import os

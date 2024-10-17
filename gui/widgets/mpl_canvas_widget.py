@@ -1,3 +1,14 @@
+'''
+matplotlibを使用してグラフを描画するためのカスタムウィジェット
+
+1. matplotlibのバックエンドをQt5Aggに設定することでQtとの連携を行う
+2. 以下のメソッドを提供する
+    - MplCanvas: matplotlibのFigureを表示するためのカスタムウィジェット
+    - gen_graph: グラフの初期化
+    - update_existing_plot: 既存のプロットを更新
+    - clear: グラフをクリア
+'''
+
 # Pillow と matplotlib のログを無効にする
 import logging
 logging.getLogger('matplotlib').setLevel(logging.ERROR)

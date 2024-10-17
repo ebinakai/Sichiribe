@@ -1,3 +1,15 @@
+'''
+動画ファイル解析を行うワーカークラス
+
+1. 以下の処理を行う
+    - モデルのロード
+    - 推論処理
+    - フレームの保存
+    - UIへの通知
+2. キャプチャしたフレームを保存する場合は、フレーム保存用ディレクトリを作成する
+3. モデルのロードに失敗した場合、モデルが見つからないことを UI に通知
+'''
+
 from PySide6.QtCore import Signal, QThread
 import logging
 
@@ -26,7 +38,6 @@ class DetectWorker(QThread):
           self.model_not_found.emit()
           return None
         
-        # テキスト検出
         for frame, timestamp in zip(self.params['frames'], self.params['timestamps']):
             # 途中終了
             if self._is_cancelled: 

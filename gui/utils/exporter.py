@@ -1,3 +1,7 @@
+'''
+GUIアプリケーションにおいて、画面間で共有されるパラメータを使用して結果をエクスポートするためモジュール
+'''
+
 from cores.exporter import Exporter
 
 def export_result(params):

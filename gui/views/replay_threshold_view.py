@@ -1,3 +1,11 @@
+'''
+動画ファイル解析のための二値化しきい値を設定するViewクラス
+
+1. 初期値は大津の二値化を適用した画像を表示
+2. スライダーでしきい値を設定し、画像を更新する
+3. 次へボタンを押すと、しきい値をパラメータに保存し、次の画面に遷移する
+'''
+
 from PySide6.QtWidgets import QWidget, QHBoxLayout, QVBoxLayout, QFormLayout, QPushButton, QLabel, QSlider
 from PySide6.QtCore import Qt
 from PySide6.QtGui import QPixmap
@@ -21,8 +29,8 @@ class ReplayThresholdWindow(QWidget):
         self.logger = logging.getLogger('__main__').getChild(__name__)
         self.initUI()
         
+    # レイアウトを作成
     def initUI(self):
-        # レイアウトを作成
         main_layout = QVBoxLayout()
         extracted_image_layout = QHBoxLayout()
         form_layout = QFormLayout()

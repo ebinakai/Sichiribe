@@ -1,3 +1,14 @@
+'''
+リアルタイム解析を行うViewクラス
+
+1. 実際の推論処理はDetectWorkerクラスで行う
+2. 以下の処理を行う
+    - パラメータをDetectWorkerに渡し、結果を受け取る
+    - 結果を MplCanvas のグラフに表示する
+    - 結果をファイルに出力する
+    - メニュー画面に戻る
+'''
+
 from PySide6.QtWidgets import QWidget, QHBoxLayout, QVBoxLayout, QFormLayout, QPushButton, QLabel, QSlider
 from PySide6.QtCore import Qt
 from PySide6.QtGui import QPixmap
@@ -19,8 +30,8 @@ class LiveExeWindow(QWidget):
         self.logger = logging.getLogger('__main__').getChild(__name__)
         self.initUI()
 
+    # レイアウトを作成
     def initUI(self):
-        # レイアウトを作成
         main_layout = QVBoxLayout()
         graph_layout = QVBoxLayout()
         extracted_image_layout = QHBoxLayout()
@@ -146,7 +157,7 @@ class LiveExeWindow(QWidget):
         self.update_graph(result, failed_rate, timestamp)
         
     def detect_error(self):
-        self.screen_manager.popup("カメラにアクセスできませんでした。")
+        self.screen_manager.popup("カメラにアクセスできませんでした")
         
     def update_graph(self, result, failed_rate, timestamp):
         self.graph_results.append(result)

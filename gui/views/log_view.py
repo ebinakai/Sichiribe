@@ -1,3 +1,11 @@
+'''
+ログウィンドウのViewクラス
+
+1. 黒い背景に白い文字でログを表示するやつ
+2. ログはログハンドラを使って受け取ることで、別スレッドで実行中のワーカーからもログを受け取れる
+3. 処理中で、表示するコンテンツがない場合に使う
+'''
+
 from PySide6.QtWidgets import QWidget, QVBoxLayout, QTextEdit
 from PySide6.QtCore import Signal, QObject
 from gui.utils.screen_manager import ScreenManager
@@ -23,8 +31,8 @@ class LogWindow(QWidget):
         screen_manager.add_screen('log', self)
         self.initUI()
 
+    # レイアウトを追加
     def initUI(self):
-        # レイアウトを追加
         layout = QVBoxLayout()
         self.setLayout(layout)
 

@@ -1,3 +1,18 @@
+'''
+リアルタイム解析を行うワーカークラス
+
+1. 以下の処理を行う
+  - モデルのロード
+  - フレームのキャプチャ
+  - フレームの編集
+  - 推論処理
+  - フレームの保存
+  - UI への通知
+2. キャプチャしたフレームを保存する場合は、フレーム保存用ディレクトリを作成する
+3. モデルのロードに失敗した場合、モデルが見つからないことを UI に通知
+4. フレームのキャプチャが失敗した場合、エラーを UI に通知
+'''
+
 from PySide6.QtCore import Signal, QThread
 from cores.capture import FrameCapture
 from cores.frameEditor import FrameEditor

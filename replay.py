@@ -1,3 +1,8 @@
+'''
+動画ファイルから7セグメントディスプレイの数字を読み取る
+詳細については、docs/execution_replay.mdを参照
+'''
+
 # 警告がだるいので非表示
 import warnings
 warnings.filterwarnings("ignore", category=FutureWarning)

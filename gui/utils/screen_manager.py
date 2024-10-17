@@ -1,3 +1,11 @@
+'''
+画面の管理を行うクラス
+
+1. 画面遷移を行う
+2. 画面サイズの保存、復元を行う
+3. ポップアップメッセージボックスの表示を行う
+'''
+
 from PySide6.QtWidgets import QApplication, QStackedWidget, QWidget, QMainWindow, QMessageBox
 from PySide6.QtGui import QPalette
 from PySide6.QtCore import QEventLoop, QTimer

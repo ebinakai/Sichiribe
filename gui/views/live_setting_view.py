@@ -1,3 +1,17 @@
+'''
+リアルタイム解析の設定を行うViewクラス
+
+1. 以下を設定する
+    - カメラID
+    - 7セグメント表示器の桁数
+    - 動画をサンプリングする頻度
+    - 一回のサンプリングで何フレーム取得するか
+    - 総サンプリング時間
+    - 出力形式
+    - キャプチャしたフレームを保存するか
+2. 実行ボタンを押すと、次の画面に遷移する
+'''
+
 from PySide6.QtWidgets import QWidget, QHBoxLayout, QVBoxLayout, QFormLayout, QPushButton, QComboBox, QSpinBox, QCheckBox, QLineEdit, QFileDialog, QLabel
 from gui.utils.screen_manager import ScreenManager
 from cores.exporter import get_supported_formats
@@ -14,8 +28,8 @@ class LiveSettingsWindow(QWidget):
         self.initUI()
         self.logger = logging.getLogger('__main__').getChild(__name__)
 
+    # レイアウトを作成
     def initUI(self):
-        # レイアウトを作成
         main_layout = QVBoxLayout()
         form_layout = QFormLayout()
         footer_layout = QHBoxLayout()

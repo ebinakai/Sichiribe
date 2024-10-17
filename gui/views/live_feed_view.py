@@ -1,3 +1,11 @@
+'''
+カメラの画角を確認するカメラフィード画面を表示するViewクラス
+
+1. カメラフィードを表示
+2. 戻るボタンを押すと、カメラフィードを停止し、前の画面に戻る
+3. 次へボタンを押すと、カメラフィードを停止し、7セグメント領域選択画面に遷移する
+'''
+
 from PySide6.QtWidgets import QWidget, QHBoxLayout, QVBoxLayout, QPushButton, QLabel
 from PySide6.QtCore import QTimer, Qt
 from PySide6.QtGui import QPixmap
@@ -16,8 +24,8 @@ class LiveFeedWindow(QWidget):
         self.logger = logging.getLogger('__main__').getChild(__name__)
         self.initUI()
 
+    # レイアウトを作成
     def initUI(self):
-        # レイアウトを作成
         main_layout = QVBoxLayout()
         header_layout = QVBoxLayout()
         feed_layout = QVBoxLayout()
@@ -118,7 +126,7 @@ class LiveFeedWindow(QWidget):
         
     def feed_error(self):
         self.clear_env()
-        self.screen_manager.popup("カメラにアクセスできませんでした。")
+        self.screen_manager.popup("カメラにアクセスできませんでした")
         QTimer.singleShot(1, lambda: self.screen_manager.show_screen('live_setting'))
         self.logger.error('Feed missing frame.')
         

@@ -1,3 +1,11 @@
+'''
+映像中の7セグメント領域を選択する画面のViewクラス
+
+1. 4点を選択することで7セグメント領域を囲むことができる
+2. opencvの画像処理を行うため、FrameEditorクラスを利用する
+3. 選択が終わると次の画面に遷移する
+'''
+
 import logging
 import numpy as np
 from PySide6.QtWidgets import QApplication, QLabel, QVBoxLayout, QHBoxLayout, QWidget, QPushButton, QSizePolicy
@@ -46,8 +54,8 @@ class RegionSelectWindow(QWidget):
         self.target_height = int((screen_rect.height() - 100) * 0.8)
         self.initUI()
         
+    # メインウィジェットの設定
     def initUI(self):
-        # メインウィジェットの設定
         main_layout = QVBoxLayout()
         header_layout = QVBoxLayout()
         image_layout = QVBoxLayout()
