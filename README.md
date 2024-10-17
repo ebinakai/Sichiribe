@@ -74,7 +74,7 @@ curl https://github.com/EbinaKai/Sichiribe/releases/download/v0.1.2/model_100x10
 GUIでの諸項目の実行を行うには以下のコマンドを実行する。
 
 ```bash
-python Sichiribe.py
+python app.py
 ```
 
 階層構造及び画面フローを以下に示す。
@@ -159,7 +159,7 @@ python live.py --device 1 --num-frames 10 --sampling-sec 2 --total-sampling-min 
 
 | ファイル | 説明 |
 | --- | --- |  
-| `Sichiribe.py` | GUIアプリケーションの起動 |
+| `app.py` | GUIアプリケーションの起動 |
 | `live.py` | 外部カメラからライブ解析 |
 | `replay.py` | 動画ファイルから解析 |
 | `cores/common.py` | コアな汎用的な機能の関数詰め合わせ |
