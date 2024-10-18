@@ -6,9 +6,7 @@ GUIでの諸項目の実行を行うには以下のコマンドを実行する�
 python app.py
 ```
 
-<video controls>
-  <source src="https://github.com/user-attachments/assets/01ea5865-278b-47b5-ac9d-9beeab42c204" type="video/mp4">
-</video>
+<video controls src="https://github.com/user-attachments/assets/01ea5865-278b-47b5-ac9d-9beeab42c204" type="video/mp4"></video>
 
 ## 処理の流れ
 
