@@ -12,4 +12,4 @@ https://github.com/user-attachments/assets/01ea5865-278b-47b5-ac9d-9beeab42c204
 
 階層構造及び画面フローを以下に示す。
 
-![screen flow](https://github.com/user-attachments/assets/70d2a21f-0cb9-4074-a5c2-0449ed2b64eb)
+![screen flow](https://github.com/user-attachments/assets/44a09f86-2325-4a2d-bc8b-db9eba29fe86)
