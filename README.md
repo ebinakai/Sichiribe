@@ -18,7 +18,7 @@
 
 ---  
 
-![Python](https://img.shields.io/badge/python-3.9-blue)
+![Python](https://img.shields.io/badge/python-3.9_|_3.10_|_3.11_|_3.12-blue)
 [![Tensorflow](https://img.shields.io/badge/tensorflow-2.17.0-green)](https://github.com/tensorflow/tensorflow/tree/v2.17.0)
 [![PySide](https://img.shields.io/badge/PySide-6-green)](https://pypi.org/project/PySide6/6.7.2/)
 [![opencv](https://img.shields.io/badge/opencv-4.10-green)](https://pypi.org/project/opencv-python/4.10.0.84/)
@@ -67,8 +67,8 @@ pip install -r requirements.txt
    pip install tensorflow==2.17.0
    ```
 
-2. TensorFlow Metal (MacOSでGPUを使用する場合は追加で必要)  
-   MacOSでMetal APIを利用してGPU加速を行う場合:
+2. TensorFlow Metal (MacOS向けの追加インストール)  
+   MacOSで Python 3.11 以前のバージョンを使用し、Metal APIを活用してGPUでの学習・推論を行う場合、追加で以下をインストールする:
 
    ```bash
    pip install tensorflow-metal
@@ -120,7 +120,7 @@ curl -L -o model/model_100x100.tflite https://github.com/EbinaKai/Sichiribe/rele
 | `cnn/train.py` | CNNモデルを学習させるプログラム |
 | `cnn/conv_keras2tf.py` | Kerasモデルをtflite形式に変換するプログラム |
 | `gui/utils/common.py` | GUI用の汎用的な機能の関数詰め合わせ |
-| `gui/utils/router.py` | GUIの各ページのルーティング関数 |
+| `**gui**/utils/router.py` | GUIの各ページのルーティング関数 |
 | `gui/utils/screen_manager.py` | GUIの各ページの管理クラス |
 | `gui/views/splash_view.py` | GUI起動後のスプラッシュ画像 |
 | `gui/views/main_view.py` | メインページ。この中に各ページをラップする |
