@@ -3,8 +3,14 @@
 カメラを接続して、ライブで解析する場合は、`live.py` を実行する。  
 
 ```bash
-# 短時間解析（6秒）のサンプル
-python live.py --device 1 --num-frames 10 --sampling-sec 2 --total-sampling-min 0.1 --format csv --save-frame --debug
+# 短時間解析 0.1分（6秒）のサンプル
+python live.py --device 1 \
+               --num-frames 10 \
+               --sampling-sec 2 \
+               --total-sampling-min 0.1 \
+               --format csv \
+               --save-frame \
+               --debug
 ```
 
 ## 引数
