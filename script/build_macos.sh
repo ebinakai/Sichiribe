@@ -16,13 +16,13 @@ else
     export CPPFLAGS="-I/opt/homebrew/opt/gettext/include"
 fi
 
-
 echo "Starting build with Nuitka for $ARCH..."
 
 # リネーム（何故か app-name の指定が効かない）
-mv app.py Sichiribe.py
+cp -f app.py Sichiribe.py
 
 # ビルド
+
 python -m nuitka \
     --remove-output \
     --macos-create-app-bundle \
@@ -36,8 +36,8 @@ python -m nuitka \
     Sichiribe.py
 BUILD_STATUS=$? # ビルドの終了ステータスを取得
 
-# ファイル名を元に戻す
-mv Sichiribe.py app.py
+# 不要なファイルは削除する
+rm Sichiribe.py
 
 # ビルドが失敗した場合にエラーメッセージを表示
 if [ $BUILD_STATUS -ne 0 ]; then
