@@ -56,7 +56,7 @@ CUSTOM_BAZEL_FLAGS=--macos_cpus=arm64 \
 tensorflow/lite/tools/pip_package/build_pip_package_with_bazel.sh
 
 # ビルド済みwhlパッケージを確認
-ls tensorflow/lite/tools/pip_package/gen/tflite_pip/python3/dist
+ls ~/tensorflow-src/tensorflow/lite/tools/pip_package/gen/tflite_pip/python3/dist/*.whl
 ```
 
 最終的に `*.whl` ファイルが生成されていればビルド成功だ。  

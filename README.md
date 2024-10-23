@@ -12,8 +12,6 @@
    <a href="#init">Installation</a> ･ 
    <a href="#references">References</a> ･ 
    <a href="#license">License</a>
-</p>
-
 </div>
 
 ---  
@@ -152,6 +150,27 @@ python cnn/train.py
 
 # 軽量モデルに変換
 python cnn/conv_keras2tf.py
+```
+
+## アプリのビルド (MacOS用)
+
+とりあえず下記のスクリプトを使えば、一括でGUIアプリがビルドされる。スクリプト内で必要なものはインストールされるため、このリポジトリをクローンする必要はない。  
+
+ビルドに `Bazel` が必要なので、[公式サイト](https://bazel.build/install/os-x) を参照して事前にインストールすること。
+
+> [!TIP]
+> Macアプリは [Apple Developer Program](https://developer.apple.com/programs/) に登録して署名しないと配布が難しいので、各自ビルドして使ってほしい。  
+> 学生に $99 は高いよね…
+
+```bash
+# スクリプトをダウンロード
+curl -L -o install.sh https://raw.githubusercontent.com/EbinaKai/Sichiribe/feature/app/macos/script/install.sh
+
+# 実行権限を付与
+chmod +x install.sh
+
+# tensorflow-runtimeのビルド・Sichiribe.appの構築
+./install.sh
 ```
 
 ## 参考資料

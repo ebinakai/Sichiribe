@@ -37,10 +37,10 @@ Nuitkaを使ってビルドするには以下のライブラリが必要なの�
 
 ```bash
 # ライブラリのインストール
-pip install nuitka zstandard orderedset
+pip install nuitka zstandard orderedset imageio
 
 # ビルド
-source script/make.sh
+source script/build.sh
 ```
 
 以上。
