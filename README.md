@@ -152,27 +152,6 @@ python cnn/train.py
 python cnn/conv_keras2tf.py
 ```
 
-## アプリのビルド (MacOS用)
-
-とりあえず下記のスクリプトを使えば、一括でGUIアプリがビルドされる。スクリプト内で必要なものはインストールされるため、このリポジトリをクローンする必要はない。  
-
-ビルドに `Bazel` が必要なので、[公式サイト](https://bazel.build/install/os-x) を参照して事前にインストールすること。
-
-> [!TIP]
-> Macアプリは [Apple Developer Program](https://developer.apple.com/programs/) に登録して署名しないと配布が難しいので、各自ビルドして使ってほしい。  
-> 学生に $99 は高いよね…
-
-```bash
-# スクリプトをダウンロード
-curl -L -o install.sh https://raw.githubusercontent.com/EbinaKai/Sichiribe/feature/app/macos/script/install.sh
-
-# 実行権限を付与
-chmod +x install.sh
-
-# tensorflow-runtimeのビルド・Sichiribe.appの構築
-./install.sh
-```
-
 ## 参考資料
 
 - [子供プログラマー](https://child-programmer.com/seven-segment-digits-ocr-original-model/ "【7セグメント編】オリジナル学習済みモデルの作成方法：連続デジタル数字画像認識プログラミング入門（Python・OpenCV・Keras・CNN）")
