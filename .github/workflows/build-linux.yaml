@@ -44,8 +44,8 @@ jobs:
           enable-plugins: pyside6
           include-module: matplotlib.backends.backend_qt5agg
           include-data-dir: |
-            ./model=model
-            ./gui/images=gui/images/splash_image.png
+            model=model
+            gui/images=gui/images
           linux-icon: script/Sichiribe_icon.png
 
       - name: Upload Artifacts
