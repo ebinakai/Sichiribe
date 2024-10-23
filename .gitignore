@@ -17,6 +17,7 @@ test_*.py
 
 # カスタムビルドライブラリ
 externals/
+/lib/
 
 # CNNモデル
 model/
