@@ -53,14 +53,35 @@ jobs:
       - name: Fix app bundle structure
         run: |
           cd build
-          if [ -d "Resources" ]; then
-            mkdir -p Sichiribe.app/Contents/Resources
-            mv Resources/* Sichiribe.app/Contents/Resources/
+          if [ -d "Resources" ] && [ -d "Sichiribe.app/Contents" ]; then
+            if [ -d "Sichiribe.app/Contents/Resources" ]; then
+              mv "Sichiribe.app/Contents/Resources" "Sichiribe.app/Contents/Resources.bak"
+            fi
+            
+            mkdir -p "Sichiribe.app/Contents/Resources"
+            cp -R Resources/* "Sichiribe.app/Contents/Resources/"
             rm -rf Resources
+            
+            if [ -d "Sichiribe.app/Contents/Resources.bak" ]; then
+              cp -R "Sichiribe.app/Contents/Resources.bak"/* "Sichiribe.app/Contents/Resources/"
+              rm -rf "Sichiribe.app/Contents/Resources.bak"
+            fi
           fi
-          if [ -f "Info.plist" ]; then
-            mv Info.plist Sichiribe.app/Contents/
+          
+          if [ -f "Info.plist" ] && [ ! -f "Sichiribe.app/Contents/Info.plist" ]; then
+            mv "Info.plist" "Sichiribe.app/Contents/"
           fi
+          
+          chmod -R 755 "Sichiribe.app"
+          
+          codesign --verify --verbose "Sichiribe.app" || true
+
+      - name: Create version info
+        run: |
+          cd build/Sichiribe.app/Contents
+          VERSION=$(git describe --tags --always)
+          /usr/libexec/PlistBuddy -c "Set :CFBundleShortVersionString $VERSION" Info.plist
+          /usr/libexec/PlistBuddy -c "Set :CFBundleVersion $VERSION" Info.plist
 
       - name: Upload Artifacts
         uses: actions/upload-artifact@v4
