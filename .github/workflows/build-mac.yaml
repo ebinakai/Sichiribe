@@ -35,7 +35,6 @@ jobs:
           mv app.py Sichiribe.py
 
       - name: Build with Nuitka (MacOS)
-        if: matrix.os == 'macos-latest'
         uses: Nuitka/Nuitka-Action@main
         with:
           nuitka-version: main
