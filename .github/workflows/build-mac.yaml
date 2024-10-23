@@ -1,4 +1,4 @@
-name: Build Windows App
+name: Build Mac App
 
 on:
   pull_request:
@@ -9,7 +9,7 @@ jobs:
   build:
     strategy:
       matrix:
-        os: windows-latest
+        os: macos-latest
 
     steps:
       - name: Setup Build Environment
@@ -17,24 +17,26 @@ jobs:
         with:
           python-version: 3.12
 
-      - name: Build with Nuitka
+      - name: Build with Nuitka (MacOS)
+        if: matrix.os == 'macos-latest'
         uses: Nuitka/Nuitka-Action@main
         with:
           nuitka-version: main
           script-name: Sichiribe.py
-          onefile: true
-          standalone: true
           enable-plugins: pyside6
           include-module: matplotlib.backends.backend_qt5agg
           include-data-dir: |
             ./model=model
             ./gui/images=gui/images/splash_image.png
-          windows-icon-from-ico: script/Sichiribe_icon.png
+          macos-create-app-bundle: true
+          macos-app-name: Sichiribe
+          macos-app-icon: script/Sichiribe_icon.png
+          macos-app-protected-resource: "NSCameraUsageDescription:Camera access"
 
       - name: Upload Artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: Windows Build
+          name: MacOS Build
           path: |
-            build/*.exe
+            build/*.app/**/*
           include-hidden-files: true
