@@ -38,7 +38,7 @@ jobs:
       - name: Download model file
         run: |
           mkdir model
-          curl -L -o model/model_100x100.keras https://github.com/EbinaKai/Sichiribe/releases/download/v0.1.1/model_100x100.keras
+          curl -L -o model/model_100x100.onnx https://github.com/EbinaKai/Sichiribe/releases/download/v0.1.6/model_100x100.onnx
 
       - name: Run bash script
         run: |
