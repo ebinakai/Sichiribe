@@ -11,11 +11,11 @@ python -m nuitka \
     --remove-output \
     --macos-create-app-bundle \
     --macos-app-name=Sichiribe \
+    --macos-app-icon=script/Sichiribe_icon.png \
     --enable-plugins=pyside6 \
     --include-module=matplotlib.backends.backend_qt5agg \
-    --include-data-dir=model=model \
-    --include-data-dir=gui/images=gui/images \
+    --include-data-dir=./model=model \
+    --include-data-dir=./gui/images=gui/images \
     --macos-app-protected-resource="NSCameraUsageDescription:Camera access" \
     Sichiribe.py
-python -m nuitka --macos-create-app-bundle --macos-app-icon=script/Sichiribe_icon.png Sichiiribe.py
 rm -rf Sichiribe.py Sichiribe.dist

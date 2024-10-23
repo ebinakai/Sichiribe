@@ -50,17 +50,22 @@ jobs:
           macos-app-icon: script/Sichiribe_icon.png
           macos-app-protected-resource: "NSCameraUsageDescription:Camera access"
 
-      - name: Create archive
+      - name: Fix app bundle structure
         run: |
           cd build
-          VERSION=$(git describe --tags --always)
-          ditto -c -k --keepParent Sichiribe.app "Sichiribe-${VERSION}-mac.zip"
+          if [ -d "Resources" ]; then
+            mkdir -p Sichiribe.app/Contents/Resources
+            mv Resources/* Sichiribe.app/Contents/Resources/
+            rm -rf Resources
+          fi
+          if [ -f "Info.plist" ]; then
+            mv Info.plist Sichiribe.app/Contents/
+          fi
 
       - name: Upload Artifacts
         uses: actions/upload-artifact@v4
         with:
           name: MacOS Build
           path: |
-            build/Sichiribe-*-mac.zip
             build/*.app/**/*
           include-hidden-files: true
