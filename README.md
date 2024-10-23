@@ -95,9 +95,9 @@ curl -L -o model/model_100x100.tflite https://github.com/EbinaKai/Sichiribe/rele
 
 ## 使い方
 
-- [GUIアプリの使い方](docs/execution_gui.md)
-- [CLIによるカメラ映像のリアルタイム解析のやり方](docs/execution_live.md)
-- [CLIによる動画ファイルの解析のやり方](docs/execution_replay.md)
+- [GUIアプリの使い方](https://github.com/EbinaKai/Sichiribe/wiki/How-to-use-GUI-App)
+- [CLIによるカメラ映像のリアルタイム解析のやり方](https://github.com/EbinaKai/Sichiribe/wiki/How-to-use-CLI#%E3%82%AB%E3%83%A1%E3%83%A9%E6%98%A0%E5%83%8F%E3%81%AE%E3%83%AA%E3%82%A2%E3%83%AB%E3%82%BF%E3%82%A4%E3%83%A0%E8%A7%A3%E6%9E%90-by-livepy)
+- [CLIによる動画ファイルの解析のやり方](https://github.com/EbinaKai/Sichiribe/wiki/How-to-use-CLI#%E5%8B%95%E7%94%BB%E3%83%95%E3%82%A1%E3%82%A4%E3%83%AB%E3%81%AE%E8%A7%A3%E6%9E%90-by-replaypy)
 
 ## ファイル構造
 
