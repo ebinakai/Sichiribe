@@ -11,9 +11,10 @@ jobs:
 
     steps:
       - name: Setup Build Environment
-        uses: ./.github/workflows/setup_environment.yml
+        uses: ./.github/workflows/build-common.yaml
         with:
           python-version: 3.12
+          os: ubuntu-latest
 
       - name: Build with Nuitka
         uses: Nuitka/Nuitka-Action@main

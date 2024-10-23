@@ -11,9 +11,10 @@ jobs:
 
     steps:
       - name: Setup Build Environment
-        uses: ./.github/workflows/setup_environment.yml
+        uses: ./.github/workflows/build-common.yml
         with:
           python-version: 3.12
+          os: macos-latest
 
       - name: Build with Nuitka (MacOS)
         if: matrix.os == 'macos-latest'
