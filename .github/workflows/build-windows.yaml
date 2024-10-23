@@ -25,7 +25,6 @@ jobs:
         run: |
           pip install -r requirements.txt
 
-      # モデルディレクトリの作成とファイルのダウンロード
       - name: Download model file
         run: |
           mkdir model
