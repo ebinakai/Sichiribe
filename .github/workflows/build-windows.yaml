@@ -1,0 +1,39 @@
+name: Build Windows App
+
+on:
+  push:
+    branches:
+      - feature/app/windows  # プッシュ時に実行されるブランチ
+
+jobs:
+  build:
+    runs-on: windows-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: 3.12
+          
+      - name: Install Git for Windows
+        run: |
+          choco install git
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirementes.txt
+          pip install nuitka tensorflow zstandard imageio
+
+      - name: Run bash script
+        run: |
+          C:/Program Files/Git/bin/bash.exe script/build.sh
+
+      - name: Upload build artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: windows-app
+          path: ./Sichiribe.dist/
