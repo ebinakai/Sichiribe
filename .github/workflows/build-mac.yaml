@@ -34,12 +34,13 @@ jobs:
         run: |
           mv app.py Sichiribe.py
 
-      - name: Build with Nuitka (MacOS)
+      - name: Build with Nuitka
         uses: Nuitka/Nuitka-Action@main
         with:
           nuitka-version: main
           script-name: Sichiribe.py
           standalone: true
+          onefile: true
           enable-plugins: pyside6
           include-module: matplotlib.backends.backend_qt5agg
           include-data-dir: |
@@ -76,17 +77,10 @@ jobs:
           
           codesign --verify --verbose "Sichiribe.app" || true
 
-      - name: Create version info
-        run: |
-          cd build/Sichiribe.app/Contents
-          VERSION=$(git describe --tags --always)
-          /usr/libexec/PlistBuddy -c "Set :CFBundleShortVersionString $VERSION" Info.plist
-          /usr/libexec/PlistBuddy -c "Set :CFBundleVersion $VERSION" Info.plist
-
       - name: Upload Artifacts
         uses: actions/upload-artifact@v4
         with:
           name: MacOS Build
           path: |
-            build/*.app/**/*
+            build/*.app
           include-hidden-files: true
