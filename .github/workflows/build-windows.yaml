@@ -22,7 +22,7 @@ jobs:
       - name: Cache pip dependencies
         uses: actions/cache@v3
         with:
-          path: ~/.cache/pip
+          path: C:\Users\${{ github.actor }}\AppData\Local\pip\Cache
           key: ${{ runner.os }}-pip-${{ hashFiles('requirements.txt') }}
           restore-keys: |
             ${{ runner.os }}-pip-
@@ -39,6 +39,12 @@ jobs:
           if (-not (Test-Path "C:/Program Files/Git/bin/bash.exe")) {
             choco install git
           }
+
+      # モデルディレクトリの作成とファイルのダウンロード
+      - name: Download model file
+        run: |
+          mkdir model
+          curl -L -o model/model_100x100.keras https://github.com/EbinaKai/Sichiribe/releases/download/v0.1.1/model_100x100.keras
 
       - name: Run bash script
         run: |
