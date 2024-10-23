@@ -1,5 +1,6 @@
 #!/bin/bash
 
+set NUITKA_DOWNLOAD_CONFIRMATION=True
 python -m nuitka \
     --show-progress \
     --onefile \
