@@ -17,23 +17,36 @@ jobs:
         uses: actions/setup-python@v4
         with:
           python-version: 3.12
-          
-      - name: Install Git for Windows
-        run: |
-          choco install git
+
+      # pipキャッシュの利用
+      - name: Cache pip dependencies
+        uses: actions/cache@v3
+        with:
+          path: ~/.cache/pip
+          key: ${{ runner.os }}-pip-${{ hashFiles('requirements.txt') }}
+          restore-keys: |
+            ${{ runner.os }}-pip-
 
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
-          pip install -r requirementes.txt
+          pip install -r requirements.txt
           pip install nuitka tensorflow zstandard imageio
+
+      # Gitのインストールをキャッシュ
+      - name: Install Git for Windows if not installed
+        run: |
+          if (-not (Test-Path "C:/Program Files/Git/bin/bash.exe")) {
+            choco install git
+          }
 
       - name: Run bash script
         run: |
-          C:/Program Files/Git/bin/bash.exe script/build.sh
+          "C:/Program Files/Git/bin/bash.exe" script/build.sh
 
       - name: Upload build artifact
         uses: actions/upload-artifact@v3
         with:
           name: windows-app
           path: ./Sichiribe.dist/
+          retention-days: 7  # 7日間だけ保存
