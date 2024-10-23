@@ -25,7 +25,7 @@ jobs:
         run: |
           python -m pip install --upgrade pip
           pip install -r requirements.txt
-          pip install nuitka tensorflow zstandard imageio
+          pip install nuitka onnxruntime zstandard imageio
 
       # Gitのインストールをキャッシュ
       - name: Install Git for Windows if not installed
