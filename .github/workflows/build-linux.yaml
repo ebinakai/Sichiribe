@@ -8,13 +8,12 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
-
+    
     steps:
       - name: Setup Build Environment
-        uses: ./.github/workflows/build-common.yaml
+        uses: ./.github/actions/build-setup
         with:
           python-version: 3.12
-          os: ubuntu-latest
 
       - name: Build with Nuitka
         uses: Nuitka/Nuitka-Action@main

@@ -1,0 +1,35 @@
+name: Setup Build Environment
+
+description: Sets up the build environment for the application.
+
+inputs:
+  python-version:
+    required: true
+    description: 'Python version to use'
+
+runs:
+  using: "composite"
+  steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: ${{ inputs.python-version }}
+        cache: 'pip'
+        cache-dependency-path: |
+          **/requirements.txt
+
+    - name: Install dependencies
+      run: |
+        pip install -r requirements.txt
+
+    - name: Download model file
+      run: |
+        mkdir model
+        curl -L -o model/model_100x100.onnx https://github.com/EbinaKai/Sichiribe/releases/download/v0.1.6/model_100x100.onnx
+
+    - name: Rename app.py to Sichiribe.py
+      run: |
+        mv app.py Sichiribe.py
