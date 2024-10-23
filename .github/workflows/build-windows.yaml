@@ -42,7 +42,7 @@ jobs:
 
       - name: Run bash script
         run: |
-          "C:/Program Files/Git/bin/bash.exe" script/build.sh
+          & "C:/Program Files/Git/bin/bash.exe" script/build_windows.sh
 
       - name: Upload build artifact
         uses: actions/upload-artifact@v3
