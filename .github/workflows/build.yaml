@@ -1,0 +1,66 @@
+name: Build App
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  build:
+    strategy:
+      matrix:
+        os: [macos-latest, ubuntu-latest, windows-latest]
+
+    runs-on: ${{ matrix.os }}
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: 3.12
+          cache: 'pip'
+          cache-dependency-path: |
+            **/requirements.txt
+
+      - name: Install dependencies
+        run: |
+          pip install -r requirements.txt
+
+      - name: Download model file
+        run: |
+          mkdir model
+          curl -L -o model/model_100x100.onnx https://github.com/EbinaKai/Sichiribe/releases/download/v0.1.6/model_100x100.onnx
+
+      - name: Rename app.py to Sichiribe.py
+        run: |
+          mv app.py Sichiribe.py
+
+      - name: Build with Nuitka
+        uses: Nuitka/Nuitka-Action@main
+        with:
+          nuitka-version: main
+          script-name: Sichiribe.py
+          onefile: true
+          standalone: true
+          windows-icon-from-ico: script/Sichiribe_icon.png
+          macos-app-icon: script/Sichiribe_icon.png
+          linux-icon: script/Sichiribe_icon.png
+          enable-plugins: pyside6
+          include-module: matplotlib.backends.backend_qt5agg
+          include-data-dir: |
+            ./model=model
+            ./gui/images=gui/images/splash_image.png
+          product-version: 1.0.0
+
+      - name: Upload Artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ runner.os }} Build
+          path: |
+            build/*.exe
+            build/*.bin
+            build/*.app/**/*
+          include-hidden-files: true
