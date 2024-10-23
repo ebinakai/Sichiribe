@@ -17,17 +17,7 @@ jobs:
         uses: actions/setup-python@v4
         with:
           python-version: 3.12
-
-      # pipキャッシュの利用
-      - name: Cache pip dependencies
-        uses: actions/cache@v3
-        with:
-          path: C:\Users\${{ github.actor }}\AppData\Local\pip\Cache
-          key: ${{ runner.os }}-pip-${{ hashFiles('requirements.txt') }}
-          restore-keys: |
-            ${{ runner.os }}-pip-
-
-      - name: Install dependencies
+          cache: 'pip'
         run: |
           python -m pip install --upgrade pip
           pip install -r requirements.txt
