@@ -8,4 +8,5 @@ python -m nuitka \
     --include-data-files=./model/model_100x100.keras=model/model_100x100.keras \
     --include-data-files=./gui/images/splash_image.png=gui/images/splash_image.png \
     --product-version=1.0.0 \
+    --onefile \
     app.py
