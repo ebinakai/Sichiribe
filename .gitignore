@@ -15,6 +15,9 @@ result_*.csv
 result_*.json
 test_*.py
 
+# カスタムビルドライブラリ
+externals/
+
 # CNNモデル
 model/
 datasets/
