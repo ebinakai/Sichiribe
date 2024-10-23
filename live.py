@@ -1,6 +1,6 @@
 '''
 リアルタイムで7セグメントディスプレイの数字を読み取る
-詳細については、docs/execution_live.mdを参照
+詳細については、https://github.com/EbinaKai/Sichiribe/wiki/How-to-use-CLI#execution-live を参照
 '''
 
 # 警告がだるいので非表示

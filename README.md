@@ -36,7 +36,7 @@
 ## インストール
 
 仮想環境の作成等はMacOS・Linuxに準拠するため、Windowsで実行する際などは適宜読み替えてほしい。  
-また、Linux環境以外で `tflite-runtime` を用いたい場合は [about_tensorflow.md](./docs/about_tensorflow.md) を参照するとよい。
+また、Linux環境以外で `tflite-runtime` を用いたい場合は [こちら](https://github.com/EbinaKai/Sichiribe/wiki/How-to-build-tflite%E2%80%90runtime) を参照するとよい。
 
 ```bash
 # リポジトリのクローン

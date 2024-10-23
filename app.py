@@ -1,6 +1,6 @@
 '''
 GUIアプリケーションを起動するためのメインプログラムこのスクリプトを実行することで、GUIアプリケーションが起動する
-詳細については、docs/execution_gui.mdを参照
+詳細については、https://github.com/EbinaKai/Sichiribe/wiki/How-to-use-GUI-App を参照
 '''
 
 # ログの設定

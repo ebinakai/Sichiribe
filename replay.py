@@ -1,6 +1,6 @@
 '''
 動画ファイルから7セグメントディスプレイの数字を読み取る
-詳細については、docs/execution_replay.mdを参照
+詳細については、https://github.com/EbinaKai/Sichiribe/wiki/How-to-use-CLI#execution-replay を参照
 '''
 
 # 警告がだるいので非表示
