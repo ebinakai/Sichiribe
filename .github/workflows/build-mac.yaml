@@ -44,7 +44,7 @@ jobs:
           include-data-dir: |
             ./model=model
             ./gui/images=gui/images/splash_image.png
-          macos-create-app-bundle: true
+          onefile: true
           macos-app-name: Sichiribe
           macos-app-icon: script/Sichiribe.icns
           macos-app-protected-resource: "NSCameraUsageDescription:Camera access"
