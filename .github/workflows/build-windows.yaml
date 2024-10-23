@@ -40,9 +40,22 @@ jobs:
           mkdir model
           curl -L -o model/model_100x100.onnx https://github.com/EbinaKai/Sichiribe/releases/download/v0.1.6/model_100x100.onnx
 
-      - name: Run bash script
-        run: |
-          & "C:/Program Files/Git/bin/bash.exe" script/build_windows.sh
+      - name: Build with Nuitka
+        uses: Nuitka/Nuitka-Action@main
+        with:
+          nuitka-version: main
+          script-name: app.py  # ビルドするPythonスクリプト
+          onefile: true        # 単一ファイルとしてビルド
+          standalone: true     # スタンドアロンモード
+          show-progress: true  # ビルドの進捗を表示
+          product-name: Sichiribe
+          windows-icon-from-ico: script/Sichiribe_icon.png
+          enable-plugins: pyside6
+          include-module: matplotlib.backends.backend_qt5agg
+          include-data-dir: |
+            ./model=model
+            ./gui/images=gui/images/splash_image.png
+          product-version: 1.0.0
 
       - name: Upload build artifact
         uses: actions/upload-artifact@v4

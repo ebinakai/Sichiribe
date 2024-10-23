@@ -1,10 +1,10 @@
 #!/bin/bash
 
-set NUITKA_DOWNLOAD_CONFIRMATION=True
+echo "Yes" | \
 python -m nuitka \
-    --show-progress \
     --onefile \
     --standalone \
+    --show-progress \
     --product-name=Sichiribe \
     --windows-icon-from-ico=script/Sichiribe_icon.png \
     --enable-plugins=pyside6 \
