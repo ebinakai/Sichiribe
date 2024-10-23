@@ -1,4 +1,4 @@
-name: Build Windows App
+name: Build Linux App
 
 on:
   pull_request:
@@ -9,7 +9,7 @@ jobs:
   build:
     strategy:
       matrix:
-        os: windows-latest
+        os: ubuntu-latest
 
     steps:
       - name: Setup Build Environment
@@ -29,12 +29,12 @@ jobs:
           include-data-dir: |
             ./model=model
             ./gui/images=gui/images/splash_image.png
-          windows-icon-from-ico: script/Sichiribe_icon.png
+          linux-icon: script/Sichiribe_icon.png
 
       - name: Upload Artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: Windows Build
+          name: Linux-Ubuntu Build
           path: |
-            build/*.exe
+            build/*.bin
           include-hidden-files: true
