@@ -17,9 +17,12 @@ else
 fi
 
 
-# ビルド
 echo "Starting build with Nuitka for $ARCH..."
+
+# リネーム（何故か app-name の指定が効かない）
 mv app.py Sichiribe.py
+
+# ビルド
 python -m nuitka \
     --remove-output \
     --macos-create-app-bundle \
@@ -31,9 +34,16 @@ python -m nuitka \
     --include-data-dir=./gui/images=gui/images \
     --macos-app-protected-resource="NSCameraUsageDescription:Camera access" \
     Sichiribe.py
-mv app.py Sichiribe.py
+BUILD_STATUS=$? # ビルドの終了ステータスを取得
 
-# Nuitkaのビルドが成功したかどうかを確認
+# ファイル名を元に戻す
+mv Sichiribe.py app.py
+
+# ビルドが失敗した場合にエラーメッセージを表示
+if [ $BUILD_STATUS -ne 0 ]; then
+    echo "ビルドが失敗しました"
+fi
+
 # パッケージング
 DMG_NAME="Sichiribe.dmg"
 if [ "$ARCH" = "x86_64" ]; then
@@ -53,5 +63,5 @@ create-dmg --window-size 920 660 \
 echo "DMG created!"
 
 # 不要なファイルを削除
-# rm -rf Sichiribe.app
+rm -rf Sichiribe.app
 rm -rf Sichiribe.dist
