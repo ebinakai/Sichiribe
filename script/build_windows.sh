@@ -1,6 +1,6 @@
 #!/bin/bash
 
-nuitka \
+python -m nuitka \
     --product-name=Sichiribe \
     --enable-plugins=pyside6 \
     --include-module=matplotlib.backends.backend_qt5agg \
