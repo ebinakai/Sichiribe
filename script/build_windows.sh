@@ -1,6 +1,9 @@
 #!/bin/bash
 
 python -m nuitka \
+    --show-progress \
+    --onefile \
+    --standalone \
     --product-name=Sichiribe \
     --windows-icon-from-ico=script/Sichiribe_icon.png \
     --enable-plugins=pyside6 \
@@ -8,5 +11,4 @@ python -m nuitka \
     --include-data-dir=./model=model \
     --include-data-dir=./gui/images=gui/images/splash_image.png \
     --product-version=1.0.0 \
-    --onefile \
     app.py
