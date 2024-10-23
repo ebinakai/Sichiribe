@@ -35,6 +35,7 @@ build/
 nuitka-crash-report.xml
 Resources/
 Info.plist
+/Sichiribe.py
 
 # create-dmg
 *.dmg
