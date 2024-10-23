@@ -7,6 +7,7 @@ env_x86/*
 
 # 画像解析機能
 __pycache__
+tempCodeRunnerFile.py
 contents/
 frames/
 frames_*/
@@ -39,3 +40,9 @@ Info.plist
 
 # create-dmg
 *.dmg
+
+# 推論結果
+result_*.csv
+result_*.json
+parameters_*.csv
+parameters_*.json

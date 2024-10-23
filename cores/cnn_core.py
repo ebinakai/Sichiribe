@@ -114,11 +114,24 @@ def select_cnn_model()->CNNCore:
     from tflite_runtime.interpreter import Interpreter
     
     # インポートに成功した場合は、TFLiteモデルを使用する
-    from cores.cnn_lite import CNNLite
+    from cores.cnn_tflite import CNNLite
     logger.info("TFLite model selected.")  
     return CNNLite
   except ImportError:
-    # インポートに失敗した場合は、通常のKerasモデルを使用する
-    from cores.cnn import CNN
-    logger.info("Keras model selected.")
-    return CNN
+    logger.warning("TFLite runtime not found.")
+    
+    try:
+      # TensorFlowのインポートを試みる
+      import tensorflow as tf
+      
+      # インポートに成功した場合は、Kerasモデルを使用する
+      from cores.cnn_tf import CNN
+      logger.info("Keras model selected.")
+      return CNN
+    except ImportError:
+      logger.warning("TensorFlow not found. Attempting to use ONNX model.")
+      
+      # ONNXモデルを返す
+      from cores.cnn_onnx import CNNOnnx
+      logger.info("ONNX model selected.")
+      return CNNOnnx
