@@ -7,7 +7,10 @@ on:
 
 jobs:
   build:
-    runs-on: macos-latest
+    strategy:
+      matrix:
+        os: [macos-latest, ubuntu-latest, windows-latest]
+    runs-on: ${{matrix.os}}
 
     steps:
       - name: Checkout code
@@ -34,7 +37,8 @@ jobs:
         run: |
           mv app.py Sichiribe.py
 
-      - name: Build with Nuitka
+      - name: Build for macos-latest
+        if: matrix.os == 'macos-latest'
         uses: Nuitka/Nuitka-Action@main
         with:
           nuitka-version: main
@@ -50,29 +54,45 @@ jobs:
           macos-app-icon: script/Sichiribe_icon.png
           macos-app-protected-resource: "NSCameraUsageDescription:Camera access"
 
+      - name: Build for ${{ matrix.os }}
+        if: ${{ matrix.os == 'ubuntu-latest' || matrix.os == 'windows-latest' }}
+        uses: Nuitka/Nuitka-Action@main
+        with:
+          nuitka-version: main
+          script-name: Sichiribe.py
+          onefile: true
+          standalone: true
+          enable-plugins: pyside6
+          include-module: matplotlib.backends.backend_qt5agg
+          include-data-dir: |
+            model=model
+            gui/images=gui/images
+          linux-icon: script/Sichiribe_icon.png
+          windows-icon-from-ico: script/Sichiribe_icon.png
+
       - name: Fix app bundle structure
+        if: matrix.os == 'macos-latest'
         run: |
           cd build
           ls -la Sichiribe.app || true
           mkdir -p "Sichiribe.app/Contents/MacOS"
           mkdir -p "Sichiribe.app/Contents/Resources"
-          
           if [ -d "Resources" ]; then
             cp -R Resources/* "Sichiribe.app/Contents/Resources/"
             rm -rf Resources
           fi
-          
           if [ -f "Info.plist" ]; then
             mv "Info.plist" "Sichiribe.app/Contents/"
           fi
-          
           chmod -R 755 "Sichiribe.app"
           codesign --force --sign - "Sichiribe.app"
 
       - name: Upload Artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: MacOS Build
+          name: ${{ matrix.os }}-Build
           path: |
             build/*.app
+            build/*.bin
+            build/*.exe
           include-hidden-files: true
