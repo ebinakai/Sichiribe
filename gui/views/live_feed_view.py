@@ -31,19 +31,15 @@ class LiveFeedWindow(QWidget):
         footer_layout = QHBoxLayout()
         self.setLayout(main_layout)
         
-        # レイアウトの設定
         header_layout.setAlignment(Qt.AlignmentFlag.AlignCenter)
         feed_layout.setAlignment(Qt.AlignmentFlag.AlignCenter)
         
-        # ヘッダーレイアウト
         self.header_description = QLabel("画角を調整してください")
         header_layout.addWidget(self.header_description)
         
-        # フレームの設定
         self.feed_label = QLabel()
         feed_layout.addWidget(self.feed_label)
         
-        # フッターレイアウト
         self.back_button = QPushButton('戻る')
         self.back_button.setFixedWidth(100)
         self.back_button.clicked.connect(self.back)
@@ -51,14 +47,13 @@ class LiveFeedWindow(QWidget):
         self.next_button = QPushButton('次へ')
         self.next_button.setFixedWidth(100)
         self.next_button.setDefault(True)  # 強調表示されるデフォルトボタンに設定
-        self.next_button.setAutoDefault(True)  # フォーカス時にエンターキーで実行
+        self.next_button.setAutoDefault(True)
         self.next_button.clicked.connect(self.next)
 
         footer_layout.addWidget(self.back_button)
-        footer_layout.addStretch()  # スペーサーを追加してボタンを右寄せ
+        footer_layout.addStretch()
         footer_layout.addWidget(self.next_button)
 
-        # メインレイアウトに追加
         main_layout.addLayout(header_layout)
         main_layout.addStretch()
         main_layout.addLayout(feed_layout)

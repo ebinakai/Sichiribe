@@ -34,23 +34,16 @@ class SplashScreen(QWidget):
         layout.setSpacing(0)
         self.setLayout(layout)
         
-        # ウィンドウのサイズを設定
         self.resize(pixmap.width(), pixmap.height())
         
-        # スプラッシュスクリーンをディスプレイの中央に配置
         self.center()
 
     def center(self):
-        # ディスプレイサイズを取得
         screen = QApplication.primaryScreen()
         screen_rect = screen.availableGeometry()
-        
-        # ウィンドウサイズを取得
         window_rect = self.frameGeometry()
         
-        # 中央に配置するための位置を計算
         x = (screen_rect.width() - window_rect.width()) // 2
         y = (screen_rect.height() - window_rect.height()) // 2
         
-        # 計算した位置にウィンドウを移動
         self.move(x, y)

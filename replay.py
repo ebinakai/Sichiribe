@@ -8,7 +8,6 @@ import warnings
 warnings.filterwarnings("ignore", category=FutureWarning)
 warnings.filterwarnings("ignore", category=UserWarning, module='cv2')
 
-# ロガーの設定
 import logging
 formatter = '%(asctime)s - %(name)s - %(levelname)s - %(message)s'
 logging.basicConfig(level=logging.DEBUG, format=formatter)
@@ -18,14 +17,12 @@ import argparse
 from cores.frameEditor import FrameEditor
 from cores.exporter import Exporter, get_supported_formats
 
-# モデルを読み込む
 from cores.cnn_core import select_cnn_model
 Detector = select_cnn_model()
 
 def get_args():
   export_formats = get_supported_formats()
   
-  # 引数を取得
   parser = argparse.ArgumentParser(description='7セグメントディスプレイの数字を読み取る') 
   parser.add_argument('video_path', help='解析する動画のパス')
   parser.add_argument('--num-digits', help="7セグメント表示器の桁数", type=int, default=4)
@@ -48,19 +45,15 @@ def main(video_path,
          save_frame,
          out_dir='results',
 ):
-  # インスタンスの生成
   fe = FrameEditor(sampling_sec, num_frames, num_digits)
   dt = Detector(num_digits)
   ep = Exporter(format, out_dir)
 
-  # モデルの読み込み
   dt.load()
   
-  # フレームの切り出し
   frames = fe.frame_devide(video_path, video_skip_sec, save_frame)
   timestamps = fe.generate_timestamp(len(frames))
     
-  # テキスト検出
   results = []
   failed_rates = []
   for frame in frames:
@@ -70,7 +63,6 @@ def main(video_path,
     logger.info(f"Detected Result: {result}")
     logger.info(f"Failed Rate: {failed_rate}")
 
-  # 結果のエクスポート
   data = ep.format(results, failed_rates, timestamps)
   ep.export(data)
 
@@ -78,11 +70,9 @@ def main(video_path,
 if __name__ == "__main__":
   args = get_args()
   
-  # ログレベルを設定
   logger.setLevel(logging.DEBUG) if args.debug else logger.setLevel(logging.INFO)
   logger.debug("args: %s", args)
   
-  # 実行
   main(video_path=args.video_path, 
        num_digits=args.num_digits, 
        sampling_sec=args.sampling_sec, 

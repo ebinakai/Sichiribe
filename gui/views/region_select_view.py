@@ -66,45 +66,38 @@ class RegionSelectWindow(QWidget):
         image_layout.setAlignment(Qt.AlignmentFlag.AlignCenter)
         extracted_image_layout.setAlignment(Qt.AlignmentFlag.AlignCenter)
         
-        # ヘッダーレイアウト
         self.header_description = QLabel("7セグメント領域として4点を選択してください")
         header_layout.addWidget(self.header_description)
         
-        # 画像を表示するためのラベル
         self.main_label = ClickableLabel(self, self.label_clicked)
         # サイズポリシーを設定して、ラベルが画像サイズに合わせて変わるようにする
         self.main_label.setSizePolicy(QSizePolicy.Policy.Fixed, QSizePolicy.Policy.Fixed)
         image_layout.addWidget(self.main_label)
         
-        # 選択領域表示用レイアウト
         self.extracted_label = QLabel()
         self.extracted_label.setMinimumHeight(100)
         extracted_image_layout.addWidget(self.extracted_label)
         
-        # フッターレイアウト
-        # 「戻る」ボタン
         self.back_button = QPushButton('戻る')
         self.back_button.setFixedWidth(100)
         self.back_button.clicked.connect(self.cancel_select)
         footer_layout.addWidget(self.back_button)
 
-        footer_layout.addStretch()  # スペーサーを追加してボタンを右寄せ
+        footer_layout.addStretch()
 
-        # 次へボタンとコンファームテキスト
         footer_right_layout = QHBoxLayout()
         self.confirm_txt = QLabel()
         self.confirm_txt.setStyleSheet('color: red')
         footer_right_layout.addWidget(self.confirm_txt)
         self.next_button = QPushButton('次へ')
         self.next_button.setDefault(True)  # 強調表示されるデフォルトボタンに設定
-        self.next_button.setAutoDefault(True)  # フォーカス時にエンターキーで実行
+        self.next_button.setAutoDefault(True)
         self.next_button.setFixedWidth(100)
         self.next_button.clicked.connect(self.finish_select)
-        footer_right_layout.addWidget(self.next_button)  # 次へボタンを追加
+        footer_right_layout.addWidget(self.next_button)
 
-        footer_layout.addLayout(footer_right_layout)  # フッターレイアウトに追加
+        footer_layout.addLayout(footer_right_layout)
         
-        # メインレイアウトに追加
         main_layout.addLayout(header_layout)
         main_layout.addLayout(image_layout)
         main_layout.addLayout(extracted_image_layout)
@@ -132,10 +125,9 @@ class RegionSelectWindow(QWidget):
             new_point = np.array([label_pos.x(), label_pos.y()]).astype(np.int32)
             
             if len(self.click_points) < 4:
-                # 4点未満なら普通に追加
                 self.click_points.append(new_point)
             else:
-                # 4点以上の場合、最も近い点を入れ替える
+                # 最も近い点を入れ替える
                 distances = np.linalg.norm(np.array(self.click_points) - new_point, axis=1)
                 closest_index = np.argmin(distances)
                 self.click_points[closest_index] = new_point
@@ -148,7 +140,7 @@ class RegionSelectWindow(QWidget):
     def display_image(self, image: np.ndarray):
         q_image = convert_cv_to_qimage(image)
         self.main_label.setPixmap(QPixmap.fromImage(q_image))
-        self.main_label.adjustSize()  # ラベルを画像サイズに調整
+        self.main_label.adjustSize()
         
     def display_extract_image(self, image: np.ndarray):
         q_image = convert_cv_to_qimage(image)
@@ -170,10 +162,8 @@ class RegionSelectWindow(QWidget):
         self.prev_screen = prev_screen
         self.fe = FrameEditor(num_digits=params['num_digits'])
         
-        # ウィンドウの位置とサイズを保存
-        window_pos, window_size = self.screen_manager.save_screen_size()
+        window_pos, _s = self.screen_manager.save_screen_size()
         
-        # 表示画像サイズを計算
         screen = QApplication.primaryScreen()
         screen_rect = screen.availableGeometry()
         self.target_width = int(screen_rect.width() * 0.8)
@@ -192,7 +182,6 @@ class RegionSelectWindow(QWidget):
         click_points = np.array(self.click_points) / self.resize_scale
         self.params['click_points'] = click_points.tolist()
         
-        # 現在のページのウィジェットの設定をリセット
         self.clear_env()
 
         # ウィンドウサイズの適用を待ってから次の画面に遷移

@@ -55,35 +55,25 @@ class MplCanvas(FigureCanvasQTAgg):
             bg_color = '#ECECEC'
             plt_color = 'white'
             
-        # グラフの背景色を設定
         self.figure.set_facecolor(bg_color)
         self.axes1.set_facecolor(plt_color)
         self.axes2.set_facecolor(plt_color)
         
-        # ラベルを設定
         self.axes1.set_xlabel(xlabel, color=label_color)
         self.axes1.set_ylabel(ylabel1, color=label_color)
-        # self.axes2.set_ylabel(ylabel2, color=label_color) # なぜかylabel2が左に表示されているので非表示
         
-        # 軸のパッディングを設定
         self.axes1.tick_params(pad=10, color=label_color, labelcolor=label_color)
         self.axes2.tick_params(pad=10, color=label_color, labelcolor=label_color)
         
-        # プロットを作成
         self.line1, = self.axes1.plot([], [], marker='o', color='royalblue', label=ylabel1)
         self.line2, = self.axes2.plot([], [], marker='s', color='tomato', label=ylabel2)
         
-        # 軸の範囲を設定
         self.axes1.set_ylim(-0.1, 1.1)
-        
-        # タイトルを設定
         self.axes1.set_title(title, color=title_color)
         
-        # レジェンドを追加
         lines = [self.line1, self.line2]
         self.axes1.legend(lines, [line.get_label() for line in lines], loc='upper left')
 
-        # 描画を更新
         self.draw()
 
     def update_existing_plot(self, x_val, y_val1, y_val2):
@@ -91,12 +81,9 @@ class MplCanvas(FigureCanvasQTAgg):
         x_val_datetime = [datetime.strptime(t, '%H:%M:%S') for t in x_val]
         x_val_num = mdates.date2num(x_val_datetime)
         
-        # 新しいデータでプロット
         self.line1.set_data(x_val_num, y_val1)
         self.line2.set_data(x_val_num, y_val2)
 
-        
-        # x軸を時間形式に設定
         self.axes1.xaxis.set_major_formatter(mdates.DateFormatter('%H:%M:%S'))
         
         # x軸の範囲設定
@@ -105,7 +92,6 @@ class MplCanvas(FigureCanvasQTAgg):
             x_margin = (x_max - x_min) * 0.05  # データの5%を余裕として設定
             self.axes1.set_xlim(x_min - x_margin, x_max + x_margin)
 
-        # axes2軸の再設定
         self.axes2.relim()
         self.axes2.autoscale_view()
         
@@ -117,8 +103,5 @@ class MplCanvas(FigureCanvasQTAgg):
         self.axes1.set_xticks(ticks)
         self.axes1.set_xticklabels(labels)
 
-        # グラフのレイアウトを調整
         self.figure.tight_layout()
-        
-        # 描画を更新
         self.draw()

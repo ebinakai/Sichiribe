@@ -21,7 +21,6 @@ def init_screen_manager(stacked_widget: QStackedWidget, main_window: QMainWindow
   
     screen_manager = ScreenManager(stacked_widget, main_window)
 
-    # ビュークラスをインスタンス化
     menu_window = MenuWindow(screen_manager)
     log_window = LogWindow(screen_manager)
     region_select_window = RegionSelectWindow(screen_manager)
@@ -32,7 +31,6 @@ def init_screen_manager(stacked_widget: QStackedWidget, main_window: QMainWindow
     live_feed_window = LiveFeedWindow(screen_manager)
     live_exe_window = LiveExeWindow(screen_manager)
     
-    # ビューをスタックウィジェットに追加
     stacked_widget.addWidget(menu_window)
     stacked_widget.addWidget(log_window)
     stacked_widget.addWidget(region_select_window)

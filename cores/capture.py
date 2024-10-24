@@ -19,12 +19,10 @@ class FrameCapture:
   def show_camera_feed(self):
 
     while True:
-      # フレームが正しくキャプチャされているかを確認
       frame = self.capture()
       if frame is None:
         break
 
-      # フレームをウィンドウに表示
       window_title = "Press 'Y' to finish."
       cv2.imshow(window_title, frame)
 
@@ -32,7 +30,6 @@ class FrameCapture:
       if cv2.waitKey(1) & 0xFF == ord('y'):
         break
 
-    # ウィンドウを閉じる
     cv2.destroyAllWindows()
     cv2.waitKey(1)
 

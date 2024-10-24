@@ -36,18 +36,15 @@ class LiveFeedWorker(QThread):
         self.cap_size.emit((cap_width, cap_height))
 
         while True:
-            # キャンセルフラグを確認
             if self._is_cancelled:
                 self.cancelled.emit()
                 break
             
-            # フレームが正しくキャプチャされているかを確認
             frame = fc.capture()
             if frame is None:
                 self.error.emit()
                 break
             
-            # 終了フラグを確認
             if self._is_finished:
                 self.end.emit(frame)
                 break
@@ -58,8 +55,8 @@ class LiveFeedWorker(QThread):
             
     def stop(self):
         self.logger.info("Capture Feed stopping...") 
-        self._is_finished = True  # 停止フラグを設定
+        self._is_finished = True
         
     def cancel(self):
         self.logger.info("Capture Feed canceling...") 
-        self._is_cancelled = True # 停止フラグを設定
+        self._is_cancelled = True

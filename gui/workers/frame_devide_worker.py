@@ -24,7 +24,6 @@ class   FrameDivideWorker(QThread):
         self.logger = logging.getLogger('__main__').getChild(__name__)
         
     def run(self):
-        # フレームの切り出し
         frames = self.fe.frame_devide(self.video_path, 
                                       self.video_skip_sec, 
                                       self.save_frame,
@@ -33,6 +32,5 @@ class   FrameDivideWorker(QThread):
                                       )
             
         timestamps = self.fe.generate_timestamp(len(frames))
-        self.end.emit(frames, timestamps)  # 処理完了を通知   
+        self.end.emit(frames, timestamps)
         return None
-        

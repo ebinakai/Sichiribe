@@ -23,10 +23,8 @@ class MenuWindow(QWidget):
         footer_layout = QHBoxLayout()
         self.setLayout(main_layout)
         
-        # レイアウトの設定
         button_layout.setAlignment(Qt.AlignmentFlag.AlignCenter)
         
-        # メニュー項目
         self.live_button = QPushButton('ライブカム')
         self.live_button.setFixedHeight(50)
         self.live_button.setFixedWidth(200)
@@ -39,14 +37,12 @@ class MenuWindow(QWidget):
         self.replay_button.clicked.connect(lambda: self.screen_manager.show_screen('replay_setting'))
         button_layout.addWidget(self.replay_button)
         
-        # フッター
         self.quit_button = QPushButton('終了')
         self.quit_button.setFixedWidth(100)
         self.quit_button.clicked.connect(lambda: self.screen_manager.quit())
         footer_layout.addWidget(self.quit_button)
         footer_layout.addStretch()
         
-        # メインレイアウトに追加
         main_layout.addStretch()
         main_layout.addLayout(button_layout)
         main_layout.addStretch()

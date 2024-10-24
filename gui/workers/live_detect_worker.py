@@ -23,7 +23,6 @@ import os
 import cv2
 import numpy as np
 
-# モデルを読み込む
 from cores.cnn_core import select_cnn_model
 Detector = select_cnn_model()
 
@@ -54,19 +53,16 @@ class DetectWorker(QThread):
         self.fe = FrameEditor(num_digits=self.params['num_digits'])
         self.dt = Detector(self.params['num_digits'])
         
-        # モデルのロード
         if not self.dt.load():
           self.logger.error("Failed to load the model.")
           self.model_not_found.emit()
           return None
         
-        # 初期化
         start_time = time.time()
         end_time = time.time() + self.params['total_sampling_sec']
         frame_count = 0
         timestamps = []
         
-        # キャプチャ開始
         while time.time() < end_time:
           temp_time = time.time()
           frames = []   
@@ -89,15 +85,12 @@ class DetectWorker(QThread):
               self.error.emit()
               return None
             
-            # 推論処理
             cropped_frame = self.fe.crop(frame, self.params['click_points'])
             frames.append(cropped_frame)
             
-            # UI に画像を通知
             image_bin = self.dt.preprocess_binarization(cropped_frame, self.binarize_th)
             self.send_image.emit(image_bin)
             
-            # フレームを保存
             if self.params['save_frame']:
               frame_filename = os.path.join(self.params['out_dir'], 'frames', f"frame_{frame_count}.jpg")
               cv2.imwrite(frame_filename, cropped_frame)
@@ -109,7 +102,6 @@ class DetectWorker(QThread):
           value, failed_rate = self.dt.detect(frames, self.binarize_th)
           self.logger.info(f"Detected: {value}, Failed rate: {failed_rate}")
           
-          # UI に推論結果を通知
           self.progress.emit(value, failed_rate, timestamp_str)
                 
           elapsed_time = time.time() - temp_time
@@ -123,13 +115,12 @@ class DetectWorker(QThread):
         
     def cancel(self):
         self.logger.info("DetectWorker terminating...") 
-        self._is_cancelled = True  # 停止フラグを設定
+        self._is_cancelled = True
 
     def update_binarize_th(self, value):
         self.binarize_th = value
         self.logger.info(f"Update binarize_th: {self.binarize_th}")
         
-        # UI に画像を通知
         if not self._is_capturing:
           frame = self.fc.capture()
           if frame is None:
@@ -137,4 +128,3 @@ class DetectWorker(QThread):
           cropped_frame = self.fe.crop(frame, self.params['click_points'])
           image_bin = self.dt.preprocess_binarization(cropped_frame, self.binarize_th)
           self.send_image.emit(image_bin)
-        

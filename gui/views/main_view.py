@@ -15,11 +15,9 @@ class MainWindow(QMainWindow):
         super().__init__()
         self.setWindowTitle('Sichiribe')
         
-        # スタックウィジェットを作成
         stacked_widget = QStackedWidget()
         self.setCentralWidget(stacked_widget)
         
-        # スクリーンマネージャーを初期化
         screen_manager = init_screen_manager(stacked_widget, self)
         screen_manager.resie_defualt()
         screen_manager.center()

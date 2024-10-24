@@ -37,14 +37,11 @@ class ReplayExeWindow(QWidget):
         footer_layout = QHBoxLayout()
         self.setLayout(main_layout)
         
-        # レイアウトの設定
         graph_layout.setAlignment(Qt.AlignmentFlag.AlignCenter)
         
-        # グラフの設定
         self.graph_label = MplCanvas()
         graph_layout.addWidget(self.graph_label)
         
-        # フッター
         self.term_button = QPushButton('中止')
         self.term_button.setFixedWidth(100)
         self.term_button.clicked.connect(self.cancel)
@@ -54,9 +51,8 @@ class ReplayExeWindow(QWidget):
         self.term_label.setStyleSheet('color: red')
         footer_layout.addWidget(self.term_label)
         
-        footer_layout.addStretch()  # スペーサー
+        footer_layout.addStretch()
         
-        # メインレイアウトに追加
         main_layout.addStretch()
         main_layout.addLayout(graph_layout)
         main_layout.addStretch()
@@ -65,10 +61,10 @@ class ReplayExeWindow(QWidget):
     def cancel(self):
         if self.worker is not None:
             self.term_label.setText('中止中...')
-            self.worker.cancel()  # ワーカーに停止を指示
+            self.worker.cancel()
         
     def startup(self, params):
-        # 初期化
+
         self.graph_label.gen_graph(
                     title='Results', 
                     xlabel='Timestamp', 
@@ -92,7 +88,6 @@ class ReplayExeWindow(QWidget):
                         extract_single_frame=True) 
         self.params['first_frame'] = first_frame
         
-        # 切り取り領域選択
         self.screen_manager.get_screen('region_select').startup(self.params, 'replay_exe')
      
     def frame_devide_process(self, params):
@@ -100,7 +95,6 @@ class ReplayExeWindow(QWidget):
         self.screen_manager.get_screen('log').clear_log()
         self.screen_manager.show_screen('log')
         
-        # ワーカーのインスタンスを作成
         self.worker = FrameDivideWorker(params)
         self.worker.end.connect(self.frame_devide_finished)
         self.worker.start()
@@ -158,13 +152,9 @@ class ReplayExeWindow(QWidget):
     def export_process(self, params):
         self.logger.info('Data exporting...')
         
-        # 結果出力
         export_result(params)
-        
-        # 設定パラメータを出力
         export_params(params)
 
-        # 完了ポップアップウィンドウを表示
         self.screen_manager.popup(f"保存場所：{params['out_dir']}")
         self.screen_manager.show_screen('menu')
 

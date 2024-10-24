@@ -32,7 +32,6 @@ class ReplaySettingsWindow(QWidget):
         footer_layout = QHBoxLayout()
         self.setLayout(main_layout)
 
-        # ファイルパス
         self.video_path = QLineEdit()
         self.video_path.setReadOnly(True)
         self.video_path_button = QPushButton('ファイル選択')
@@ -42,50 +41,43 @@ class ReplaySettingsWindow(QWidget):
         file_layout.addWidget(self.video_path_button)
         form_layout.addRow('解析する動画のパス：', file_layout)
 
-        # 7セグメント表示器の桁数
         self.num_digits = QSpinBox()
         self.num_digits.setValue(4)
         self.num_digits.setFixedWidth(50)
         self.num_digits.setMinimum(1)
         form_layout.addRow('7セグメント表示器の桁数：', self.num_digits)
 
-        # 動画をサンプリングする頻度
         self.sampling_sec = QSpinBox()
         self.sampling_sec.setValue(5)
         self.sampling_sec.setFixedWidth(50)
         self.sampling_sec.setMinimum(1)
         form_layout.addRow('動画をサンプリングする頻度 (秒)：', self.sampling_sec)
 
-        # 一回のサンプリングで何フレーム取得するか
         self.num_frames = QSpinBox()
         self.num_frames.setValue(30)
         self.num_frames.setFixedWidth(50)
         self.num_frames.setMinimum(1)
         form_layout.addRow('一回のサンプリングで何フレーム取得するか：', self.num_frames)
 
-        # 動画の解析を始めるタイミング
         self.video_skip_sec = QSpinBox()
         self.video_skip_sec.setValue(0)
         self.video_skip_sec.setFixedWidth(50)
         form_layout.addRow('動画の解析を始めるタイミング (秒)：', self.video_skip_sec)
 
-        # 出力形式
         self.format = QComboBox()
         for fmt in get_supported_formats():
             self.format.addItem(fmt)
         form_layout.addRow('出力フォーマット：', self.format)
 
-        # キャプチャしたフレームを保存するか
         self.save_frame = QCheckBox()
         form_layout.addRow('キャプチャしたフレームを保存する：', self.save_frame)
 
-        # フッター
         self.back_button = QPushButton('戻る')
         self.back_button.setFixedWidth(100)
         self.back_button.clicked.connect(lambda: self.screen_manager.show_screen('menu'))
         footer_layout.addWidget(self.back_button)
 
-        footer_layout.addStretch()  # スペーサーを追加してボタンを右寄せ
+        footer_layout.addStretch()
         
         self.confirm_txt = QLabel()
         self.confirm_txt.setStyleSheet('color: red')
@@ -95,11 +87,10 @@ class ReplaySettingsWindow(QWidget):
         self.next_button.setFixedWidth(100)
 
         self.next_button.setDefault(True)  # 強調表示されるデフォルトボタンに設定
-        self.next_button.setAutoDefault(True)  # フォーカス時にエンターキーで実行
+        self.next_button.setAutoDefault(True)
         self.next_button.clicked.connect(self.startup)
         footer_layout.addWidget(self.next_button)
         
-        # メインレイアウトに追加
         main_layout.addLayout(form_layout)
         main_layout.addLayout(footer_layout)
         
@@ -119,7 +110,6 @@ class ReplaySettingsWindow(QWidget):
         else:
             self.confirm_txt.setText('')
         
-        # 必要なパラメータを設定
         params = {
             'video_path': self.video_path.text(),
             'num_digits': self.num_digits.value(),

@@ -60,13 +60,11 @@ def main(device,
   dt = Detector(num_digits=num_digits)
   ep = Exporter(format, out_dir)
 
-  # モデルの読み込み
   dt.load()
   
   # 画角を調整するためにカメラフィードを表示
   fc.show_camera_feed()
 
-  # フレームをキャプチャ
   frame = fc.capture()
   click_points = fe.region_select(frame)
   
@@ -86,11 +84,9 @@ def main(device,
       if frame is None:
         continue
       
-      # 推論処理
       cropped_frame = fe.crop(frame, click_points)
       frames.append(cropped_frame)
       
-      # フレームを保存
       if save_frame:
         frame_filename = os.path.join(save_dir, f"frame_{frame_count}.jpg")
         cv2.imwrite(frame_filename, cropped_frame)
@@ -117,7 +113,6 @@ def main(device,
   
   fc.release()
   
-  # 結果のエクスポート
   data = ep.format(results, failed_rates, timestamps)
   ep.export(data)
 
@@ -130,7 +125,6 @@ if __name__ == "__main__":
     save_dir = f"frames_{now}"
     os.makedirs(save_dir)
     
-  # ログレベルを設定
   logger.setLevel(logging.DEBUG) if args.debug else logger.setLevel(logging.INFO)
   logger.debug("args: %s", args)
     

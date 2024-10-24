@@ -25,7 +25,6 @@ def convert_cv_to_qimage(cv_img: np.ndarray) -> QImage:
     else:
         raise ValueError("Unsupported number of channels: {}".format(channels))
 
-# 画像を規定の大きさにリサイズ
 def resize_image(image: np.ndarray, target_width: int, target_height: int) -> tuple[np.ndarray, float]:
   
   height, width = image.shape[:2]
@@ -33,7 +32,7 @@ def resize_image(image: np.ndarray, target_width: int, target_height: int) -> tu
   resize_scale_height = float(target_height / height)
   aspect_ratio = height / width
   
-  # リサイズスケールの決定
+  # 短辺に合わせてアスペクト比を維持してリサイズ
   if resize_scale_width < resize_scale_height:
     resize_scale = resize_scale_width
     target_height = int(target_width * aspect_ratio)

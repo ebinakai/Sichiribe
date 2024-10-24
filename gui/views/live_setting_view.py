@@ -74,7 +74,6 @@ class LiveSettingsWindow(QWidget):
         self.save_frame = QCheckBox()
         form_layout.addRow('フレームを保存する：', self.save_frame)
         
-        # フォルダパス
         self.out_dir = QLineEdit()
         self.out_dir.setReadOnly(True)
         self.out_dir_button = QPushButton('フォルダ選択')
@@ -84,7 +83,6 @@ class LiveSettingsWindow(QWidget):
         file_layout.addWidget(self.out_dir_button)
         form_layout.addRow('保存場所：', file_layout)
 
-        # フッター
         self.back_button = QPushButton('戻る')
         self.back_button.setFixedWidth(100)
         self.back_button.clicked.connect(lambda: self.screen_manager.show_screen('menu'))
@@ -99,11 +97,10 @@ class LiveSettingsWindow(QWidget):
         self.next_button = QPushButton('実行')
         self.next_button.setFixedWidth(100)
         self.next_button.setDefault(True)  # 強調表示されるデフォルトボタンに設定
-        self.next_button.setAutoDefault(True)  # フォーカス時にエンターキーで実行
+        self.next_button.setAutoDefault(True)
         self.next_button.clicked.connect(self.startup)
         footer_layout.addWidget(self.next_button)
 
-        # メインレイアウトに追加
         main_layout.addLayout(form_layout)
         main_layout.addLayout(footer_layout)
 

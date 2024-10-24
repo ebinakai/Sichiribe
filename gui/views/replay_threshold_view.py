@@ -36,38 +36,33 @@ class ReplayThresholdWindow(QWidget):
         footer_layout = QHBoxLayout()
         self.setLayout(main_layout)
         
-        # レイアウトの設定
         extracted_image_layout.setAlignment(Qt.AlignmentFlag.AlignCenter)
         form_layout.setAlignment(Qt.AlignmentFlag.AlignCenter)
         
-        # 選択領域表示用レイアウト
         self.extracted_label = QLabel()
         self.extracted_label.setMinimumHeight(100)
         extracted_image_layout.addWidget(self.extracted_label)
         
-        # しきい値設定
-        slider_layout = QHBoxLayout()  # 水平レイアウトを作成
+        slider_layout = QHBoxLayout()
         self.binarize_th = QSlider()
         self.binarize_th.setFixedWidth(200)
         self.binarize_th.setRange(0, 255)
         self.binarize_th.setOrientation(Qt.Orientation.Horizontal)
         self.binarize_th.valueChanged.connect(self.update_binarize_th)
         self.binarize_th_label = QLabel()
-        slider_layout.addWidget(self.binarize_th)  # スライダーを追加
-        slider_layout.addWidget(self.binarize_th_label)  # ラベルを追加
-        form_layout.addRow("画像二値化しきい値：", slider_layout)   # そのレイアウトをaddRowに渡す
+        slider_layout.addWidget(self.binarize_th)
+        slider_layout.addWidget(self.binarize_th_label)
+        form_layout.addRow("画像二値化しきい値：", slider_layout)
 
-        # フッターレイアウト
         self.next_button = QPushButton('次へ')
         self.next_button.setFixedWidth(100)
         self.next_button.setDefault(True)  # 強調表示されるデフォルトボタンに設定
-        self.next_button.setAutoDefault(True)  # フォーカス時にエンターキーで実行
+        self.next_button.setAutoDefault(True)
         self.next_button.clicked.connect(self.next)
         
-        footer_layout.addStretch()  # スペーサー
+        footer_layout.addStretch()
         footer_layout.addWidget(self.next_button)
         
-        # メインレイアウトに追加
         main_layout.addLayout(extracted_image_layout)
         main_layout.addLayout(form_layout)
         main_layout.addStretch()
@@ -77,10 +72,8 @@ class ReplayThresholdWindow(QWidget):
         self.logger.info('Starting ReplayThresholdWindow.')
         self.screen_manager.show_screen('replay_threshold')
         
-        # ウィンドウの位置とサイズを保存
-        window_pos, window_size = self.screen_manager.save_screen_size()
+        _p, _s = self.screen_manager.save_screen_size()
      
-        # 初期化
         self.params = params
         self.threshold = None
         self.first_frame = self.fe.crop(params['first_frame'], params['click_points'])
@@ -93,7 +86,6 @@ class ReplayThresholdWindow(QWidget):
         binarize_th_str = '自動設定' if self.threshold is None else str(self.threshold)
         self.binarize_th_label.setText(binarize_th_str)
         
-        # 画像の二値化
         image_bin = self.dt.preprocess_binarization(self.first_frame, self.threshold)
         self.display_extract_image(image_bin)
 
