@@ -1,7 +1,7 @@
 <div align="center">
    <img
-      src="script/Sichiribe_icon.png"
-      alt="Reminders MenuBar"
+      src="res/Sichiribe_icon.png"
+      alt="Sichiribe icon"
       width="100"
    >
    <h1>Sichiribe</h1>
