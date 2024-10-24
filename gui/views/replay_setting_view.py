@@ -26,7 +26,6 @@ class ReplaySettingsWindow(QWidget):
         screen_manager.add_screen('replay_setting', self)
         self.initUI()
 
-    # レイアウトを作成
     def initUI(self):
         main_layout = QVBoxLayout()
         form_layout = QFormLayout()

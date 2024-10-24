@@ -31,7 +31,6 @@ class ReplayExeWindow(QWidget):
         self.logger = logging.getLogger('__main__').getChild(__name__)
         self.initUI()
 
-    # レイアウトを作成
     def initUI(self):
         main_layout = QVBoxLayout()
         graph_layout = QVBoxLayout()

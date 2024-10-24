@@ -31,7 +31,6 @@ class LogWindow(QWidget):
         screen_manager.add_screen('log', self)
         self.initUI()
 
-    # レイアウトを追加
     def initUI(self):
         layout = QVBoxLayout()
         self.setLayout(layout)

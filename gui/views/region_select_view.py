@@ -54,7 +54,6 @@ class RegionSelectWindow(QWidget):
         self.target_height = int((screen_rect.height() - 100) * 0.8)
         self.initUI()
         
-    # メインウィジェットの設定
     def initUI(self):
         main_layout = QVBoxLayout()
         header_layout = QVBoxLayout()
