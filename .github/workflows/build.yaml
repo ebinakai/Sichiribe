@@ -54,7 +54,7 @@ jobs:
           macos-app-icon: script/Sichiribe_icon.png
           macos-app-protected-resource: "NSCameraUsageDescription:Camera access"
 
-      - name: Build for ${{ matrix.os }}
+      - name: Build for ubuntu-latest, windows-latest
         if: ${{ matrix.os == 'ubuntu-latest' || matrix.os == 'windows-latest' }}
         uses: Nuitka/Nuitka-Action@main
         with:
