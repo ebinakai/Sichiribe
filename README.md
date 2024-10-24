@@ -21,6 +21,8 @@
 [![PySide](https://img.shields.io/badge/PySide-6-green)](https://pypi.org/project/PySide6/6.7.2/)
 [![opencv](https://img.shields.io/badge/opencv-4.10-green)](https://pypi.org/project/opencv-python/4.10.0.84/)
 [![License](https://img.shields.io/badge/lisence-MIT-blue)](https://github.com/EbinaKai/Sichiribe/blob/main/LICENSE.txt)
+<br><br>
+![Build Status](https://github.com/EbinaKai/Sichiribe/actions/workflows/build.yaml/badge.svg)
 
 ## 概要
 
