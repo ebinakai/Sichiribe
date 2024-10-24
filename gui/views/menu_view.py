@@ -17,7 +17,6 @@ class MenuWindow(QWidget):
         screen_manager.add_screen('menu', self)
         self.initUI()
 
-    # レイアウトを作成
     def initUI(self):
         main_layout = QVBoxLayout()
         button_layout = QVBoxLayout()

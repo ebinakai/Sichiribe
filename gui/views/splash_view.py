@@ -19,17 +19,19 @@ class SplashScreen(QWidget):
         current_dir = Path(__file__).resolve().parent
         self.image_path = current_dir / '..' / 'images' / 'splash_image.png'
         self.image_path = self.image_path.resolve()
-        
-    # レイアウトを作成
+        self.initUI()
+
     def initUI(self):
         layout = QVBoxLayout()
         label = QLabel()
+        
         pixmap = QPixmap(self.image_path)
         pixmap = pixmap.scaledToWidth(640, Qt.TransformationMode.SmoothTransformation)
         label.setPixmap(pixmap)
+        
         layout.addWidget(label)
-        layout.setContentsMargins(0, 0, 0, 0)  # マージンを0に設定
-        layout.setSpacing(0)  # スペーシングを0に設定
+        layout.setContentsMargins(0, 0, 0, 0)  #
+        layout.setSpacing(0)
         self.setLayout(layout)
         
         # ウィンドウのサイズを設定
