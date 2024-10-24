@@ -1,7 +1,7 @@
 name: Build App
 
 on:
-  push:
+  pull_request:
     branches:
       - main
 
@@ -10,8 +10,7 @@ jobs:
     strategy:
       matrix:
         os: [macos-latest, ubuntu-latest, windows-latest]
-
-    runs-on: ${{ matrix.os }}
+    runs-on: ${{matrix.os}}
 
     steps:
       - name: Checkout code
@@ -20,7 +19,7 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
-          python-version: 3.12
+          python-version: 3.11
           cache: 'pip'
           cache-dependency-path: |
             **/requirements.txt
@@ -38,29 +37,62 @@ jobs:
         run: |
           mv app.py Sichiribe.py
 
-      - name: Build with Nuitka
+      - name: Build for macos-latest
+        if: matrix.os == 'macos-latest'
+        uses: Nuitka/Nuitka-Action@main
+        with:
+          nuitka-version: main
+          script-name: Sichiribe.py
+          standalone: true
+          enable-plugins: pyside6
+          include-module: matplotlib.backends.backend_qt5agg
+          include-data-dir: |
+            model=model
+            gui/images=gui/images
+          macos-create-app-bundle: true
+          macos-app-name: Sichiribe
+          macos-app-icon: script/Sichiribe_icon.png
+          macos-app-protected-resource: "NSCameraUsageDescription:Camera access"
+
+      - name: Build for ubuntu-latest, windows-latest
+        if: ${{ matrix.os == 'ubuntu-latest' || matrix.os == 'windows-latest' }}
         uses: Nuitka/Nuitka-Action@main
         with:
           nuitka-version: main
           script-name: Sichiribe.py
           onefile: true
           standalone: true
-          windows-icon-from-ico: script/Sichiribe_icon.png
-          macos-app-icon: script/Sichiribe_icon.png
-          linux-icon: script/Sichiribe_icon.png
           enable-plugins: pyside6
           include-module: matplotlib.backends.backend_qt5agg
           include-data-dir: |
-            ./model=model
-            ./gui/images=gui/images/splash_image.png
-          product-version: 1.0.0
+            model=model
+            gui/images=gui/images
+          linux-icon: script/Sichiribe_icon.png
+          windows-icon-from-ico: script/Sichiribe_icon.png
+
+      - name: Fix app bundle structure
+        if: matrix.os == 'macos-latest'
+        run: |
+          cd build
+          ls -la Sichiribe.app || true
+          mkdir -p "Sichiribe.app/Contents/MacOS"
+          mkdir -p "Sichiribe.app/Contents/Resources"
+          if [ -d "Resources" ]; then
+            cp -R Resources/* "Sichiribe.app/Contents/Resources/"
+            rm -rf Resources
+          fi
+          if [ -f "Info.plist" ]; then
+            mv "Info.plist" "Sichiribe.app/Contents/"
+          fi
+          chmod -R 755 "Sichiribe.app"
+          codesign --force --sign - "Sichiribe.app"
 
       - name: Upload Artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: ${{ runner.os }} Build
+          name: ${{ matrix.os }}-Build
           path: |
-            build/*.exe
+            build/*.app
             build/*.bin
-            build/*.app/**/*
+            build/*.exe
           include-hidden-files: true
