@@ -10,13 +10,14 @@ matplotlibを使用してグラフを描画するためのカスタムウィジ�
 '''
 
 # Pillow と matplotlib のログを無効にする
+from datetime import datetime
+from matplotlib import dates as mdates
+from matplotlib import pyplot as plt
+from matplotlib.figure import Figure
+from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg
 import logging
 logging.getLogger('matplotlib').setLevel(logging.ERROR)
-from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg
-from matplotlib.figure import Figure
-from matplotlib import pyplot as plt
-from matplotlib import dates as mdates
-from datetime import datetime
+
 
 class MplCanvas(FigureCanvasQTAgg):
 
@@ -30,18 +31,18 @@ class MplCanvas(FigureCanvasQTAgg):
         self.axes2 = self.axes1.twinx()
         self.logger = logging.getLogger('__main__').getChild(__name__)
         self.clear()
-        
+
     def clear(self):
         self.axes1.clear()
         self.axes2.clear()
         self.draw()
-    
+
     def gen_graph(self, title, xlabel, ylabel1, ylabel2, dark_theme=False):
         self.title = title
         self.xlabel = xlabel
         self.ylabel1 = ylabel1
         self.ylabel2 = ylabel2
-        
+
         # ダークテーマの設定
         if dark_theme:
             plt.style.use('dark_background')
@@ -54,25 +55,34 @@ class MplCanvas(FigureCanvasQTAgg):
             label_color = 'black'
             bg_color = '#ECECEC'
             plt_color = 'white'
-            
+
         self.figure.set_facecolor(bg_color)
         self.axes1.set_facecolor(plt_color)
         self.axes2.set_facecolor(plt_color)
-        
+
         self.axes1.set_xlabel(xlabel, color=label_color)
         self.axes1.set_ylabel(ylabel1, color=label_color)
-        
-        self.axes1.tick_params(pad=10, color=label_color, labelcolor=label_color)
-        self.axes2.tick_params(pad=10, color=label_color, labelcolor=label_color)
-        
-        self.line1, = self.axes1.plot([], [], marker='o', color='royalblue', label=ylabel1)
-        self.line2, = self.axes2.plot([], [], marker='s', color='tomato', label=ylabel2)
-        
+
+        self.axes1.tick_params(
+            pad=10,
+            color=label_color,
+            labelcolor=label_color)
+        self.axes2.tick_params(
+            pad=10,
+            color=label_color,
+            labelcolor=label_color)
+
+        self.line1, = self.axes1.plot(
+            [], [], marker='o', color='royalblue', label=ylabel1)
+        self.line2, = self.axes2.plot(
+            [], [], marker='s', color='tomato', label=ylabel2)
+
         self.axes1.set_ylim(-0.1, 1.1)
         self.axes1.set_title(title, color=title_color)
-        
+
         lines = [self.line1, self.line2]
-        self.axes1.legend(lines, [line.get_label() for line in lines], loc='upper left')
+        self.axes1.legend(lines, [line.get_label()
+                          for line in lines], loc='upper left')
 
         self.draw()
 
@@ -80,12 +90,12 @@ class MplCanvas(FigureCanvasQTAgg):
         # 時間データを数値に変換
         x_val_datetime = [datetime.strptime(t, '%H:%M:%S') for t in x_val]
         x_val_num = mdates.date2num(x_val_datetime)
-        
+
         self.line1.set_data(x_val_num, y_val1)
         self.line2.set_data(x_val_num, y_val2)
 
         self.axes1.xaxis.set_major_formatter(mdates.DateFormatter('%H:%M:%S'))
-        
+
         # x軸の範囲設定
         if len(x_val_num) > 1:
             x_min, x_max = x_val_num[0], x_val_num[-1]
@@ -94,7 +104,7 @@ class MplCanvas(FigureCanvasQTAgg):
 
         self.axes2.relim()
         self.axes2.autoscale_view()
-        
+
         # 表示するラベルの数を制限
         max_labels = 5
         step = max(1, len(x_val) // max_labels)

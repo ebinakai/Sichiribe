@@ -18,6 +18,7 @@ from cores.common import get_now_str
 from cores.exporter import get_supported_formats
 import os
 
+
 class ReplaySettingsWindow(QWidget):
     def __init__(self, screen_manager: ScreenManager):
         super().__init__()
@@ -74,15 +75,16 @@ class ReplaySettingsWindow(QWidget):
 
         self.back_button = QPushButton('戻る')
         self.back_button.setFixedWidth(100)
-        self.back_button.clicked.connect(lambda: self.screen_manager.show_screen('menu'))
+        self.back_button.clicked.connect(
+            lambda: self.screen_manager.show_screen('menu'))
         footer_layout.addWidget(self.back_button)
 
         footer_layout.addStretch()
-        
+
         self.confirm_txt = QLabel()
         self.confirm_txt.setStyleSheet('color: red')
         footer_layout.addWidget(self.confirm_txt)
-        
+
         self.next_button = QPushButton('実行')
         self.next_button.setFixedWidth(100)
 
@@ -90,26 +92,27 @@ class ReplaySettingsWindow(QWidget):
         self.next_button.setAutoDefault(True)
         self.next_button.clicked.connect(self.startup)
         footer_layout.addWidget(self.next_button)
-        
+
         main_layout.addLayout(form_layout)
         main_layout.addLayout(footer_layout)
-        
+
     def select_file(self):
-        video_path, _ = QFileDialog.getOpenFileName(self, 'ファイルを選択', '', '動画ファイル (*.mp4 *.avi)')
+        video_path, _ = QFileDialog.getOpenFileName(
+            self, 'ファイルを選択', '', '動画ファイル (*.mp4 *.avi)')
         if video_path:
             self.video_path.setText(video_path)
-            
+
     def back(self):
         self.confirm_txt.setText('')
         self.screen_manager.show_screen('menu')
-        
+
     def startup(self):
         if self.video_path.text() == '':
             self.confirm_txt.setText('動画ファイルを選択してください')
             return
         else:
             self.confirm_txt.setText('')
-        
+
         params = {
             'video_path': self.video_path.text(),
             'num_digits': self.num_digits.value(),
@@ -118,8 +121,9 @@ class ReplaySettingsWindow(QWidget):
             'video_skip_sec': self.video_skip_sec.value(),
             'format': self.format.currentText(),
             'save_frame': self.save_frame.isChecked(),
-            'out_dir': os.path.join(os.path.dirname(self.video_path.text()), get_now_str())
-        }
-        
+            'out_dir': os.path.join(
+                os.path.dirname(
+                    self.video_path.text()),
+                get_now_str())}
+
         self.screen_manager.get_screen('replay_exe').startup(params)
-        

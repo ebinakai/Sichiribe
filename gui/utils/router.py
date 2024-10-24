@@ -16,9 +16,12 @@ from gui.views.replay_threshold_view import ReplayThresholdWindow
 from gui.views.live_setting_view import LiveSettingsWindow
 from gui.views.live_feed_view import LiveFeedWindow
 from gui.views.live_exe_view import LiveExeWindow
-        
-def init_screen_manager(stacked_widget: QStackedWidget, main_window: QMainWindow) -> ScreenManager:
-  
+
+
+def init_screen_manager(
+        stacked_widget: QStackedWidget,
+        main_window: QMainWindow) -> ScreenManager:
+
     screen_manager = ScreenManager(stacked_widget, main_window)
 
     menu_window = MenuWindow(screen_manager)
@@ -30,7 +33,7 @@ def init_screen_manager(stacked_widget: QStackedWidget, main_window: QMainWindow
     live_setting_window = LiveSettingsWindow(screen_manager)
     live_feed_window = LiveFeedWindow(screen_manager)
     live_exe_window = LiveExeWindow(screen_manager)
-    
+
     stacked_widget.addWidget(menu_window)
     stacked_widget.addWidget(log_window)
     stacked_widget.addWidget(region_select_window)
@@ -40,5 +43,5 @@ def init_screen_manager(stacked_widget: QStackedWidget, main_window: QMainWindow
     stacked_widget.addWidget(live_setting_window)
     stacked_widget.addWidget(live_feed_window)
     stacked_widget.addWidget(live_exe_window)
-    
+
     return screen_manager

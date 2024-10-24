@@ -12,8 +12,11 @@ from gui.utils.screen_manager import ScreenManager
 import logging
 
 # ログをメインスレッドに送信するためのクラス
+
+
 class LogEmitter(QObject):
     new_log = Signal(str)
+
 
 class QTextEditLogger(logging.Handler):
     def __init__(self, emitter: LogEmitter):
@@ -23,6 +26,7 @@ class QTextEditLogger(logging.Handler):
     def emit(self, record):
         log_entry = self.format(record)
         self.emitter.new_log.emit(log_entry)
+
 
 class LogWindow(QWidget):
     def __init__(self, screen_manager: ScreenManager):

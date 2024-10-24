@@ -1,6 +1,7 @@
 import tensorflow as tf
 from tensorflow.keras.models import load_model
-import subprocess, shutil
+import subprocess
+import shutil
 
 # Kerasモデルのロード
 model_path = 'model/model_100x100.keras'
@@ -12,7 +13,14 @@ tf.saved_model.save(model, saved_model_path)
 
 # ONNX形式に変換
 onnx_model_path = 'model/model_100x100.onnx'
-subprocess.run(['python', '-m', 'tf2onnx.convert', '--saved-model', saved_model_path, '--output', onnx_model_path], check=True)
+subprocess.run(['python',
+                '-m',
+                'tf2onnx.convert',
+                '--saved-model',
+                saved_model_path,
+                '--output',
+                onnx_model_path],
+               check=True)
 
 # SavedModel形式のフォルダを削除
 shutil.rmtree(saved_model_path)

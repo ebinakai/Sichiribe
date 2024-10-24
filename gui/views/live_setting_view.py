@@ -19,6 +19,7 @@ from cores.common import get_now_str
 import logging
 import os
 
+
 class LiveSettingsWindow(QWidget):
     def __init__(self, screen_manager: ScreenManager):
         super().__init__()
@@ -70,10 +71,10 @@ class LiveSettingsWindow(QWidget):
         for fmt in get_supported_formats():
             self.format.addItem(fmt)
         form_layout.addRow('出力フォーマット：', self.format)
-        
+
         self.save_frame = QCheckBox()
         form_layout.addRow('フレームを保存する：', self.save_frame)
-        
+
         self.out_dir = QLineEdit()
         self.out_dir.setReadOnly(True)
         self.out_dir_button = QPushButton('フォルダ選択')
@@ -85,15 +86,16 @@ class LiveSettingsWindow(QWidget):
 
         self.back_button = QPushButton('戻る')
         self.back_button.setFixedWidth(100)
-        self.back_button.clicked.connect(lambda: self.screen_manager.show_screen('menu'))
+        self.back_button.clicked.connect(
+            lambda: self.screen_manager.show_screen('menu'))
         footer_layout.addWidget(self.back_button)
 
         footer_layout.addStretch()  # スペーサー
-        
+
         self.confirm_txt = QLabel()
         self.confirm_txt.setStyleSheet('color: red')
         footer_layout.addWidget(self.confirm_txt)
-        
+
         self.next_button = QPushButton('実行')
         self.next_button.setFixedWidth(100)
         self.next_button.setDefault(True)  # 強調表示されるデフォルトボタンに設定
@@ -109,18 +111,18 @@ class LiveSettingsWindow(QWidget):
 
         if folder_path:
             self.out_dir.setText(folder_path)
-            
+
     def calc_max_frames(self):
         sampling_sec = self.sampling_sec.value()
         self.num_frames.setMaximum(sampling_sec * 5)
-            
+
     def startup(self):
         if self.out_dir.text() == '':
             self.confirm_txt.setText('保存場所を選択してください')
             return
         else:
             self.confirm_txt.setText('')
-        
+
         params = {
             'device_num': self.device_num.value(),
             'num_digits': self.num_digits.value(),
@@ -131,7 +133,6 @@ class LiveSettingsWindow(QWidget):
             'save_frame': self.save_frame.isChecked(),
             'out_dir': os.path.join(self.out_dir.text(), get_now_str())
         }
-    
+
         self.logger.debug("Starting live feed with params: %s", params)
         self.screen_manager.get_screen('live_feed').startup(params)
-
