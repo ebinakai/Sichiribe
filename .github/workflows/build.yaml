@@ -15,11 +15,6 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
-        
-      - name: Intentional Failure
-        run: |
-          echo "This step will intentionally fail."
-          exit 1
 
       - name: Set up Python
         uses: actions/setup-python@v5
