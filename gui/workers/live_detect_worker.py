@@ -23,7 +23,7 @@ import os
 import cv2
 import numpy as np
 
-from cores.cnn_core import select_cnn_model
+from cores.cnn import select_cnn_model
 Detector = select_cnn_model()
 
 
@@ -34,7 +34,7 @@ class DetectWorker(QThread):
     model_not_found = Signal()
     error = Signal()
 
-    def __init__(self, params) -> None:
+    def __init__(self, params: dict) -> None:
         super().__init__()
         self.params = params
         self.logger = logging.getLogger('__main__').getChild(__name__)
@@ -128,7 +128,7 @@ class DetectWorker(QThread):
         self.logger.info("DetectWorker terminating...")
         self._is_cancelled = True
 
-    def update_binarize_th(self, value) -> None:
+    def update_binarize_th(self, value: int) -> None:
         self.binarize_th = value
         self.logger.info(f"Update binarize_th: {self.binarize_th}")
 

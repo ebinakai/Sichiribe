@@ -69,7 +69,7 @@ class ReplayThresholdWindow(QWidget):
         main_layout.addStretch()
         main_layout.addLayout(footer_layout)
 
-    def startup(self, params) -> None:
+    def startup(self, params: dict) -> None:
         self.logger.info('Starting ReplayThresholdWindow.')
         self.screen_manager.show_screen('replay_threshold')
 
@@ -83,7 +83,7 @@ class ReplayThresholdWindow(QWidget):
         self.binarize_th_label.setText('自動設定')
         self.update_binarize_th(0)
 
-    def update_binarize_th(self, value) -> None:
+    def update_binarize_th(self, value: int) -> None:
         self.threshold = None if value == 0 else value
         binarize_th_str = '自動設定' if self.threshold is None else str(
             self.threshold)

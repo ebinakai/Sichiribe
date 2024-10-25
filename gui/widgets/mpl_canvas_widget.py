@@ -16,12 +16,13 @@ from matplotlib import pyplot as plt
 from matplotlib.figure import Figure
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg
 import logging
+from typing import Optional, List, Union
 logging.getLogger('matplotlib').setLevel(logging.ERROR)
 
 
 class MplCanvas(FigureCanvasQTAgg):
 
-    def __init__(self, parent=None, figure=None) -> None:
+    def __init__(self, figure: Optional[Figure] = None) -> None:
         # figure が渡されていない場合、空の Figure を作成
         if figure is None:
             figure = Figure()
@@ -37,8 +38,8 @@ class MplCanvas(FigureCanvasQTAgg):
         self.axes2.clear()
         self.draw()
 
-    def gen_graph(self, title, xlabel, ylabel1, ylabel2,
-                  dark_theme=False) -> None:
+    def gen_graph(self, title: str, xlabel: str, ylabel1: str, ylabel2: str,
+                  dark_theme: bool = False) -> None:
         self.title = title
         self.xlabel = xlabel
         self.ylabel1 = ylabel1
@@ -86,7 +87,8 @@ class MplCanvas(FigureCanvasQTAgg):
 
         self.draw()
 
-    def update_existing_plot(self, x_val, y_val1, y_val2) -> None:
+    def update_existing_plot(
+            self, x_val: List[str], y_val1: List[Union[int, float]], y_val2: List[Union[int, float]]) -> None:
         # 時間データを数値に変換
         x_val_datetime = [datetime.strptime(t, '%H:%M:%S') for t in x_val]
         x_val_num = mdates.date2num(x_val_datetime)

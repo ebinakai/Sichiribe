@@ -1,6 +1,7 @@
 from cores.detector import Detector
 import os
 import logging
+from typing import Optional, Union, List
 import cv2
 import numpy as np
 
@@ -11,7 +12,7 @@ logging.getLogger('h5py').setLevel(logging.ERROR)
 
 
 class CNNCore(Detector):
-    def __init__(self, num_digits) -> None:
+    def __init__(self, num_digits: int) -> None:
         self.num_digits = num_digits
 
         self.logger = logging.getLogger("__main__").getChild(__name__)
@@ -49,8 +50,8 @@ class CNNCore(Detector):
             images.append(img_)
         return np.array(images, dtype=np.float32)
 
-    def detect(self, images, binarize_th=None) -> tuple[int, float]:
-        # [引数] images: ファイルパスまたはnumpy画像データまたはそれを含んだリスト
+    def detect(self, images: Union[str, np.ndarray, List[Union[str, np.ndarray]]],
+               binarize_th: Optional[int] = None) -> tuple[int, float]:
 
         results = np.zeros((0, self.num_digits))
 

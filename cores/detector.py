@@ -1,4 +1,5 @@
 import logging
+from typing import Optional, Union
 import cv2
 import numpy as np
 
@@ -7,23 +8,22 @@ class Detector():
     def __init__(self) -> None:
         self.logger = logging.getLogger("__main__").getChild(__name__)
 
-    def load_image(self, image) -> np.ndarray:
+    def load_image(self, image: Union[str, np.ndarray]) -> np.ndarray:
         if isinstance(image, np.ndarray):
             if len(image.shape) == 3:
                 image_gs = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
             else:
                 image_gs = image
         else:
-            # 画像ファイルをグレースケールで読み込む
             image_gs = cv2.imread(image, cv2.IMREAD_GRAYSCALE)
 
         return image_gs
 
     def preprocess_binarization(
             self,
-            image,
-            binarize_th=None,
-            output_grayscale=False) -> np.ndarray:
+            image: np.ndarray,
+            binarize_th: Optional[int] = None,
+            output_grayscale: bool = False) -> np.ndarray:
 
         if len(image.shape) == 3 and image.shape[2] == 3:
             image = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)

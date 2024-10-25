@@ -3,7 +3,7 @@
 詳細については、https://github.com/EbinaKai/Sichiribe/wiki/How-to-use-CLI#execution-live を参照
 '''
 
-from cores.cnn_core import select_cnn_model
+from cores.cnn import select_cnn_model
 import cv2
 import os
 from datetime import timedelta
@@ -71,19 +71,18 @@ def get_args() -> argparse.Namespace:
 
 
 def main(device,
-         num_digits,
-         sampling_sec,
-         num_frames,
-         total_sampling_sec,
-         format,
-         save_frame,
-         out_dir='results',
+         num_digits: int,
+         sampling_sec: int,
+         num_frames: int,
+         total_sampling_sec: int,
+         format: str,
+         save_frame: bool,
          ) -> None:
 
     fc = FrameCapture(device_num=device)
     fe = FrameEditor(num_digits=num_digits)
     dt = Detector(num_digits=num_digits)
-    ep = Exporter(format, out_dir)
+    ep = Exporter(format, out_dir='results')
 
     dt.load()
 

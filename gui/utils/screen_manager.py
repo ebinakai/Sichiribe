@@ -84,7 +84,7 @@ class ScreenManager:
         else:
             self.logger.error("No screen size saved")
 
-    def popup(self, message: str, is_modal=False) -> None:
+    def popup(self, message: str, is_modal: bool = False) -> None:
         self.logger.debug("Popup message: %s" % message)
 
         msg_box = QMessageBox(self.main_window)

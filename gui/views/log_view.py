@@ -52,7 +52,7 @@ class LogWindow(QWidget):
         # シグナルとスロットの接続
         self.emitter.new_log.connect(self.append_log)
 
-    def append_log(self, message) -> None:
+    def append_log(self, message: str) -> None:
         self.log_display.append(message)
 
     def clear_log(self) -> None:

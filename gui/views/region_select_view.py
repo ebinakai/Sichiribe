@@ -156,7 +156,7 @@ class RegionSelectWindow(QWidget):
         q_image = convert_cv_to_qimage(image)
         self.extracted_label.setPixmap(QPixmap.fromImage(q_image))
 
-    def update_image(self, image) -> None:
+    def update_image(self, image: np.ndarray) -> None:
         extract_image = self.fe.crop(
             self.image_original, np.array(
                 self.click_points) / self.resize_scale)
@@ -169,7 +169,7 @@ class RegionSelectWindow(QWidget):
         if extract_image is not None:
             self.display_extract_image(extract_image)
 
-    def startup(self, params, prev_screen) -> None:
+    def startup(self, params: dict, prev_screen: str) -> None:
         self.logger.info('Starting RegionSelectWindow.')
         self.params = params
         self.prev_screen = prev_screen

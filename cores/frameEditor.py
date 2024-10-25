@@ -1,4 +1,5 @@
 import os
+from typing import Union
 import cv2
 import logging
 import numpy as np
@@ -8,11 +9,11 @@ from cores.common import clear_directory
 
 class FrameEditor:
     def __init__(self,
-                 sampling_sec=3,
-                 num_frames_per_sample=10,
-                 num_digits=4,
-                 crop_width=100,
-                 crop_height=100,
+                 sampling_sec: int = 3,
+                 num_frames_per_sample: int = 10,
+                 num_digits: int = 4,
+                 crop_width: int = 100,
+                 crop_height: int = 100,
                  ) -> None:
 
         self.return_frames = []
@@ -28,13 +29,13 @@ class FrameEditor:
 
     # 動画をフレームに分割
     def frame_devide(self,
-                     video_path,
-                     skip_sec=0,
-                     save_frame=True,
-                     out_dir='frames',
-                     is_crop=True,
-                     click_points=[],
-                     extract_single_frame=False,
+                     video_path: str,
+                     skip_sec: int = 0,
+                     save_frame: bool = True,
+                     out_dir: str = 'frames',
+                     is_crop: bool = True,
+                     click_points: list = [],
+                     extract_single_frame: bool = False,
                      ) -> list:
         self.click_points = click_points
 
@@ -107,7 +108,7 @@ class FrameEditor:
         return return_frames
 
     # 切り出したフレームの間隔からタイムスタンプを生成
-    def generate_timestamp(self, n) -> list[str]:
+    def generate_timestamp(self, n: int) -> list[str]:
         timestamps = []
 
         for i in range(0, n):
@@ -120,8 +121,8 @@ class FrameEditor:
     # クリックポイント4点から画像を切り出す
     def crop(
         self,
-        image,
-        click_points,
+        image: np.ndarray,
+        click_points: Union[list, np.ndarray],
     ) -> np.ndarray:
         extract_image = None
 
@@ -145,7 +146,7 @@ class FrameEditor:
 
         return extract_image
 
-    def region_select(self, image) -> np.ndarray:
+    def region_select(self, image: Union[str, np.ndarray]) -> np.ndarray:
         img = image if isinstance(image, np.ndarray) else cv2.imread(image)
 
         window_name = "Select 7seg Region"
@@ -195,7 +196,7 @@ class FrameEditor:
             if len(self.click_points) == 4:
                 self.click_points = self.order_points(self.click_points)
 
-    def order_points(self, points) -> np.ndarray:
+    def order_points(self, points: Union[list, np.ndarray]) -> np.ndarray:
         points = np.array(points)
 
         # x座標で昇順にソート
@@ -218,9 +219,9 @@ class FrameEditor:
     # 選択領域の可視化
     def draw_debug_info(
         self,
-        image,
-        extract_image,
-        click_points_,
+        image: np.ndarray,
+        extract_image: np.ndarray,
+        click_points_: Union[list, np.ndarray],
     ) -> tuple[np.ndarray, np.ndarray]:
         for click_point in click_points_:
             cv2.circle(

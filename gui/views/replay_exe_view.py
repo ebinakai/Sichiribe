@@ -20,6 +20,8 @@ from gui.workers.frame_devide_worker import FrameDivideWorker
 from gui.workers.replay_detect_worker import DetectWorker
 from cores.frameEditor import FrameEditor
 import logging
+from typing import List, Union
+import numpy as np
 
 
 class ReplayExeWindow(QWidget):
@@ -64,7 +66,7 @@ class ReplayExeWindow(QWidget):
             self.term_label.setText('中止中...')
             self.worker.cancel()
 
-    def startup(self, params) -> None:
+    def startup(self, params: dict) -> None:
         self.graph_label.gen_graph(
             title='Results',
             xlabel='Timestamp',
@@ -94,7 +96,7 @@ class ReplayExeWindow(QWidget):
         self.screen_manager.get_screen(
             'region_select').startup(self.params, 'replay_exe')
 
-    def frame_devide_process(self, params) -> None:
+    def frame_devide_process(self, params: dict) -> None:
         self.params = params
         self.screen_manager.get_screen('log').clear_log()
         self.screen_manager.show_screen('log')
@@ -104,7 +106,8 @@ class ReplayExeWindow(QWidget):
         self.worker.start()
         self.logger.info('Frame Devide started.')
 
-    def frame_devide_finished(self, frames, timestamps) -> None:
+    def frame_devide_finished(
+            self, frames: List[Union[str, np.ndarray]], timestamps: List[str]) -> None:
         self.logger.debug('timestamps: %s' % timestamps)
         self.logger.info('Frame Devide finished.')
         self.params['frames'] = frames
@@ -126,13 +129,15 @@ class ReplayExeWindow(QWidget):
         self.clear_env()
         self.screen_manager.show_screen('menu')
 
-    def detect_progress(self, result, failed_rate, timestamp) -> None:
+    def detect_progress(self, result: int, failed_rate: float,
+                        timestamp: str) -> None:
         self.screen_manager.show_screen('replay_exe')
         self.results.append(result)
         self.failed_rates.append(failed_rate)
         self.update_graph(result, failed_rate, timestamp)
 
-    def update_graph(self, result, failed_rate, timestamp) -> None:
+    def update_graph(self, result: int, failed_rate: float,
+                     timestamp: str) -> None:
         self.graph_results.append(result)
         self.graph_failed_rates.append(failed_rate)
         self.graph_timestamps.append(timestamp)
@@ -157,7 +162,7 @@ class ReplayExeWindow(QWidget):
         self.params['timestamps'] = self.params['timestamps'][:len(
             self.results)]
 
-    def export_process(self, params) -> None:
+    def export_process(self, params: dict) -> None:
         self.logger.info('Data exporting...')
 
         export_result(params)

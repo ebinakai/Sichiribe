@@ -6,7 +6,7 @@ import datetime
 logger = logging.getLogger("__main__").getChild(__name__)
 
 
-def clear_directory(directory) -> None:
+def clear_directory(directory: str) -> None:
     if not os.path.exists(directory):
         logger.debug(f"The specified directory does not exist: {directory}")
         return
@@ -26,7 +26,7 @@ def clear_directory(directory) -> None:
         f"All contents in the directory '{directory}' have been deleted.")
 
 
-def ask_user_confirmation(prompt) -> bool:
+def ask_user_confirmation(prompt: str) -> bool:
     while True:
         answer = input(f"{prompt} (y/n): ").strip().lower()
         if answer in ['y', 'n']:

@@ -43,7 +43,7 @@ class LiveExeWindow(QWidget):
         extracted_image_layout.setAlignment(Qt.AlignmentFlag.AlignCenter)
         form_layout.setAlignment(Qt.AlignmentFlag.AlignCenter)
 
-        self.graph_label = MplCanvas(self)
+        self.graph_label = MplCanvas()
         graph_layout.addWidget(self.graph_label)
 
         self.extracted_label = QLabel()
@@ -87,7 +87,7 @@ class LiveExeWindow(QWidget):
             self.term_label.setText('中止中...')
             self.worker.cancel()
 
-    def update_binarize_th(self, value) -> None:
+    def update_binarize_th(self, value: int) -> None:
         value = None if value == 0 else value
         binarize_th_str = '自動設定' if value is None else str(value)
         self.binarize_th_label.setText(binarize_th_str)
@@ -102,7 +102,7 @@ class LiveExeWindow(QWidget):
                           self.failed_rates[-1],
                           self.timestamps[-1])
 
-    def startup(self, params) -> None:
+    def startup(self, params: dict) -> None:
         self.logger.info('Starting LiveExeWindow.')
         self.screen_manager.get_screen('log').clear_log()
         self.screen_manager.show_screen('log')
@@ -144,7 +144,8 @@ class LiveExeWindow(QWidget):
         self.clear_env()
         self.screen_manager.show_screen('menu')
 
-    def detect_progress(self, result, failed_rate, timestamp) -> None:
+    def detect_progress(self, result: int, failed_rate: float,
+                        timestamp: str) -> None:
         self.screen_manager.show_screen('live_exe')
         self.results.append(result)
         self.failed_rates.append(failed_rate)
@@ -154,7 +155,8 @@ class LiveExeWindow(QWidget):
     def detect_error(self) -> None:
         self.screen_manager.popup("カメラにアクセスできませんでした")
 
-    def update_graph(self, result, failed_rate, timestamp) -> None:
+    def update_graph(self, result: int, failed_rate: float,
+                     timestamp: str) -> None:
         self.graph_results.append(result)
         self.graph_failed_rates.append(failed_rate)
         self.graph_timestamps.append(timestamp)
@@ -180,7 +182,7 @@ class LiveExeWindow(QWidget):
         self.logger.info('Detect cancelled.')
         self.term_label.setText('中止しました')
 
-    def export_process(self, params) -> None:
+    def export_process(self, params: dict) -> None:
         self.logger.info('Data exporting...')
 
         export_result(params)

@@ -14,7 +14,7 @@ from PySide6.QtCore import Signal, QThread
 import logging
 
 # モデルを読み込む
-from cores.cnn_core import select_cnn_model
+from cores.cnn import select_cnn_model
 Detector = select_cnn_model()
 
 

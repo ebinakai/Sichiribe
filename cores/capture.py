@@ -45,7 +45,7 @@ class FrameCapture:
         self.cap.release()
         cv2.destroyAllWindows()
 
-    def set_cap_size(self, width, height) -> tuple[int, int]:
+    def set_cap_size(self, width: int, height: int) -> tuple[int, int]:
         self.cap.set(cv2.CAP_PROP_FRAME_WIDTH, width)
         self.cap.set(cv2.CAP_PROP_FRAME_HEIGHT, height)
         self.logger.debug(

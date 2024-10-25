@@ -13,6 +13,8 @@ from gui.utils.screen_manager import ScreenManager
 from gui.utils.common import convert_cv_to_qimage, resize_image
 from gui.workers.live_feed_worker import LiveFeedWorker
 import logging
+from typing import List
+import numpy as np
 
 
 class LiveFeedWindow(QWidget):
@@ -71,7 +73,7 @@ class LiveFeedWindow(QWidget):
         if self.worker is not None:
             self.worker.stop()  # ワーカーに停止を指示
 
-    def startup(self, params) -> None:
+    def startup(self, params: dict) -> None:
         self.logger.info("Starting LiveFeedWindow.")
         self.feed_label.setText("読込中...")
         self.screen_manager.show_screen('live_feed')
@@ -103,16 +105,16 @@ class LiveFeedWindow(QWidget):
         self.worker.start()
         self.logger.info('Feed started.')
 
-    def recieve_cap_size(self, cap_size) -> None:
+    def recieve_cap_size(self, cap_size: List[int, int]) -> None:
         self.params['cap_size'] = cap_size
         self.logger.debug('Capture size: %d x %d' % (cap_size[0], cap_size[1]))
 
-    def show_feed(self, frame) -> None:
+    def show_feed(self, frame: np.ndarray) -> None:
         frame, _ = resize_image(frame, self.target_width, self.target_height)
         qimage = convert_cv_to_qimage(frame)
         self.feed_label.setPixmap(QPixmap(qimage))
 
-    def feed_finished(self, first_frame) -> None:
+    def feed_finished(self, first_frame: np.ndarray) -> None:
         self.logger.info('Feed finished.')
         self.params['first_frame'] = first_frame
         params = self.params

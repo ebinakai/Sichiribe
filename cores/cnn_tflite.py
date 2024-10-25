@@ -1,4 +1,4 @@
-from cores.cnn_core import CNNCore
+from cores.cnn import CNNCore
 import os
 import logging
 import numpy as np
@@ -11,8 +11,8 @@ logging.getLogger('h5py').setLevel(logging.ERROR)
 
 
 class CNNLite(CNNCore):
-    def __init__(self, num_digits,
-                 model_filename='model_100x100.tflite') -> None:
+    def __init__(self, num_digits: int,
+                 model_filename: str = 'model_100x100.tflite') -> None:
         super().__init__(num_digits)
         self.logger = logging.getLogger('__main__').getChild(__name__)
 

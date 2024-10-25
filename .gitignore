@@ -46,3 +46,6 @@ result_*.csv
 result_*.json
 parameters_*.csv
 parameters_*.json
+
+# vocode
+.vscode/

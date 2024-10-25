@@ -3,7 +3,7 @@
 詳細については、https://github.com/EbinaKai/Sichiribe/wiki/How-to-use-CLI#execution-replay を参照
 '''
 
-from cores.cnn_core import select_cnn_model
+from cores.cnn import select_cnn_model
 from cores.exporter import Exporter, get_supported_formats
 from cores.frameEditor import FrameEditor
 import argparse
@@ -62,18 +62,17 @@ def get_args() -> argparse.Namespace:
     return args
 
 
-def main(video_path,
-         num_digits,
-         sampling_sec,
-         num_frames,
-         video_skip_sec,
-         format,
-         save_frame,
-         out_dir='results',
+def main(video_path: str,
+         num_digits: int,
+         sampling_sec: int,
+         num_frames: int,
+         video_skip_sec: int,
+         format: str,
+         save_frame: bool,
          ) -> None:
     fe = FrameEditor(sampling_sec, num_frames, num_digits)
     dt = Detector(num_digits)
-    ep = Exporter(format, out_dir)
+    ep = Exporter(format, out_dir='results')
 
     dt.load()
 
