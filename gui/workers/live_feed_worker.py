@@ -20,7 +20,7 @@ class LiveFeedWorker(QThread):
     cancelled = Signal()
     error = Signal()
 
-    def __init__(self, params, width, height):
+    def __init__(self, params, width, height) -> None:
         super().__init__()
         self.params = params
         self.width = width
@@ -29,7 +29,7 @@ class LiveFeedWorker(QThread):
         self._is_cancelled = False
         self._is_finished = False
 
-    def run(self):
+    def run(self) -> None:
         fc = FrameCapture(self.params['device_num'])
         self.logger.info(
             'Capture device(%s) loaded.' %
@@ -58,10 +58,10 @@ class LiveFeedWorker(QThread):
         fc.release()
         return None
 
-    def stop(self):
+    def stop(self) -> None:
         self.logger.info("Capture Feed stopping...")
         self._is_finished = True
 
-    def cancel(self):
+    def cancel(self) -> None:
         self.logger.info("Capture Feed canceling...")
         self._is_cancelled = True

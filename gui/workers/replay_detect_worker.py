@@ -23,14 +23,14 @@ class DetectWorker(QThread):
     cancelled = Signal()
     model_not_found = Signal()
 
-    def __init__(self, params):
+    def __init__(self, params) -> None:
         super().__init__()
         self.params = params
         self.dt = Detector(params['num_digits'])
         self.logger = logging.getLogger('__main__').getChild(__name__)
         self._is_cancelled = False
 
-    def run(self):
+    def run(self) -> None:
         self.logger.info("DetectWorker started.")
 
         if not self.dt.load():
@@ -53,6 +53,6 @@ class DetectWorker(QThread):
 
         return None
 
-    def cancel(self):
+    def cancel(self) -> None:
         self.logger.info("DetectWorker terminating...")
         self._is_cancelled = True

@@ -21,7 +21,7 @@ logging.getLogger('matplotlib').setLevel(logging.ERROR)
 
 class MplCanvas(FigureCanvasQTAgg):
 
-    def __init__(self, parent=None, figure=None):
+    def __init__(self, parent=None, figure=None) -> None:
         # figure が渡されていない場合、空の Figure を作成
         if figure is None:
             figure = Figure()
@@ -32,18 +32,18 @@ class MplCanvas(FigureCanvasQTAgg):
         self.logger = logging.getLogger('__main__').getChild(__name__)
         self.clear()
 
-    def clear(self):
+    def clear(self) -> None:
         self.axes1.clear()
         self.axes2.clear()
         self.draw()
 
-    def gen_graph(self, title, xlabel, ylabel1, ylabel2, dark_theme=False):
+    def gen_graph(self, title, xlabel, ylabel1, ylabel2,
+                  dark_theme=False) -> None:
         self.title = title
         self.xlabel = xlabel
         self.ylabel1 = ylabel1
         self.ylabel2 = ylabel2
 
-        # ダークテーマの設定
         if dark_theme:
             plt.style.use('dark_background')
             title_color = 'white'
@@ -86,7 +86,7 @@ class MplCanvas(FigureCanvasQTAgg):
 
         self.draw()
 
-    def update_existing_plot(self, x_val, y_val1, y_val2):
+    def update_existing_plot(self, x_val, y_val1, y_val2) -> None:
         # 時間データを数値に変換
         x_val_datetime = [datetime.strptime(t, '%H:%M:%S') for t in x_val]
         x_val_num = mdates.date2num(x_val_datetime)

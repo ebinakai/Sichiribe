@@ -12,7 +12,7 @@ from pathlib import Path
 
 
 class SplashScreen(QWidget):
-    def __init__(self):
+    def __init__(self) -> None:
         super().__init__()
         self.setWindowFlags(Qt.WindowType.FramelessWindowHint |
                             Qt.WindowType.WindowStaysOnTopHint)
@@ -23,7 +23,7 @@ class SplashScreen(QWidget):
         self.image_path = self.image_path.resolve()
         self.initUI()
 
-    def initUI(self):
+    def initUI(self) -> None:
         layout = QVBoxLayout()
         label = QLabel()
 
@@ -41,7 +41,7 @@ class SplashScreen(QWidget):
 
         self.center()
 
-    def center(self):
+    def center(self) -> None:
         screen = QApplication.primaryScreen()
         screen_rect = screen.availableGeometry()
         window_rect = self.frameGeometry()

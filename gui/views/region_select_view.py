@@ -18,30 +18,30 @@ from gui.utils.common import convert_cv_to_qimage, resize_image
 
 class ClickableLabel(QLabel):
     # コールバック関数はマウスイベント内で呼び出され、イベントが引き継がれる
-    def __init__(self, parent=None, handle_event=lambda x: x):
+    def __init__(self, parent=None, handle_event=lambda x: x) -> None:
         super().__init__(parent)
         self.handle_event = handle_event
         self.drawing = False
 
-    def mousePressEvent(self, event: QMouseEvent):
+    def mousePressEvent(self, event: QMouseEvent) -> None:
         if event.button() == Qt.MouseButton.LeftButton:
             self.drawing = True
             self.last_point = event.position().toPoint()
             self.handle_event(event)
 
-    def mouseMoveEvent(self, event: QMouseEvent):
+    def mouseMoveEvent(self, event: QMouseEvent) -> None:
         if self.drawing:
             current_point = event.position().toPoint()
             self.handle_event(event)
             self.last_point = current_point
 
-    def mouseReleaseEvent(self, event: QMouseEvent):
+    def mouseReleaseEvent(self, event: QMouseEvent) -> None:
         if event.button() == Qt.MouseButton.LeftButton:
             self.drawing = False
 
 
 class RegionSelectWindow(QWidget):
-    def __init__(self, screen_manager: ScreenManager):
+    def __init__(self, screen_manager: ScreenManager) -> None:
         super().__init__()
 
         self.logger = logging.getLogger('__main__').getChild(__name__)
@@ -56,7 +56,7 @@ class RegionSelectWindow(QWidget):
         self.target_height = int((screen_rect.height() - 100) * 0.8)
         self.initUI()
 
-    def initUI(self):
+    def initUI(self) -> None:
         main_layout = QVBoxLayout()
         header_layout = QVBoxLayout()
         image_layout = QVBoxLayout()
@@ -107,14 +107,14 @@ class RegionSelectWindow(QWidget):
         main_layout.addLayout(extracted_image_layout)
         main_layout.addLayout(footer_layout)
 
-    def set_image(self, image: np.ndarray):
+    def set_image(self, image: np.ndarray) -> None:
         self.image_original = image
         self.image, self.resize_scale = resize_image(
             image, self.target_width, self.target_height)
 
         self.update_image(self.image.copy())
 
-    def label_clicked(self, event: QMouseEvent):
+    def label_clicked(self, event: QMouseEvent) -> None:
         if event.button() == Qt.MouseButton.LeftButton or event.button(
         ) == Qt.MouseButton.NoButton and len(self.click_points) == 4:
 
@@ -147,16 +147,16 @@ class RegionSelectWindow(QWidget):
 
             self.update_image(self.image.copy())
 
-    def display_image(self, image: np.ndarray):
+    def display_image(self, image: np.ndarray) -> None:
         q_image = convert_cv_to_qimage(image)
         self.main_label.setPixmap(QPixmap.fromImage(q_image))
         self.main_label.adjustSize()
 
-    def display_extract_image(self, image: np.ndarray):
+    def display_extract_image(self, image: np.ndarray) -> None:
         q_image = convert_cv_to_qimage(image)
         self.extracted_label.setPixmap(QPixmap.fromImage(q_image))
 
-    def update_image(self, image):
+    def update_image(self, image) -> None:
         extract_image = self.fe.crop(
             self.image_original, np.array(
                 self.click_points) / self.resize_scale)
@@ -169,7 +169,7 @@ class RegionSelectWindow(QWidget):
         if extract_image is not None:
             self.display_extract_image(extract_image)
 
-    def startup(self, params, prev_screen):
+    def startup(self, params, prev_screen) -> None:
         self.logger.info('Starting RegionSelectWindow.')
         self.params = params
         self.prev_screen = prev_screen
@@ -186,7 +186,7 @@ class RegionSelectWindow(QWidget):
         self.screen_manager.show_screen('region_select')
         QTimer.singleShot(1, lambda: self.window().move(window_pos.x(), 1))
 
-    def finish_select(self):
+    def finish_select(self) -> None:
         if len(self.click_points) != 4:
             self.confirm_txt.setText('7セグメント領域を囲ってください')
             return
@@ -200,12 +200,12 @@ class RegionSelectWindow(QWidget):
         # ウィンドウサイズの適用を待ってから次の画面に遷移
         QTimer.singleShot(1, self.switch_next)
 
-    def cancel_select(self):
+    def cancel_select(self) -> None:
         self.logger.info("Region selection canceled.")
         self.clear_env()
         QTimer.singleShot(1, lambda: self.switch_back())
 
-    def switch_back(self):
+    def switch_back(self) -> None:
         self.logger.debug("Switching to back screen(%s).", self.prev_screen)
         if self.prev_screen == 'replay_exe':
             self.screen_manager.show_screen('replay_setting')
@@ -214,7 +214,7 @@ class RegionSelectWindow(QWidget):
         self.prev_screen = None
         self.params = None
 
-    def switch_next(self):
+    def switch_next(self) -> None:
         self.logger.debug("Switching to next screen(%s).", self.prev_screen)
         if self.prev_screen == 'replay_exe':
             self.screen_manager.get_screen(
@@ -224,7 +224,7 @@ class RegionSelectWindow(QWidget):
         self.prev_screen = None
         self.params = None
 
-    def clear_env(self):
+    def clear_env(self) -> None:
         self.main_label.clear()
         self.extracted_label.clear()
         self.target_width = None

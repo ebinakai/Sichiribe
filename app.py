@@ -14,7 +14,7 @@ formatter = '%(asctime)s - %(name)s - %(levelname)s - %(message)s'
 logging.basicConfig(level=logging.INFO, format=formatter)
 
 
-def main():
+def main() -> None:
     show_splash_ms = 2000
 
     app = QApplication([])

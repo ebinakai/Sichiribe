@@ -18,7 +18,7 @@ import numpy as np
 
 
 class ReplayThresholdWindow(QWidget):
-    def __init__(self, screen_manager: ScreenManager):
+    def __init__(self, screen_manager: ScreenManager) -> None:
         super().__init__()
 
         self.screen_manager = screen_manager
@@ -30,7 +30,7 @@ class ReplayThresholdWindow(QWidget):
         self.logger = logging.getLogger('__main__').getChild(__name__)
         self.initUI()
 
-    def initUI(self):
+    def initUI(self) -> None:
         main_layout = QVBoxLayout()
         extracted_image_layout = QHBoxLayout()
         form_layout = QFormLayout()
@@ -69,7 +69,7 @@ class ReplayThresholdWindow(QWidget):
         main_layout.addStretch()
         main_layout.addLayout(footer_layout)
 
-    def startup(self, params):
+    def startup(self, params) -> None:
         self.logger.info('Starting ReplayThresholdWindow.')
         self.screen_manager.show_screen('replay_threshold')
 
@@ -83,7 +83,7 @@ class ReplayThresholdWindow(QWidget):
         self.binarize_th_label.setText('自動設定')
         self.update_binarize_th(0)
 
-    def update_binarize_th(self, value):
+    def update_binarize_th(self, value) -> None:
         self.threshold = None if value == 0 else value
         binarize_th_str = '自動設定' if self.threshold is None else str(
             self.threshold)
@@ -93,11 +93,11 @@ class ReplayThresholdWindow(QWidget):
             self.first_frame, self.threshold)
         self.display_extract_image(image_bin)
 
-    def display_extract_image(self, image: np.ndarray):
+    def display_extract_image(self, image: np.ndarray) -> None:
         q_image = convert_cv_to_qimage(image)
         self.extracted_label.setPixmap(QPixmap.fromImage(q_image))
 
-    def next(self):
+    def next(self) -> None:
         self.logger.info("Set threshold finished.")
         self.params['threshold'] = self.threshold
         self.clear_env()
@@ -106,7 +106,7 @@ class ReplayThresholdWindow(QWidget):
             'replay_exe').frame_devide_process(self.params)
         self.params = None
 
-    def clear_env(self):
+    def clear_env(self) -> None:
         self.extracted_label.clear()
         self.first_frame = None
         self.threshold = None

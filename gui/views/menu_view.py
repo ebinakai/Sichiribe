@@ -11,14 +11,14 @@ from gui.utils.screen_manager import ScreenManager
 
 
 class MenuWindow(QWidget):
-    def __init__(self, screen_manager: ScreenManager):
+    def __init__(self, screen_manager: ScreenManager) -> None:
         super().__init__()
 
         self.screen_manager = screen_manager
         screen_manager.add_screen('menu', self)
         self.initUI()
 
-    def initUI(self):
+    def initUI(self) -> None:
         main_layout = QVBoxLayout()
         button_layout = QVBoxLayout()
         footer_layout = QHBoxLayout()

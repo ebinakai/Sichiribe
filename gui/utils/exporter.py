@@ -5,7 +5,7 @@ GUIアプリケーションにおいて、画面間で共有されるパラメ�
 from cores.exporter import Exporter
 
 
-def export_result(params):
+def export_result(params) -> None:
     ep = Exporter(params['format'], params['out_dir'])
     data = ep.format(
         params['results'],
@@ -14,7 +14,7 @@ def export_result(params):
     ep.export(data)
 
 
-def export_params(params):
+def export_params(params) -> None:
     ep = Exporter(
         method='json',
         out_dir=params['out_dir'],

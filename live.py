@@ -29,7 +29,7 @@ logger = logging.getLogger('__main__').getChild(__name__)
 Detector = select_cnn_model()
 
 
-def get_args():
+def get_args() -> argparse.Namespace:
     export_formats = get_supported_formats()
 
     # 引数を取得
@@ -78,7 +78,7 @@ def main(device,
          format,
          save_frame,
          out_dir='results',
-         ):
+         ) -> None:
 
     fc = FrameCapture(device_num=device)
     fe = FrameEditor(num_digits=num_digits)
@@ -153,9 +153,11 @@ if __name__ == "__main__":
         save_dir = f"frames_{now}"
         os.makedirs(save_dir)
 
-    logger.setLevel(
-        logging.DEBUG) if args.debug else logger.setLevel(
-        logging.INFO)
+    if args.debug:
+        logger.setLevel(logging.DEBUG)
+    else:
+        logger.setLevel(logging.INFO)
+
     logger.debug("args: %s", args)
 
     main(

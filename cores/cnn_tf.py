@@ -11,7 +11,8 @@ logging.getLogger('h5py').setLevel(logging.ERROR)
 
 
 class CNN(CNNCore):
-    def __init__(self, num_digits, model_filename='model_100x100.keras'):
+    def __init__(self, num_digits,
+                 model_filename='model_100x100.keras') -> None:
         super().__init__(num_digits)
         self.logger = logging.getLogger("__main__").getChild(__name__)
 
@@ -21,7 +22,7 @@ class CNN(CNNCore):
         model_path = model_path.resolve()
         self.model_path = str(model_path)
 
-    def load(self):
+    def load(self) -> bool:
         self.logger.debug('Load model path: %s' % self.model_path)
         if not os.path.exists(self.model_path):
             self.logger.error('Model file not found.')
@@ -33,7 +34,7 @@ class CNN(CNNCore):
         self.logger.info("CNN Model loaded.")
         return True
 
-    def inference_7seg_classifier(self, image: np.ndarray) -> list:
+    def inference_7seg_classifier(self, image: np.ndarray) -> list[int]:
         # 各桁に分割
         preprocessed_images = self.preprocess_image(image)
 

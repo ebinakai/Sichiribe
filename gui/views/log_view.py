@@ -19,23 +19,23 @@ class LogEmitter(QObject):
 
 
 class QTextEditLogger(logging.Handler):
-    def __init__(self, emitter: LogEmitter):
+    def __init__(self, emitter: LogEmitter) -> None:
         super().__init__()
         self.emitter = emitter
 
-    def emit(self, record):
+    def emit(self, record) -> None:
         log_entry = self.format(record)
         self.emitter.new_log.emit(log_entry)
 
 
 class LogWindow(QWidget):
-    def __init__(self, screen_manager: ScreenManager):
+    def __init__(self, screen_manager: ScreenManager) -> None:
         super().__init__()
         self.screen_manager = screen_manager
         screen_manager.add_screen('log', self)
         self.initUI()
 
-    def initUI(self):
+    def initUI(self) -> None:
         layout = QVBoxLayout()
         self.setLayout(layout)
 
@@ -52,8 +52,8 @@ class LogWindow(QWidget):
         # シグナルとスロットの接続
         self.emitter.new_log.connect(self.append_log)
 
-    def append_log(self, message):
+    def append_log(self, message) -> None:
         self.log_display.append(message)
 
-    def clear_log(self):
+    def clear_log(self) -> None:
         self.log_display.clear()

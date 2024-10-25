@@ -4,10 +4,10 @@ import numpy as np
 
 
 class Detector():
-    def __init__(self):
+    def __init__(self) -> None:
         self.logger = logging.getLogger("__main__").getChild(__name__)
 
-    def load_image(self, image):
+    def load_image(self, image) -> np.ndarray:
         if isinstance(image, np.ndarray):
             if len(image.shape) == 3:
                 image_gs = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
@@ -23,26 +23,24 @@ class Detector():
             self,
             image,
             binarize_th=None,
-            output_grayscale=False):
+            output_grayscale=False) -> np.ndarray:
 
         if len(image.shape) == 3 and image.shape[2] == 3:
             image = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
         else:
             image = image
 
-        # 二値化（大津の2値化）
         if binarize_th is None:
+            # 大津の2値化
             _, image_bin = cv2.threshold(
                 image, 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)
         else:
             _, image_bin = cv2.threshold(
                 image, binarize_th, 255, cv2.THRESH_BINARY)
 
-        # 二値化後の画像の背景が黒であるかどうかを判別
+        # 背景が黒（0）のピクセルが全体の50%未満の場合は反転（使用する学習モデルの特性上の理由）
         black_pixels = np.sum(image_bin == 0)
         white_pixels = np.sum(image_bin == 255)
-
-        # 背景が黒（0）のピクセルが全体の50%未満の場合は反転（使用する学習モデルの特性上の理由）
         if black_pixels > white_pixels:
             image_bin = cv2.bitwise_not(image_bin)
 
@@ -56,7 +54,6 @@ class Detector():
 
         return image_cl
 
-    # 検出失敗率を取得
     def get_failed_rate(self, data: list, correct_value: float) -> float:
         total = len(data)
         if total == 0:

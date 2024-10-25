@@ -22,32 +22,32 @@ class ScreenManager:
         self.logger = logging.getLogger('__main__').getChild(__name__)
         self.screens = {}
 
-    def add_screen(self, name, widget: QWidget):
+    def add_screen(self, name: str, widget: QWidget) -> None:
         self.screens[name] = widget
         self.stacked_widget.addWidget(widget)
 
-    def show_screen(self, name):
+    def show_screen(self, name: str) -> None:
         if name in self.screens:
             self.stacked_widget.setCurrentWidget(self.screens[name])
             self.main_window.setFocus()
         else:
             self.logger.error(f"Screen '{name}' not found")
 
-    def get_screen(self, name) -> QWidget:
+    def get_screen(self, name: str) -> QWidget:
         if name in self.screens:
             return self.screens[name]
         else:
             self.logger.error(f"Screen '{name}' not found")
             return None
 
-    def check_if_dark_mode(self):
+    def check_if_dark_mode(self) -> None:
         palette = QApplication.palette()
         return palette.color(QPalette.ColorRole.Window).value() < 128
 
-    def resie_defualt(self):
+    def resie_defualt(self) -> None:
         self.main_window.resize(640, 480)
 
-    def center(self):
+    def center(self) -> None:
         screen = QApplication.primaryScreen()
         screen_rect = screen.availableGeometry()
         window_rect = self.main_window.frameGeometry()
@@ -57,16 +57,16 @@ class ScreenManager:
 
         self.main_window.move(x, y)
 
-    def quit(self):
+    def quit(self) -> None:
         self.logger.info("Quitting application")
         QApplication.quit()
 
-    def save_screen_size(self):
+    def save_screen_size(self) -> None:
         self.window_pos = self.main_window.frameGeometry().topLeft()
         self.window_size = self.main_window.size()
         return self.window_pos, self.window_size
 
-    def restore_screen_size(self):
+    def restore_screen_size(self) -> None:
         QApplication.processEvents()
         if self.window_pos is not None and self.window_size is not None:
             self.logger.info("Screen geometry restoring...")
@@ -84,7 +84,7 @@ class ScreenManager:
         else:
             self.logger.error("No screen size saved")
 
-    def popup(self, message: str, is_modal=False):
+    def popup(self, message: str, is_modal=False) -> None:
         self.logger.debug("Popup message: %s" % message)
 
         msg_box = QMessageBox(self.main_window)

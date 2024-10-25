@@ -16,7 +16,7 @@ import logging
 
 
 class LiveFeedWindow(QWidget):
-    def __init__(self, screen_manager: ScreenManager):
+    def __init__(self, screen_manager: ScreenManager) -> None:
         super().__init__()
 
         self.screen_manager = screen_manager
@@ -25,7 +25,7 @@ class LiveFeedWindow(QWidget):
         self.logger = logging.getLogger('__main__').getChild(__name__)
         self.initUI()
 
-    def initUI(self):
+    def initUI(self) -> None:
         main_layout = QVBoxLayout()
         header_layout = QVBoxLayout()
         feed_layout = QVBoxLayout()
@@ -61,17 +61,17 @@ class LiveFeedWindow(QWidget):
         main_layout.addStretch()
         main_layout.addLayout(footer_layout)
 
-    def back(self):
+    def back(self) -> None:
         self.logger.debug("Back button clicked.")
         if self.worker is not None:
             self.worker.cancel()
 
-    def next(self):
+    def next(self) -> None:
         self.logger.debug("Next button clicked.")
         if self.worker is not None:
             self.worker.stop()  # ワーカーに停止を指示
 
-    def startup(self, params):
+    def startup(self, params) -> None:
         self.logger.info("Starting LiveFeedWindow.")
         self.feed_label.setText("読込中...")
         self.screen_manager.show_screen('live_feed')
@@ -103,16 +103,16 @@ class LiveFeedWindow(QWidget):
         self.worker.start()
         self.logger.info('Feed started.')
 
-    def recieve_cap_size(self, cap_size):
+    def recieve_cap_size(self, cap_size) -> None:
         self.params['cap_size'] = cap_size
         self.logger.debug('Capture size: %d x %d' % (cap_size[0], cap_size[1]))
 
-    def show_feed(self, frame):
+    def show_feed(self, frame) -> None:
         frame, _ = resize_image(frame, self.target_width, self.target_height)
         qimage = convert_cv_to_qimage(frame)
         self.feed_label.setPixmap(QPixmap(qimage))
 
-    def feed_finished(self, first_frame):
+    def feed_finished(self, first_frame) -> None:
         self.logger.info('Feed finished.')
         self.params['first_frame'] = first_frame
         params = self.params
@@ -120,20 +120,20 @@ class LiveFeedWindow(QWidget):
         QTimer.singleShot(10, lambda: self.screen_manager.get_screen(
             'region_select').startup(params, 'live_feed'))
 
-    def feed_cancelled(self):
+    def feed_cancelled(self) -> None:
         self.clear_env()
         QTimer.singleShot(
             1, lambda: self.screen_manager.show_screen('live_setting'))
         self.logger.info('Feed cancelled.')
 
-    def feed_error(self):
+    def feed_error(self) -> None:
         self.clear_env()
         self.screen_manager.popup("カメラにアクセスできませんでした")
         QTimer.singleShot(
             1, lambda: self.screen_manager.show_screen('live_setting'))
         self.logger.error('Feed missing frame.')
 
-    def clear_env(self):
+    def clear_env(self) -> None:
         self.feed_label.clear()
         self.target_width = None
         self.target_height = None

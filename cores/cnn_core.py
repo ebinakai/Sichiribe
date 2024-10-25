@@ -11,7 +11,7 @@ logging.getLogger('h5py').setLevel(logging.ERROR)
 
 
 class CNNCore(Detector):
-    def __init__(self, num_digits):
+    def __init__(self, num_digits) -> None:
         self.num_digits = num_digits
 
         self.logger = logging.getLogger("__main__").getChild(__name__)
@@ -25,7 +25,6 @@ class CNNCore(Detector):
         self.color_setting = 1        # 学習済みモデルと同じ画像のカラー設定にする。モノクロ・グレースケールの場合は「1」。カラーの場合は「3」
         self.cv2_color_setting = 0    # 同上。cv2.imreadではモノクロ・グレースケールの場合は「0」。カラーの場合は「1」
         self.crop_size = 100          # 画像をトリミングするサイズ
-        self.model = None
 
     def inference_7seg_classifier(self, image_bin):
         raise NotImplementedError(
@@ -52,12 +51,9 @@ class CNNCore(Detector):
 
     def detect(self, images, binarize_th=None) -> tuple[int, float]:
         # [引数] images: ファイルパスまたはnumpy画像データまたはそれを含んだリスト
-        if self.model is None:
-            self.logger.error("CNN Model unloaded.")
 
         results = np.zeros((0, self.num_digits))
 
-        # リスト化する
         if not isinstance(images, list):
             images = [images]
 

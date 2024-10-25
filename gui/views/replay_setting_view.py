@@ -20,14 +20,14 @@ import os
 
 
 class ReplaySettingsWindow(QWidget):
-    def __init__(self, screen_manager: ScreenManager):
+    def __init__(self, screen_manager: ScreenManager) -> None:
         super().__init__()
 
         self.screen_manager = screen_manager
         screen_manager.add_screen('replay_setting', self)
         self.initUI()
 
-    def initUI(self):
+    def initUI(self) -> None:
         main_layout = QVBoxLayout()
         form_layout = QFormLayout()
         footer_layout = QHBoxLayout()
@@ -96,17 +96,17 @@ class ReplaySettingsWindow(QWidget):
         main_layout.addLayout(form_layout)
         main_layout.addLayout(footer_layout)
 
-    def select_file(self):
+    def select_file(self) -> None:
         video_path, _ = QFileDialog.getOpenFileName(
             self, 'ファイルを選択', '', '動画ファイル (*.mp4 *.avi)')
         if video_path:
             self.video_path.setText(video_path)
 
-    def back(self):
+    def back(self) -> None:
         self.confirm_txt.setText('')
         self.screen_manager.show_screen('menu')
 
-    def startup(self):
+    def startup(self) -> None:
         if self.video_path.text() == '':
             self.confirm_txt.setText('動画ファイルを選択してください')
             return

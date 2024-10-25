@@ -19,8 +19,8 @@ import time
 # からデータセットをダウンロードして解凍し、train_data_pathにフォルダ名を入力してください。
 train_data_path = 'datasets'  # zipファイルを解凍後の、データセットのフォルダ名
 
-image_width = 100   # ここを変更。必要に応じて変更してください。「28」を指定した場合、縦の高さ28ピクセルの画像に変換します。
-image_height = 100  # ここを変更。必要に応じて変更してください。「28」を指定した場合、横の幅28ピクセルの画像に変換します。
+image_width = 100   # 必要に応じて変更してください。「28」を指定した場合、縦の高さ28ピクセルの画像に変換します。
+image_height = 100  # 必要に応じて変更してください。「28」を指定した場合、横の幅28ピクセルの画像に変換します。
 # 画像のサイズは、原寸大や長方形などでも試してみましたが、少ない学習回数で実際の正解率が高いのは28*28の正方形でした。
 color_setting = 1  # ここを変更。データセット画像のカラー指定：「1」はモノクロ・グレースケール。「3」はカラーとして画像を処理。
 
@@ -36,7 +36,7 @@ X_image = []
 Y_label = []
 for index, name in enumerate(folder):
     read_data = train_data_path + '/' + name
-    files = glob.glob(read_data + '/*.jpg')  # ここを変更。png形式のファイルを利用する場合のサンプルです。
+    files = glob.glob(read_data + '/*.jpg')  # ここを変更。
     print('--- 読み込んだデータセットは', read_data, 'です。')
 
     for i, file in enumerate(files):

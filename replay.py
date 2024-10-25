@@ -22,7 +22,7 @@ logger = logging.getLogger('__main__').getChild(__name__)
 Detector = select_cnn_model()
 
 
-def get_args():
+def get_args() -> argparse.Namespace:
     export_formats = get_supported_formats()
 
     parser = argparse.ArgumentParser(description='7セグメントディスプレイの数字を読み取る')
@@ -70,7 +70,7 @@ def main(video_path,
          format,
          save_frame,
          out_dir='results',
-         ):
+         ) -> None:
     fe = FrameEditor(sampling_sec, num_frames, num_digits)
     dt = Detector(num_digits)
     ep = Exporter(format, out_dir)

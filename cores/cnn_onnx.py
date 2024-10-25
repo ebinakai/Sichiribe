@@ -7,7 +7,8 @@ import onnxruntime as ort
 
 
 class CNNOnnx(CNNCore):
-    def __init__(self, num_digits, model_filename='model_100x100.onnx'):
+    def __init__(self, num_digits,
+                 model_filename='model_100x100.onnx') -> None:
         super().__init__(num_digits)
         self.logger = logging.getLogger('__main__').getChild(__name__)
 
@@ -19,7 +20,7 @@ class CNNOnnx(CNNCore):
         self.model = None
         self.session = None
 
-    def load(self):
+    def load(self) -> bool:
         self.logger.debug('Load model path: %s' % self.model_path)
         if not os.path.exists(self.model_path):
             self.logger.error('Model file not found.')
@@ -32,7 +33,7 @@ class CNNOnnx(CNNCore):
             self.logger.info("ONNX Model loaded.")
         return True
 
-    def inference_7seg_classifier(self, image: np.ndarray) -> list:
+    def inference_7seg_classifier(self, image: np.ndarray) -> list[int]:
         # 各桁に分割
         preprocessed_images = self.preprocess_image(image)
 

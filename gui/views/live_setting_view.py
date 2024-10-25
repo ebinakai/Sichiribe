@@ -21,7 +21,7 @@ import os
 
 
 class LiveSettingsWindow(QWidget):
-    def __init__(self, screen_manager: ScreenManager):
+    def __init__(self, screen_manager: ScreenManager) -> None:
         super().__init__()
 
         self.screen_manager = screen_manager
@@ -29,7 +29,7 @@ class LiveSettingsWindow(QWidget):
         self.initUI()
         self.logger = logging.getLogger('__main__').getChild(__name__)
 
-    def initUI(self):
+    def initUI(self) -> None:
         main_layout = QVBoxLayout()
         form_layout = QFormLayout()
         footer_layout = QHBoxLayout()
@@ -106,17 +106,17 @@ class LiveSettingsWindow(QWidget):
         main_layout.addLayout(form_layout)
         main_layout.addLayout(footer_layout)
 
-    def select_folder(self):
+    def select_folder(self) -> None:
         folder_path = QFileDialog.getExistingDirectory(self, 'フォルダを選択', '')
 
         if folder_path:
             self.out_dir.setText(folder_path)
 
-    def calc_max_frames(self):
+    def calc_max_frames(self) -> None:
         sampling_sec = self.sampling_sec.value()
         self.num_frames.setMaximum(sampling_sec * 5)
 
-    def startup(self):
+    def startup(self) -> None:
         if self.out_dir.text() == '':
             self.confirm_txt.setText('保存場所を選択してください')
             return

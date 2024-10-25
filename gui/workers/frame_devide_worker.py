@@ -14,7 +14,7 @@ import logging
 class FrameDivideWorker(QThread):
     end = Signal(list, list)
 
-    def __init__(self, params):
+    def __init__(self, params) -> None:
         super().__init__()
         self.video_path = params['video_path']
         self.video_skip_sec = params['video_skip_sec']
@@ -27,7 +27,7 @@ class FrameDivideWorker(QThread):
             params['num_digits'])
         self.logger = logging.getLogger('__main__').getChild(__name__)
 
-    def run(self):
+    def run(self) -> None:
         frames = self.fe.frame_devide(self.video_path,
                                       self.video_skip_sec,
                                       self.save_frame,

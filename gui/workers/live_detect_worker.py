@@ -34,7 +34,7 @@ class DetectWorker(QThread):
     model_not_found = Signal()
     error = Signal()
 
-    def __init__(self, params):
+    def __init__(self, params) -> None:
         super().__init__()
         self.params = params
         self.logger = logging.getLogger('__main__').getChild(__name__)
@@ -42,7 +42,7 @@ class DetectWorker(QThread):
         self.binarize_th = None
         self._is_capturing = True
 
-    def run(self):
+    def run(self) -> None:
         self.logger.info("DetectWorker started.")
 
         # フレーム保存用ディレクトリの作成
@@ -124,11 +124,11 @@ class DetectWorker(QThread):
 
         return None
 
-    def cancel(self):
+    def cancel(self) -> None:
         self.logger.info("DetectWorker terminating...")
         self._is_cancelled = True
 
-    def update_binarize_th(self, value):
+    def update_binarize_th(self, value) -> None:
         self.binarize_th = value
         self.logger.info(f"Update binarize_th: {self.binarize_th}")
 
