@@ -110,15 +110,15 @@ curl -L -o model/model_100x100.tflite https://github.com/EbinaKai/Sichiribe/rele
 | `replay.py` | 動画ファイルから解析 |
 | `cores/common.py` | コアな汎用的な機能の関数詰め合わせ |
 | `cores/capture.py` | カメラにアクセスする機能 |
-| `cores/frameEditor.py` | 動画のフレームに関する機能及び7セグメント表示器の領域選択機能 |
+| `cores/frame_editor.py` | 動画のフレームに関する機能及び7セグメント表示器の領域選択機能 |
 | `cores/detector.py` | 7セグ表示器から数字を推測するプログラムの親クラス |
 | `cores/ocr.py` | OCRにて画像から数字を取得するプログラム |
 | `cores/cnn.py` | CNNモデルを用いて画像から数字を取得するプログラムのコア部分 |
 | `cores/cnn.py` | CNNモデルをTensorflowのフルバージョン(.kerasモデル)で動かす場合 |
 | `cores/cnn_lite.py` | CNNモデルをtflite-runtime(.tfliteモデル)で動かす場合 |
 | `cores/exporter.py` | 取得した結果を任意の形式で出力・保存する機能 |
-| `cnn/train.py` | CNNモデルを学習させるプログラム |
-| `cnn/conv_keras2tf.py` | Kerasモデルをtflite形式に変換するプログラム |
+| `train/train.py` | CNNモデルを学習させるプログラム |
+| `train/conv_keras2tf.py` | Kerasモデルをtflite形式に変換するプログラム |
 | `gui/utils/common.py` | GUI用の汎用的な機能の関数詰め合わせ |
 | `**gui**/utils/router.py` | GUIの各ページのルーティング関数 |
 | `gui/utils/screen_manager.py` | GUIの各ページの管理クラス |
@@ -138,7 +138,7 @@ curl -L -o model/model_100x100.tflite https://github.com/EbinaKai/Sichiribe/rele
 | `gui/workers/frame_devide_worker.py` | 動画ファイル解析のフレーム分割のバックグランド処理 |
 | `gui/workers/replay_detect_worker.py` | 動画ファイル解析の推論のバックグランド処理 |
 | `gui/widgets/mpl_canvas_widget.py` | グラフを表示するウィジェット |
-| `test/*` | テスト用ファイル |
+| `sample/*` | テスト用ファイル |
 
 ## モデル学習
 

@@ -12,33 +12,9 @@ from PySide6.QtWidgets import QApplication, QLabel, QVBoxLayout, QHBoxLayout, QW
 from PySide6.QtGui import QPixmap, QMouseEvent
 from PySide6.QtCore import Qt, QSize, QTimer
 from gui.utils.screen_manager import ScreenManager
-from cores.frameEditor import FrameEditor
+from cores.frame_editor import FrameEditor
 from gui.utils.common import convert_cv_to_qimage, resize_image
-
-
-class ClickableLabel(QLabel):
-    # コールバック関数はマウスイベント内で呼び出され、イベントが引き継がれる
-    def __init__(self, parent=None, handle_event=lambda x: x) -> None:
-        super().__init__(parent)
-        self.handle_event = handle_event
-        self.drawing = False
-
-    def mousePressEvent(self, event: QMouseEvent) -> None:
-        if event.button() == Qt.MouseButton.LeftButton:
-            self.drawing = True
-            self.last_point = event.position().toPoint()
-            self.handle_event(event)
-
-    def mouseMoveEvent(self, event: QMouseEvent) -> None:
-        if self.drawing:
-            current_point = event.position().toPoint()
-            self.handle_event(event)
-            self.last_point = current_point
-
-    def mouseReleaseEvent(self, event: QMouseEvent) -> None:
-        if event.button() == Qt.MouseButton.LeftButton:
-            self.drawing = False
-
+from gui.widgets.clickable_label import ClickableLabel
 
 class RegionSelectWindow(QWidget):
     def __init__(self, screen_manager: ScreenManager) -> None:

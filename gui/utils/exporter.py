@@ -13,7 +13,6 @@ def export_result(params: dict) -> None:
         params['timestamps'])
     ep.export(data)
 
-
 def export_params(params: dict) -> None:
     ep = Exporter(
         method='json',

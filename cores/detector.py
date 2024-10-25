@@ -19,6 +19,10 @@ class Detector():
 
         return image_gs
 
+    def predict(self):
+        raise NotImplementedError(
+            "This method must be implemented in the subclass")
+
     def preprocess_binarization(
             self,
             image: np.ndarray,
@@ -53,12 +57,3 @@ class Detector():
         image_cl = cv2.cvtColor(image_bin, cv2.COLOR_GRAY2BGR)
 
         return image_cl
-
-    def get_failed_rate(self, data: list, correct_value: float) -> float:
-        total = len(data)
-        if total == 0:
-            return 1.0
-
-        correct = data.count(correct_value)
-        failed = total - correct
-        return failed / total if total > 0 else 0

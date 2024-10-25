@@ -45,7 +45,7 @@ class DetectWorker(QThread):
                 self.params = None
                 return None
 
-            result, failed_rate = self.dt.detect(
+            result, failed_rate = self.dt.predict(
                 frame, binarize_th=self.params['threshold'])
             self.logger.info(f"Detected Result: {result}")
             self.logger.info(f"Failed Rate: {failed_rate}")

@@ -63,6 +63,8 @@ class MplCanvas(FigureCanvasQTAgg):
 
         self.axes1.set_xlabel(xlabel, color=label_color)
         self.axes1.set_ylabel(ylabel1, color=label_color)
+        self.axes2.set_ylabel(ylabel2, color=label_color, rotation=270, labelpad=15)
+        self.axes2.yaxis.set_label_position('right')
 
         self.axes1.tick_params(
             pad=10,
@@ -78,8 +80,8 @@ class MplCanvas(FigureCanvasQTAgg):
         self.line2, = self.axes2.plot(
             [], [], marker='s', color='tomato', label=ylabel2)
 
-        self.axes1.set_ylim(-0.1, 1.1)
         self.axes1.set_title(title, color=title_color)
+        self.axes1.set_ylim(-0.1, 1.1)
 
         lines = [self.line1, self.line2]
         self.axes1.legend(lines, [line.get_label()

@@ -6,7 +6,7 @@
 '''
 
 from PySide6.QtCore import Signal, QThread
-from cores.frameEditor import FrameEditor
+from cores.frame_editor import FrameEditor
 import os
 import logging
 

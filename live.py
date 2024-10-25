@@ -10,7 +10,7 @@ from datetime import timedelta
 import time
 from cores.common import get_now_str
 from cores.exporter import Exporter, get_supported_formats
-from cores.frameEditor import FrameEditor
+from cores.frame_editor import FrameEditor
 from cores.capture import FrameCapture
 import argparse
 import logging
@@ -120,7 +120,7 @@ def main(device,
                 frame_count += 1
 
         if len(frames) != 0:
-            value, failed_rate = dt.detect(frames)
+            value, failed_rate = dt.predict(frames)
             logger.info(f"Detected: {value}, Failed rate: {failed_rate}")
             results.append(value)
             failed_rates.append(failed_rate)

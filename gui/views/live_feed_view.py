@@ -105,7 +105,7 @@ class LiveFeedWindow(QWidget):
         self.worker.start()
         self.logger.info('Feed started.')
 
-    def recieve_cap_size(self, cap_size: List[int, int]) -> None:
+    def recieve_cap_size(self, cap_size: List[int]) -> None:
         self.params['cap_size'] = cap_size
         self.logger.debug('Capture size: %d x %d' % (cap_size[0], cap_size[1]))
 

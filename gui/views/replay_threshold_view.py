@@ -11,7 +11,7 @@ from PySide6.QtCore import Qt
 from PySide6.QtGui import QPixmap
 from gui.utils.screen_manager import ScreenManager
 from gui.utils.common import convert_cv_to_qimage
-from cores.frameEditor import FrameEditor
+from cores.frame_editor import FrameEditor
 from cores.detector import Detector
 import logging
 import numpy as np

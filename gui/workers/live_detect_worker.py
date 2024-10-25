@@ -15,7 +15,7 @@
 
 from PySide6.QtCore import Signal, QThread
 from cores.capture import FrameCapture
-from cores.frameEditor import FrameEditor
+from cores.frame_editor import FrameEditor
 import logging
 import time
 from datetime import timedelta
@@ -110,7 +110,7 @@ class DetectWorker(QThread):
             self._is_capturing = False
 
             # 推論処理
-            value, failed_rate = self.dt.detect(frames, self.binarize_th)
+            value, failed_rate = self.dt.predict(frames, self.binarize_th)
             self.logger.info(f"Detected: {value}, Failed rate: {failed_rate}")
 
             self.progress.emit(value, failed_rate, timestamp_str)

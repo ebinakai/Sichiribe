@@ -5,7 +5,7 @@
 
 from cores.cnn import select_cnn_model
 from cores.exporter import Exporter, get_supported_formats
-from cores.frameEditor import FrameEditor
+from cores.frame_editor import FrameEditor
 import argparse
 import logging
 import warnings
@@ -82,7 +82,7 @@ def main(video_path: str,
     results = []
     failed_rates = []
     for frame in frames:
-        result, failed_rate = dt.detect(frame)
+        result, failed_rate = dt.predict(frame)
         results.append(result)
         failed_rates.append(failed_rate)
         logger.info(f"Detected Result: {result}")

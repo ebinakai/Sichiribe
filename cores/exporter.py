@@ -19,9 +19,10 @@ class Exporter:
         self.method = method
         self.base_filename = base_filename
         self.out_dir = out_dir
-        os.makedirs(out_dir, exist_ok=True)
-
         self.logger = logging.getLogger("__main__").getChild(__name__)
+
+        if method in self.aveilable_formats:
+            os.makedirs(out_dir, exist_ok=True)
 
         if method == 'csv':
             self.save = self.to_csv

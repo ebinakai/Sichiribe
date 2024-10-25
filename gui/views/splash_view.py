@@ -5,10 +5,11 @@
 2. 表示する画像は、images フォルダ内の splash_image.png を使用
 '''
 
-from PySide6.QtWidgets import QApplication, QWidget, QLabel, QVBoxLayout
+from PySide6.QtWidgets import QWidget, QLabel, QVBoxLayout
 from PySide6.QtGui import QPixmap
 from PySide6.QtCore import Qt
 from pathlib import Path
+from gui.utils.common import center_window
 
 
 class SplashScreen(QWidget):
@@ -33,20 +34,11 @@ class SplashScreen(QWidget):
         label.setPixmap(pixmap)
 
         layout.addWidget(label)
-        layout.setContentsMargins(0, 0, 0, 0)  #
+        layout.setContentsMargins(0, 0, 0, 0)
         layout.setSpacing(0)
         self.setLayout(layout)
 
         self.resize(pixmap.width(), pixmap.height())
 
-        self.center()
+        center_window(self)
 
-    def center(self) -> None:
-        screen = QApplication.primaryScreen()
-        screen_rect = screen.availableGeometry()
-        window_rect = self.frameGeometry()
-
-        x = (screen_rect.width() - window_rect.width()) // 2
-        y = (screen_rect.height() - window_rect.height()) // 2
-
-        self.move(x, y)

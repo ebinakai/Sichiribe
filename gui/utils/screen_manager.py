@@ -47,16 +47,6 @@ class ScreenManager:
     def resie_defualt(self) -> None:
         self.main_window.resize(640, 480)
 
-    def center(self) -> None:
-        screen = QApplication.primaryScreen()
-        screen_rect = screen.availableGeometry()
-        window_rect = self.main_window.frameGeometry()
-
-        x = (screen_rect.width() - window_rect.width()) // 2
-        y = (screen_rect.height() - window_rect.height()) // 2
-
-        self.main_window.move(x, y)
-
     def quit(self) -> None:
         self.logger.info("Quitting application")
         QApplication.quit()
@@ -74,7 +64,7 @@ class ScreenManager:
             # 現在の画面内のオブジェクトが処理を終えるまで10ms待つ
             loop = QEventLoop()
             QTimer.singleShot(10, loop.quit)
-            loop.exec_()
+            loop.exec()
 
             self.main_window.move(self.window_pos)
             self.main_window.resize(self.window_size)

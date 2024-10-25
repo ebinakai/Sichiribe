@@ -3,6 +3,7 @@
 '''
 
 from PySide6.QtGui import QImage
+from PySide6.QtWidgets import QApplication, QWidget
 import numpy as np
 import cv2
 
@@ -56,3 +57,13 @@ def resize_image(image: np.ndarray, target_width: int,
         image, (target_width, target_height), interpolation=cv2.INTER_AREA)
 
     return resized_image, resize_scale
+
+def center_window(window: QWidget) -> None:
+    screen = QApplication.primaryScreen()
+    screen_rect = screen.availableGeometry()
+    window_rect = window.frameGeometry()
+
+    x = (screen_rect.width() - window_rect.width()) // 2
+    y = (screen_rect.height() - window_rect.height()) // 2
+
+    window.move(x, y)

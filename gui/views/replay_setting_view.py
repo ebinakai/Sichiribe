@@ -19,7 +19,7 @@ from cores.exporter import get_supported_formats
 import os
 
 
-class ReplaySettingsWindow(QWidget):
+class ReplaySettingWindow(QWidget):
     def __init__(self, screen_manager: ScreenManager) -> None:
         super().__init__()
 

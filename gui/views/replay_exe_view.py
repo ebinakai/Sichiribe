@@ -18,7 +18,7 @@ from gui.utils.exporter import export_result, export_params
 from gui.widgets.mpl_canvas_widget import MplCanvas
 from gui.workers.frame_devide_worker import FrameDivideWorker
 from gui.workers.replay_detect_worker import DetectWorker
-from cores.frameEditor import FrameEditor
+from cores.frame_editor import FrameEditor
 import logging
 from typing import List, Union
 import numpy as np
@@ -91,7 +91,7 @@ class ReplayExeWindow(QWidget):
                                            save_frame=False,
                                            is_crop=False,
                                            extract_single_frame=True)
-        self.params['first_frame'] = first_frame[0]
+        self.params['first_frame'] = first_frame
 
         self.screen_manager.get_screen(
             'region_select').startup(self.params, 'replay_exe')

@@ -1,5 +1,5 @@
 import os
-from typing import Union
+from typing import Union, List
 import cv2
 import logging
 import numpy as np
@@ -36,7 +36,7 @@ class FrameEditor:
                      is_crop: bool = True,
                      click_points: list = [],
                      extract_single_frame: bool = False,
-                     ) -> list:
+                     ) -> Union[np.ndarray, List[List[Union[np.ndarray, str]]]]:
         self.click_points = click_points
 
         if save_frame:
@@ -77,10 +77,9 @@ class FrameEditor:
 
                 # 最初の位置フレームだけ取得
                 if extract_single_frame:
-                    return_frames.append(frame)
+                    return_frames = frame
                     break
 
-                # 保存
                 if save_frame:
                     frame_filename = os.path.join(
                         out_dir, f'frame_{frame_count:06d}.jpg')
@@ -241,11 +240,3 @@ class FrameEditor:
                     cv2.line(extract_image, (temp_x, 0), (temp_x, temp_y),
                              (0, 255, 0), 1)
         return image, extract_image
-
-
-if __name__ == "__main__":
-    file_path = "test/sample.jpg"
-
-    fe = FrameEditor()
-    click_points = fe.region_select(file_path)
-    print(click_points)

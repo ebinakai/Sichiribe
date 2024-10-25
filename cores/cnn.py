@@ -50,8 +50,8 @@ class CNNCore(Detector):
             images.append(img_)
         return np.array(images, dtype=np.float32)
 
-    def detect(self, images: Union[str, np.ndarray, List[Union[str, np.ndarray]]],
-               binarize_th: Optional[int] = None) -> tuple[int, float]:
+    def predict(self, images: Union[str, np.ndarray, List[Union[str, np.ndarray]]],
+                binarize_th: Optional[int] = None) -> tuple[int, float]:
 
         results = np.zeros((0, self.num_digits))
 

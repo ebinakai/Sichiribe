@@ -20,7 +20,7 @@ import logging
 import os
 
 
-class LiveSettingsWindow(QWidget):
+class LiveSettingWindow(QWidget):
     def __init__(self, screen_manager: ScreenManager) -> None:
         super().__init__()
 

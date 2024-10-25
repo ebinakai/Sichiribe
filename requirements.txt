@@ -7,6 +7,7 @@ fonttools==4.53.1
 humanfriendly==10.0
 imageio==2.36.0
 importlib_resources==6.4.4
+iniconfig==2.0.0
 kiwisolver==1.4.7
 matplotlib==3.9.2
 mccabe==0.7.0
@@ -18,11 +19,14 @@ opencv-python==4.10.0.84
 ordered-set==4.1.0
 packaging==24.1
 pillow==10.4.0
+pluggy==1.5.0
 protobuf==5.28.3
 pycodestyle==2.12.1
 pyflakes==3.2.0
 pyparsing==3.1.4
 PySide6_Essentials==6.7.2
+pytest==8.3.3
+pytest-qt==4.4.0
 python-dateutil==2.9.0.post0
 shiboken6==6.7.2
 six==1.16.0
