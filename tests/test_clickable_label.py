@@ -1,8 +1,14 @@
 import pytest
-from unittest.mock import MagicMock
+from unittest.mock import MagicMock, patch
 from PySide6.QtCore import Qt, QPoint, QPointF
 from PySide6.QtGui import QMouseEvent
 from gui.widgets.clickable_label import ClickableLabel
+
+
+@pytest.fixture(autouse=True)
+def prevent_window_show():
+    with patch('PySide6.QtWidgets.QWidget.show'):
+        yield
 
 
 @pytest.fixture

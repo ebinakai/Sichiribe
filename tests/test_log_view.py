@@ -1,7 +1,13 @@
 import pytest
-from unittest.mock import MagicMock
+from unittest.mock import MagicMock, patch
 from gui.utils.screen_manager import ScreenManager
 from gui.views.log_view import LogWindow
+
+
+@pytest.fixture(autouse=True)
+def prevent_window_show():
+    with patch('PySide6.QtWidgets.QWidget.show'):
+        yield
 
 
 @pytest.fixture

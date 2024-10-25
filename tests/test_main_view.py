@@ -1,6 +1,13 @@
 import pytest
+from unittest.mock import patch
 from PySide6.QtWidgets import QStackedWidget
 from gui.views.main_view import MainWindow
+
+
+@pytest.fixture(autouse=True)
+def prevent_window_show():
+    with patch('PySide6.QtWidgets.QWidget.show'):
+        yield
 
 
 @pytest.fixture

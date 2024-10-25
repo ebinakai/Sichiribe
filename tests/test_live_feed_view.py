@@ -1,10 +1,16 @@
 import pytest
-from unittest.mock import MagicMock
+from unittest.mock import MagicMock, patch
 from gui.utils.screen_manager import ScreenManager
 from gui.views.live_feed_view import LiveFeedWindow
 from PySide6.QtCore import Qt
 from PySide6.QtGui import QPixmap
 import numpy as np
+
+
+@pytest.fixture(autouse=True)
+def prevent_window_show():
+    with patch('PySide6.QtWidgets.QWidget.show'):
+        yield
 
 
 @pytest.fixture

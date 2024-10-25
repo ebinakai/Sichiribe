@@ -1,7 +1,14 @@
 import pytest
+from unittest.mock import patch
 from gui.widgets.mpl_canvas_widget import MplCanvas
 from matplotlib.figure import Figure
 from matplotlib.axes import Axes
+
+
+@pytest.fixture(autouse=True)
+def prevent_window_show():
+    with patch('PySide6.QtWidgets.QWidget.show'):
+        yield
 
 
 @pytest.fixture

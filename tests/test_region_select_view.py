@@ -6,6 +6,12 @@ from PySide6.QtGui import QMouseEvent
 from gui.views.region_select_view import RegionSelectWindow
 
 
+@pytest.fixture(autouse=True)
+def prevent_window_show():
+    with patch('PySide6.QtWidgets.QWidget.show'):
+        yield
+
+
 @pytest.fixture
 def mock_screen_manager():
     manager = MagicMock()

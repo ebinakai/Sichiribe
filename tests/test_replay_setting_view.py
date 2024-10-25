@@ -3,6 +3,12 @@ from unittest.mock import MagicMock, patch
 from gui.views.replay_setting_view import ReplaySettingWindow
 
 
+@pytest.fixture(autouse=True)
+def prevent_window_show():
+    with patch('PySide6.QtWidgets.QWidget.show'):
+        yield
+
+
 @pytest.fixture
 def window(qtbot):
     screen_manager = MagicMock()

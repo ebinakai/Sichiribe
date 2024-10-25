@@ -1,8 +1,8 @@
 .PHONY: format test
 
 help:
-	@echo "format - format the code"
-	@echo "test - run tests"
+	@echo "make format - format the code by autopep8"
+	@echo "make test   - run pytest"
 
 format:
 	autopep8 -v --in-place --aggressive --exclude 'env/**' **/*.py

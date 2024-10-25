@@ -1,7 +1,13 @@
 import pytest
 from PySide6.QtCore import Qt
-from unittest.mock import MagicMock
+from unittest.mock import MagicMock, patch
 from gui.views.menu_view import MenuWindow
+
+
+@pytest.fixture(autouse=True)
+def prevent_window_show():
+    with patch('PySide6.QtWidgets.QWidget.show'):
+        yield
 
 
 @pytest.fixture
