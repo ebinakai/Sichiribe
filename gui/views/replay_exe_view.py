@@ -21,13 +21,14 @@ from gui.workers.replay_detect_worker import DetectWorker
 from cores.frameEditor import FrameEditor
 import logging
 
+
 class ReplayExeWindow(QWidget):
     def __init__(self, screen_manager: ScreenManager):
         super().__init__()
-        
+
         self.screen_manager = screen_manager
         screen_manager.add_screen('replay_exe', self)
-        
+
         self.logger = logging.getLogger('__main__').getChild(__name__)
         self.initUI()
 
@@ -36,15 +37,12 @@ class ReplayExeWindow(QWidget):
         graph_layout = QVBoxLayout()
         footer_layout = QHBoxLayout()
         self.setLayout(main_layout)
-        
-        # レイアウトの設定
+
         graph_layout.setAlignment(Qt.AlignmentFlag.AlignCenter)
-        
-        # グラフの設定
+
         self.graph_label = MplCanvas()
         graph_layout.addWidget(self.graph_label)
-        
-        # フッター
+
         self.term_button = QPushButton('中止')
         self.term_button.setFixedWidth(100)
         self.term_button.clicked.connect(self.cancel)
@@ -53,28 +51,27 @@ class ReplayExeWindow(QWidget):
         self.term_label = QLabel()
         self.term_label.setStyleSheet('color: red')
         footer_layout.addWidget(self.term_label)
-        
-        footer_layout.addStretch()  # スペーサー
-        
-        # メインレイアウトに追加
+
+        footer_layout.addStretch()
+
         main_layout.addStretch()
         main_layout.addLayout(graph_layout)
         main_layout.addStretch()
         main_layout.addLayout(footer_layout)
-        
+
     def cancel(self):
         if self.worker is not None:
             self.term_label.setText('中止中...')
-            self.worker.cancel()  # ワーカーに停止を指示
-        
+            self.worker.cancel()
+
     def startup(self, params):
-        # 初期化
+
         self.graph_label.gen_graph(
-                    title='Results', 
-                    xlabel='Timestamp', 
-                    ylabel1='Failed Rate', 
-                    ylabel2='Detected results', 
-                    dark_theme=self.screen_manager.check_if_dark_mode())
+            title='Results',
+            xlabel='Timestamp',
+            ylabel1='Failed Rate',
+            ylabel2='Detected results',
+            dark_theme=self.screen_manager.check_if_dark_mode())
         self.term_label.setText('')
         self.params = params
         self.results = []
@@ -84,23 +81,25 @@ class ReplayExeWindow(QWidget):
         self.graph_timestamps = []
 
         # 最初のフレームを取得
-        self.fe = FrameEditor(self.params['sampling_sec'], self.params['num_frames'], self.params['num_digits'])
-        first_frame = self.fe.frame_devide(self.params['video_path'], 
-                        self.params['video_skip_sec'],
-                        save_frame=False,
-                        is_crop=False,
-                        extract_single_frame=True) 
+        self.fe = FrameEditor(
+            self.params['sampling_sec'],
+            self.params['num_frames'],
+            self.params['num_digits'])
+        first_frame = self.fe.frame_devide(self.params['video_path'],
+                                           self.params['video_skip_sec'],
+                                           save_frame=False,
+                                           is_crop=False,
+                                           extract_single_frame=True)
         self.params['first_frame'] = first_frame
-        
-        # 切り取り領域選択
-        self.screen_manager.get_screen('region_select').startup(self.params, 'replay_exe')
-     
+
+        self.screen_manager.get_screen(
+            'region_select').startup(self.params, 'replay_exe')
+
     def frame_devide_process(self, params):
         self.params = params
         self.screen_manager.get_screen('log').clear_log()
         self.screen_manager.show_screen('log')
-        
-        # ワーカーのインスタンスを作成
+
         self.worker = FrameDivideWorker(params)
         self.worker.end.connect(self.frame_devide_finished)
         self.worker.start()
@@ -112,7 +111,7 @@ class ReplayExeWindow(QWidget):
         self.params['frames'] = frames
         self.params['timestamps'] = timestamps
         self.detect_process()
-   
+
     def detect_process(self):
         self.worker = DetectWorker(self.params)
         self.worker.progress.connect(self.detect_progress)
@@ -121,25 +120,28 @@ class ReplayExeWindow(QWidget):
         self.worker.model_not_found.connect(self.model_not_found)
         self.worker.start()
         self.logger.info('Detect started.')
-        
+
     def model_not_found(self):
         self.term_label.setText('モデルが見つかりません')
         self.logger.error('Model not found.')
         self.clear_env()
         self.screen_manager.show_screen('menu')
-        
+
     def detect_progress(self, result, failed_rate, timestamp):
         self.screen_manager.show_screen('replay_exe')
         self.results.append(result)
         self.failed_rates.append(failed_rate)
         self.update_graph(result, failed_rate, timestamp)
-        
+
     def update_graph(self, result, failed_rate, timestamp):
         self.graph_results.append(result)
         self.graph_failed_rates.append(failed_rate)
         self.graph_timestamps.append(timestamp)
-        self.graph_label.update_existing_plot(self.graph_timestamps, self.graph_failed_rates, self.graph_results)
-        
+        self.graph_label.update_existing_plot(
+            self.graph_timestamps,
+            self.graph_failed_rates,
+            self.graph_results)
+
     def detect_finished(self):
         self.graph_label.clear()
         self.logger.info('Detect finished.')
@@ -149,22 +151,19 @@ class ReplayExeWindow(QWidget):
         params = self.params
         self.clear_env()
         self.export_process(params)
-        
+
     def detect_cancelled(self):
         self.term_label.setText('中止しました')
         self.logger.info('Detect cancelled.')
-        self.params['timestamps'] = self.params['timestamps'][:len(self.results)]
+        self.params['timestamps'] = self.params['timestamps'][:len(
+            self.results)]
 
     def export_process(self, params):
         self.logger.info('Data exporting...')
-        
-        # 結果出力
+
         export_result(params)
-        
-        # 設定パラメータを出力
         export_params(params)
 
-        # 完了ポップアップウィンドウを表示
         self.screen_manager.popup(f"保存場所：{params['out_dir']}")
         self.screen_manager.show_screen('menu')
 
@@ -180,4 +179,3 @@ class ReplayExeWindow(QWidget):
         self.fe = None
         self.logger.info('Environment cleared.')
         self.screen_manager.restore_screen_size()
-        
