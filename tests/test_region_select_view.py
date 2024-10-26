@@ -1,7 +1,7 @@
 import pytest
 from unittest.mock import MagicMock, patch
 import numpy as np
-from PySide6.QtCore import Qt, QPoint, QPointF, QSize
+from PySide6.QtCore import QPoint, QSize
 from PySide6.QtGui import QMouseEvent
 from gui.views.region_select_view import RegionSelectWindow
 from tests.test_helper import create_mouse_event

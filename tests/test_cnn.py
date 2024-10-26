@@ -1,4 +1,5 @@
 import pytest
+from unittest.mock import Mock
 import cv2
 from cores.cnn import CNNCore, select_cnn_model
 
@@ -9,18 +10,6 @@ def detector():
     detector = Detector(num_digits=4)
     detector.load()
     return detector
-
-
-@pytest.fixture
-def sample_image_path():
-    return 'tests/data/sample.jpg'
-
-
-@pytest.fixture
-def sample_image(sample_image_path):
-    image = cv2.imread(sample_image_path)
-    assert image is not None, f"Image not found at {sample_image_path}"
-    return image
 
 
 class TestCNN:
@@ -36,10 +25,11 @@ class TestCNN:
         ("single_image", lambda _, img: img),       # Single image
         ("list_of_images", lambda _, img: [img]),   # List of images
     ])
-    def test_prediction(self, detector, sample_image_path,
-                        sample_image, test_case):
+    def test_prediction(self, detector, sample_frame_gs, test_case):
+        detector.load_image = Mock()
+        detector.load_image.return_value = sample_frame_gs
         case_name, input_data_factory = test_case
-        input_data = input_data_factory(sample_image_path, sample_image)
+        input_data = input_data_factory('dummy.jpg', sample_frame_gs)
 
         result, failed_rate = detector.predict(input_data)
 
