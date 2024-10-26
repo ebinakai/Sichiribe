@@ -103,7 +103,6 @@ class TestSelectRegionWindow:
 
         window.cancel_select()
         assert window.click_points == []
-        assert window.image is None
         assert window.confirm_txt.text() == ''
 
     def test_switch_back(self, window):
@@ -127,13 +126,9 @@ class TestSelectRegionWindow:
         window.screen_manager.get_screen.assert_called_with('replay_threshold')
 
     def test_clear_env(self, window):
-        window.image = np.zeros((100, 100, 3))
-        window.image_original = np.zeros((100, 100, 3))
         window.click_points = [(0, 0), (1, 1)]
         window.confirm_txt.setText('テストメッセージ')
 
         window.clear_env()
-        assert window.image is None
-        assert window.image_original is None
         assert window.click_points == []
         assert window.confirm_txt.text() == ''

@@ -2,7 +2,7 @@ import logging
 import json
 import csv
 import os
-from typing import Union
+from typing import Union, List, Dict, Any
 from cores.common import get_now_str
 
 
@@ -35,7 +35,7 @@ class Exporter:
 
         self.logger.debug("Exporter loaded.")
 
-    def export(self, data: Union[list, dict]) -> None:
+    def export(self, data: List[Any] | Dict) -> None:
         self.save(data)
 
     # ファイル名を時刻を含めて生成
@@ -44,7 +44,7 @@ class Exporter:
         filename = f"{self.base_filename}_{now}.{extension}"
         return os.path.join(self.out_dir, filename)
 
-    def to_csv(self, data: list) -> None:
+    def to_csv(self, data: List[Dict] | List | Dict) -> None:
         if not data:
             self.logger.debug("No data to export.")
             return
@@ -56,7 +56,7 @@ class Exporter:
             dict_writer.writerows(data)
         self.logger.debug("Exported data to csv.")
 
-    def to_json(self, data: Union[dict, list]) -> None:
+    def to_json(self, data: Union[Dict, List]) -> None:
         if not data:
             self.logger.debug("No data to export.")
             return

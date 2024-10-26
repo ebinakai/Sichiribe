@@ -1,13 +1,13 @@
 import pytest
-from unittest.mock import MagicMock, patch
+from unittest.mock import Mock, patch
 from gui.views.replay_exe_view import ReplayExeWindow
 
 
 @pytest.fixture
 def window(qtbot):
-    screen_manager = MagicMock()
+    screen_manager = Mock()
     window = ReplayExeWindow(screen_manager)
-    window.worker = MagicMock()
+    window.worker = Mock()
     window.params = {}
     window.graph_results = []
     window.graph_failed_rates = []
@@ -25,9 +25,9 @@ class TestMethods:
 
     @patch('gui.views.replay_exe_view.FrameEditor')
     def test_startup(self, mock_frame_editor, window):
-        extracted_frame = MagicMock()
-        window.graph_label = MagicMock()
-        mock_frame_editor_instance = MagicMock()
+        extracted_frame = Mock()
+        window.graph_label = Mock()
+        mock_frame_editor_instance = Mock()
         mock_frame_editor_instance.frame_devide.return_value = extracted_frame
         mock_frame_editor.return_value = mock_frame_editor_instance
         test_params = {
@@ -55,10 +55,10 @@ class TestMethods:
     @patch('gui.views.replay_exe_view.export_result')
     @patch('gui.views.replay_exe_view.export_params')
     def test_export_process(self, export_params, export_result, window):
-        export_result = MagicMock()
-        export_params = MagicMock()
-        window.screen_manager.popup = MagicMock()
-        window.screen_manager.show_screen = MagicMock()
+        export_result = Mock()
+        export_params = Mock()
+        window.screen_manager.popup = Mock()
+        window.screen_manager.show_screen = Mock()
         window.params = {'out_dir': 'test'}
 
         window.export_process(window.params)
@@ -72,9 +72,11 @@ class TestMethods:
 @pytest.mark.usefixtures("prevent_window_show")
 class TestUserActions:
     def test_cancel_action(self, window):
+        window.dt_worker = Mock()
+
         window.cancel()
 
-        window.worker.cancel.assert_called_once()
+        window.dt_worker.cancel.assert_called_once()
         assert window.term_label.text() == "中止中..."
 
 
@@ -82,7 +84,7 @@ class TestUserActions:
 class TestWorkerCallback:
     @patch('gui.views.replay_exe_view.FrameDivideWorker')
     def test_frame_devide_process(self, worker_class, window):
-        worker_instance = MagicMock()
+        worker_instance = Mock()
         worker_class.return_value = worker_instance
 
         window.frame_devide_process({"test": "test"})
@@ -96,7 +98,7 @@ class TestWorkerCallback:
     def test_frame_devide_finished(self, window):
         frames = ['frame1', 'frame2']
         timestamps = ['00:01', '00:02']
-        window.detect_process = MagicMock()
+        window.detect_process = Mock()
 
         window.frame_devide_finished(frames, timestamps)
 
@@ -106,7 +108,7 @@ class TestWorkerCallback:
 
     @patch('gui.views.replay_exe_view.DetectWorker')
     def test_detect_process(self, worker_class, window):
-        worker_instance = MagicMock()
+        worker_instance = Mock()
         worker_class.return_value = worker_instance
 
         window.detect_process()
@@ -122,7 +124,7 @@ class TestWorkerCallback:
             window.model_not_found)
 
     def test_model_not_found(self, window):
-        window.clear_env = MagicMock()
+        window.clear_env = Mock()
 
         window.model_not_found()
 
@@ -130,7 +132,7 @@ class TestWorkerCallback:
         window.screen_manager.show_screen.assert_called_once_with('menu')
 
     def test_detect_progress(self, window):
-        window.update_graph = MagicMock()
+        window.update_graph = Mock()
         window.results = []
         window.failed_rates = []
 
@@ -141,7 +143,7 @@ class TestWorkerCallback:
         window.update_graph.assert_called_once()
 
     def test_detect_finished(self, window):
-        window.export_process = MagicMock()
+        window.export_process = Mock()
         window.results = [1, 2, 3]
         window.failed_rates = [0.1, 0.2, 0.3]
         window.params = {
@@ -155,7 +157,7 @@ class TestWorkerCallback:
         window.export_process.assert_called_once()
 
     def test_detect_cancelled(self, window):
-        window.term_label = MagicMock()
+        window.term_label = Mock()
         window.params = {'timestamps': ['00:01', '00:02', '00:03']}
         window.results = [1]
 
@@ -165,7 +167,7 @@ class TestWorkerCallback:
         assert len(window.params['timestamps']) == len(window.results)
 
     def test_update_graph(self, window):
-        window.graph_label = MagicMock()
+        window.graph_label = Mock()
         window.update_graph(1, 0.2, "00:03")
 
         assert window.graph_results[-1] == 1

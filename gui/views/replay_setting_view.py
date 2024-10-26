@@ -126,4 +126,4 @@ class ReplaySettingWindow(QWidget):
                     self.video_path.text()),
                 get_now_str())}
 
-        self.screen_manager.get_screen('replay_exe').startup(params)
+        self.screen_manager.get_screen('replay_exe').startup(params) 

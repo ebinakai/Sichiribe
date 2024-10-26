@@ -135,4 +135,4 @@ class LiveSettingWindow(QWidget):
         }
 
         self.logger.debug("Starting live feed with params: %s", params)
-        self.screen_manager.get_screen('live_feed').startup(params)
+        self.screen_manager.get_screen('live_feed').startup(params) 

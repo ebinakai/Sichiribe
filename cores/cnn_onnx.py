@@ -1,9 +1,10 @@
 from cores.cnn import CNNCore
 import os
 import logging
+from typing import List
 import numpy as np
 from pathlib import Path
-import onnxruntime as ort
+import onnxruntime as ort  # type: ignore
 
 
 class CNNOnnx(CNNCore):
@@ -29,11 +30,11 @@ class CNNOnnx(CNNCore):
         if self.session is None:
             # ONNXランタイムセッションの作成
             self.session = ort.InferenceSession(self.model_path)
-            self.input_name = self.session.get_inputs()[0].name
+            self.input_name = self.session.get_inputs()[0].name  # type: ignore
             self.logger.info("ONNX Model loaded.")
         return True
 
-    def inference_7seg_classifier(self, image: np.ndarray) -> list[int]:
+    def inference_7seg_classifier(self, image: np.ndarray) -> List[int]:
         # 各桁に分割
         preprocessed_images = self.preprocess_image(image)
 
@@ -42,11 +43,12 @@ class CNNOnnx(CNNCore):
             img_ = np.expand_dims(preprocessed_image, axis=0)  # バッチサイズの次元を追加
 
             # ONNX推論
-            output = self.session.run(None, {self.input_name: img_})[0]
+            output = self.session.run(None,   # type: ignore
+                                      {self.input_name: img_})[0]
             predictions.append(output)
 
         # (num_digits, num_classes) 形状に変換
-        predictions = np.array(predictions).squeeze()
-        argmax_indices = predictions.argmax(axis=1)  # 各行に対して最大値のインデックスを取得
+        _predictions = np.array(predictions).squeeze()
+        argmax_indices = _predictions.argmax(axis=1)  # 各行に対して最大値のインデックスを取得
 
         return argmax_indices

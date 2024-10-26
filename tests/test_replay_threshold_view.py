@@ -1,5 +1,5 @@
 import pytest
-from unittest.mock import MagicMock, patch
+from unittest.mock import MagicMock
 from gui.views.replay_threshold_view import ReplayThresholdWindow
 import numpy as np
 

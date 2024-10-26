@@ -18,6 +18,7 @@ from gui.utils.common import convert_cv_to_qimage
 from gui.utils.exporter import export_result, export_params
 from gui.workers.live_detect_worker import DetectWorker
 import logging
+from typing import List, Dict, Optional, Any
 import numpy as np
 
 
@@ -27,6 +28,13 @@ class LiveExeWindow(QWidget):
 
         self.screen_manager = screen_manager
         screen_manager.add_screen('live_exe', self)
+        self.params: Dict[str, Any]
+        self.results: List[int]
+        self.failed_rates: List[float]
+        self.timestamps: List[str]
+        self.graph_results: List[int]
+        self.graph_failed_rates: List[float]
+        self.graph_timestamps: List[str]
 
         self.logger = logging.getLogger('__main__').getChild(__name__)
         self.initUI()
@@ -87,7 +95,7 @@ class LiveExeWindow(QWidget):
             self.term_label.setText('中止中...')
             self.worker.cancel()
 
-    def update_binarize_th(self, value: int) -> None:
+    def update_binarize_th(self, value: Optional[int]) -> None:
         value = None if value == 0 else value
         binarize_th_str = '自動設定' if value is None else str(value)
         self.binarize_th_label.setText(binarize_th_str)
@@ -104,7 +112,8 @@ class LiveExeWindow(QWidget):
 
     def startup(self, params: dict) -> None:
         self.logger.info('Starting LiveExeWindow.')
-        self.screen_manager.get_screen('log').clear_log()
+        screen = self.screen_manager.get_screen('log')
+        screen.clear_log()
         self.screen_manager.show_screen('log')
 
         _p, _s = self.screen_manager.save_screen_size()
@@ -195,12 +204,5 @@ class LiveExeWindow(QWidget):
         self.graph_label.clear()
         self.extracted_label.clear()
         self.term_label.setText('')
-        self.params = None
-        self.results = None
-        self.failed_rates = None
-        self.timestamps = None
-        self.graph_results = None
-        self.graph_failed_rates = None
-        self.graph_timestamps = None
         self.logger.info("Environment cleared.")
         self.screen_manager.restore_screen_size()

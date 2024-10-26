@@ -12,8 +12,9 @@ from PySide6.QtGui import QPixmap
 from gui.utils.screen_manager import ScreenManager
 from gui.utils.common import convert_cv_to_qimage
 from cores.frame_editor import FrameEditor
-from cores.detector import Detector
+from cores.cnn import CNNCore as Detector
 import logging
+from typing import Optional
 import numpy as np
 
 
@@ -23,9 +24,9 @@ class ReplayThresholdWindow(QWidget):
 
         self.screen_manager = screen_manager
         screen_manager.add_screen('replay_threshold', self)
-
+        self.threshold: Optional[int]
         self.fe = FrameEditor()
-        self.dt = Detector()
+        self.dt = Detector(4)
 
         self.logger = logging.getLogger('__main__').getChild(__name__)
         self.initUI()
@@ -89,6 +90,13 @@ class ReplayThresholdWindow(QWidget):
             self.threshold)
         self.binarize_th_label.setText(binarize_th_str)
 
+        if self.first_frame is None:
+            self.logger.error("Frame lost.")
+            self.clear_env()
+            self.screen_manager.restore_screen_size()
+            self.screen_manager.show_screen('menu')
+            return
+
         image_bin = self.dt.preprocess_binarization(
             self.first_frame, self.threshold)
         self.display_extract_image(image_bin)
@@ -104,11 +112,8 @@ class ReplayThresholdWindow(QWidget):
 
         self.screen_manager.get_screen(
             'replay_exe').frame_devide_process(self.params)
-        self.params = None
 
     def clear_env(self) -> None:
         self.extracted_label.clear()
-        self.first_frame = None
-        self.threshold = None
         self.logger.info('Environment cleared.')
         self.screen_manager.restore_screen_size()

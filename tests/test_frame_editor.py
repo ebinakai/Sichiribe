@@ -92,7 +92,7 @@ class TestFrameEditor:
             ordered_points = frame_editor.order_points(sample_click_points)
 
             assert np.array_equal(ordered_points, expected_points)
-        assert isinstance(ordered_points, np.ndarray)
+        assert isinstance(ordered_points, list)
 
     def test_crop(self, frame_editor, sample_frame, sample_click_points):
         cropped = frame_editor.crop(sample_frame, sample_click_points)

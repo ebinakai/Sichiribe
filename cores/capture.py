@@ -2,6 +2,7 @@ import cv2
 import numpy as np
 import time
 import logging
+from typing import Optional
 
 
 class FrameCapture:
@@ -34,18 +35,19 @@ class FrameCapture:
         cv2.destroyAllWindows()
         cv2.waitKey(1)
 
-    def capture(self) -> np.ndarray:
+    def capture(self) -> Optional[np.ndarray]:
         ret, frame = self.cap.read()
         if ret:
             return frame
         else:
             self.logger.error("Failed to capture frame")
+            return None
 
     def release(self) -> None:
         self.cap.release()
         cv2.destroyAllWindows()
 
-    def set_cap_size(self, width: int, height: int) -> tuple[int, int]:
+    def set_cap_size(self, width: float, height: float) -> tuple[float, float]:
         self.cap.set(cv2.CAP_PROP_FRAME_WIDTH, width)
         self.cap.set(cv2.CAP_PROP_FRAME_HEIGHT, height)
         self.logger.debug(

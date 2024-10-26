@@ -1,10 +1,11 @@
 import logging
-from typing import Optional, Union
+from typing import Optional, Union, Any
 import cv2
 import numpy as np
+from abc import ABC, abstractmethod
 
 
-class Detector():
+class Detector(ABC):
     def __init__(self) -> None:
         self.logger = logging.getLogger("__main__").getChild(__name__)
 
@@ -19,7 +20,8 @@ class Detector():
 
         return image_gs
 
-    def predict(self):
+    @abstractmethod
+    def predict(self, *args, **kwargs) -> Any:
         raise NotImplementedError(
             "This method must be implemented in the subclass")
 

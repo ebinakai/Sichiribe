@@ -7,6 +7,7 @@
 '''
 
 import logging
+from typing import List
 import numpy as np
 from PySide6.QtWidgets import QApplication, QLabel, QVBoxLayout, QHBoxLayout, QWidget, QPushButton, QSizePolicy
 from PySide6.QtGui import QPixmap, QMouseEvent
@@ -24,7 +25,8 @@ class RegionSelectWindow(QWidget):
 
         self.screen_manager = screen_manager
         screen_manager.add_screen('region_select', self)
-        self.click_points = []
+        self.click_points: List = []
+        self.image_size: QSize
 
         screen = QApplication.primaryScreen()
         screen_rect = screen.availableGeometry()
@@ -136,8 +138,7 @@ class RegionSelectWindow(QWidget):
         extract_image = self.fe.crop(
             self.image_original, np.array(
                 self.click_points) / self.resize_scale)
-        image, extract_image = self.fe.draw_debug_info(
-            image, extract_image, self.click_points)
+        image, extract_image = self.fe.draw_debug_info(image, extract_image, self.click_points)
         height, width, channel = self.image.shape
         self.image_size = QSize(width, height)
         self.display_image(image)
@@ -186,9 +187,11 @@ class RegionSelectWindow(QWidget):
         if self.prev_screen == 'replay_exe':
             self.screen_manager.show_screen('replay_setting')
         elif self.prev_screen == 'live_feed':
-            self.screen_manager.get_screen('live_feed').startup(self.params)
-        self.prev_screen = None
-        self.params = None
+            screen = self.screen_manager.get_screen('live_feed')
+            screen.startup(self.params) 
+        else :
+            raise ValueError('Invalid previous screen.')
+        self.prev_screen = ''
 
     def switch_next(self) -> None:
         self.logger.debug("Switching to next screen(%s).", self.prev_screen)
@@ -197,18 +200,14 @@ class RegionSelectWindow(QWidget):
                 'replay_threshold').startup(self.params)
         elif self.prev_screen == 'live_feed':
             self.screen_manager.get_screen('live_exe').startup(self.params)
-        self.prev_screen = None
-        self.params = None
+        else :
+            raise ValueError('Invalid previous screen.')
+        self.prev_screen = ''
 
     def clear_env(self) -> None:
         self.main_label.clear()
         self.extracted_label.clear()
-        self.target_width = None
-        self.target_height = None
-        self.image = None
-        self.image_original = None
         self.click_points = []
         self.confirm_txt.setText('')
-        self.fe = None
         self.logger.info('Environment cleared.')
         self.screen_manager.restore_screen_size()

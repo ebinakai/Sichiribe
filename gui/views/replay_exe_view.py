@@ -20,7 +20,7 @@ from gui.workers.frame_devide_worker import FrameDivideWorker
 from gui.workers.replay_detect_worker import DetectWorker
 from cores.frame_editor import FrameEditor
 import logging
-from typing import List, Union
+from typing import List, Dict, Union, Any
 import numpy as np
 
 
@@ -30,6 +30,12 @@ class ReplayExeWindow(QWidget):
 
         self.screen_manager = screen_manager
         screen_manager.add_screen('replay_exe', self)
+        self.params: Dict[str, Any]
+        self.results: List[int]
+        self.failed_rates: List[float]
+        self.graph_results: List[int]
+        self.graph_failed_rates: List[float]
+        self.graph_timestamps: List[str]
 
         self.logger = logging.getLogger('__main__').getChild(__name__)
         self.initUI()
@@ -62,9 +68,9 @@ class ReplayExeWindow(QWidget):
         main_layout.addLayout(footer_layout)
 
     def cancel(self) -> None:
-        if self.worker is not None:
+        if self.dt_worker is not None:
             self.term_label.setText('中止中...')
-            self.worker.cancel()
+            self.dt_worker.cancel()
 
     def startup(self, params: dict) -> None:
         self.graph_label.gen_graph(
@@ -93,17 +99,18 @@ class ReplayExeWindow(QWidget):
                                            extract_single_frame=True)
         self.params['first_frame'] = first_frame
 
-        self.screen_manager.get_screen(
-            'region_select').startup(self.params, 'replay_exe')
+        screen = self.screen_manager.get_screen('region_select')
+        screen.startup(self.params, 'replay_exe') 
 
     def frame_devide_process(self, params: dict) -> None:
         self.params = params
-        self.screen_manager.get_screen('log').clear_log()
+        screen = self.screen_manager.get_screen('log')
+        screen.clear_log()
         self.screen_manager.show_screen('log')
 
-        self.worker = FrameDivideWorker(params)
-        self.worker.end.connect(self.frame_devide_finished)
-        self.worker.start()
+        self.fd_worker = FrameDivideWorker(params)
+        self.fd_worker.end.connect(self.frame_devide_finished)
+        self.fd_worker.start()
         self.logger.info('Frame Devide started.')
 
     def frame_devide_finished(
@@ -115,12 +122,12 @@ class ReplayExeWindow(QWidget):
         self.detect_process()
 
     def detect_process(self) -> None:
-        self.worker = DetectWorker(self.params)
-        self.worker.progress.connect(self.detect_progress)
-        self.worker.finished.connect(self.detect_finished)
-        self.worker.cancelled.connect(self.detect_cancelled)
-        self.worker.model_not_found.connect(self.model_not_found)
-        self.worker.start()
+        self.dt_worker = DetectWorker(self.params)
+        self.dt_worker.progress.connect(self.detect_progress)
+        self.dt_worker.finished.connect(self.detect_finished)
+        self.dt_worker.cancelled.connect(self.detect_cancelled)
+        self.dt_worker.model_not_found.connect(self.model_not_found)
+        self.dt_worker.start()
         self.logger.info('Detect started.')
 
     def model_not_found(self) -> None:
@@ -173,12 +180,5 @@ class ReplayExeWindow(QWidget):
     def clear_env(self) -> None:
         self.graph_label.clear()
         self.term_label.setText('')
-        self.params = None
-        self.results = None
-        self.failed_rates = None
-        self.graph_results = None
-        self.graph_failed_rates = None
-        self.graph_timestamps = None
-        self.fe = None
         self.logger.info('Environment cleared.')
         self.screen_manager.restore_screen_size()

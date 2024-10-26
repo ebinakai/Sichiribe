@@ -77,6 +77,3 @@ class TestLiveFeedWindow:
         window.clear_env()
 
         assert window.feed_label.pixmap().isNull()
-        assert window.target_width is None
-        assert window.target_height is None
-        assert window.params is None

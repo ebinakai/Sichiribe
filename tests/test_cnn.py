@@ -1,6 +1,5 @@
 import pytest
 from unittest.mock import Mock
-import cv2
 from cores.cnn import CNNCore, select_cnn_model
 
 

@@ -29,7 +29,7 @@ class CNN(CNNCore):
             return False
 
         if self.model is None:
-            from tensorflow.keras.models import load_model
+            from tensorflow.keras.models import load_model  # type: ignore
             self.model = load_model(self.model_path)
         self.logger.info("CNN Model loaded.")
         return True
@@ -38,7 +38,7 @@ class CNN(CNNCore):
         # 各桁に分割
         preprocessed_images = self.preprocess_image(image)
 
-        predictions = self.model.predict(
+        predictions = self.model.predict(  # type: ignore
             np.array(preprocessed_images),
             verbose=0)  # verbose=0: ログ出力を抑制
 

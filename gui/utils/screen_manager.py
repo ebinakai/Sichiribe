@@ -8,9 +8,9 @@
 
 from PySide6.QtWidgets import QApplication, QStackedWidget, QWidget, QMainWindow, QMessageBox
 from PySide6.QtGui import QPalette
-from PySide6.QtCore import QEventLoop, QTimer
+from PySide6.QtCore import QEventLoop, QTimer, QPoint, QSize
 import logging
-
+from typing import Tuple, Dict, Optional
 
 class ScreenManager:
     def __init__(
@@ -20,7 +20,9 @@ class ScreenManager:
         self.stacked_widget = stacked_widget
         self.main_window = main_window
         self.logger = logging.getLogger('__main__').getChild(__name__)
-        self.screens = {}
+        self.screens: Dict[str, QWidget] = {}
+        self.window_pos: Optional[QPoint] = None
+        self.window_size: Optional[QSize] = None
 
     def add_screen(self, name: str, widget: QWidget) -> None:
         self.screens[name] = widget
@@ -37,10 +39,9 @@ class ScreenManager:
         if name in self.screens:
             return self.screens[name]
         else:
-            self.logger.error(f"Screen '{name}' not found")
-            return None
+            raise ValueError(f"Screen '{name}' not found")
 
-    def check_if_dark_mode(self) -> None:
+    def check_if_dark_mode(self) -> bool:
         palette = QApplication.palette()
         return palette.color(QPalette.ColorRole.Window).value() < 128
 
@@ -51,7 +52,7 @@ class ScreenManager:
         self.logger.info("Quitting application")
         QApplication.quit()
 
-    def save_screen_size(self) -> None:
+    def save_screen_size(self) -> Tuple[QPoint, QSize]:
         self.window_pos = self.main_window.frameGeometry().topLeft()
         self.window_size = self.main_window.size()
         return self.window_pos, self.window_size
@@ -79,7 +80,7 @@ class ScreenManager:
 
         msg_box = QMessageBox(self.main_window)
         msg_box.setText(message)
-        msg_box.setStandardButtons(QMessageBox.Ok)
+        msg_box.setStandardButtons(QMessageBox.StandardButton.Ok)
 
         # 同期処理または非同期処理
         if is_modal:

@@ -29,7 +29,7 @@ class CNNLite(CNNCore):
             return False
 
         if self.model is None:
-            import tflite_runtime.interpreter as tflite
+            import tflite_runtime.interpreter as tflite  # type: ignore
             # TensorFlow Lite モデルの読み込み
             self.model = tflite.Interpreter(model_path=self.model_path)
             self.model.allocate_tensors()
@@ -48,14 +48,16 @@ class CNNLite(CNNCore):
         for preprocessed_image in preprocessed_images:
             img_ = np.expand_dims(preprocessed_image, axis=0)  # バッチサイズの次元を追加
 
-            self.model.set_tensor(self.input_details[0]['index'], img_)
-            self.model.invoke()
-            output_data = self.model.get_tensor(
+            self.model.set_tensor(  # type: ignore
+                self.input_details[0]['index'],
+                img_)
+            self.model.invoke()  # type: ignore
+            output_data = self.model.get_tensor(  # type: ignore
                 self.output_details[0]['index'])
             predictions.append(output_data)
 
         # (num_digits, num_classes) 形状に変換
-        predictions = np.array(predictions).squeeze()
-        argmax_indices = predictions.argmax(axis=1)  # 各行に対して最大値のインデックスを取得
+        _predictions = np.array(predictions).squeeze()
+        argmax_indices = _predictions.argmax(axis=1)    # 各行に対して最大値のインデックスを取得
 
         return argmax_indices

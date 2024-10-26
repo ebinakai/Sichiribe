@@ -1,5 +1,5 @@
 import pytest
-from unittest.mock import MagicMock, patch
+from unittest.mock import MagicMock
 from gui.views.live_setting_view import LiveSettingWindow
 
 

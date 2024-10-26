@@ -20,6 +20,8 @@ import numpy as np
 class LiveFeedWindow(QWidget):
     def __init__(self, screen_manager: ScreenManager) -> None:
         super().__init__()
+        self.results: List[int]
+        self.failed_rates: List[float]
 
         self.screen_manager = screen_manager
         screen_manager.add_screen('live_feed', self)
@@ -86,8 +88,8 @@ class LiveFeedWindow(QWidget):
 
         # 表示画像サイズを計算
         window_rect = self.geometry()
-        self.target_width = int(window_rect.width() * 0.8)
-        self.target_height = int(window_rect.height() * 0.8)
+        self.target_width = window_rect.width() * 0.8
+        self.target_height = window_rect.height() * 0.8
         self.logger.debug(
             'window width: %d window height: %d' %
             (window_rect.width(), window_rect.height()))
@@ -119,8 +121,7 @@ class LiveFeedWindow(QWidget):
         self.params['first_frame'] = first_frame
         params = self.params
         self.clear_env()
-        QTimer.singleShot(10, lambda: self.screen_manager.get_screen(
-            'region_select').startup(params, 'live_feed'))
+        QTimer.singleShot(10, lambda: self.screen_manager.get_screen('region_select').startup(params, 'live_feed'))
 
     def feed_cancelled(self) -> None:
         self.clear_env()
@@ -137,8 +138,5 @@ class LiveFeedWindow(QWidget):
 
     def clear_env(self) -> None:
         self.feed_label.clear()
-        self.target_width = None
-        self.target_height = None
-        self.params = None
         self.logger.info('Environment cleared.')
         self.screen_manager.restore_screen_size()

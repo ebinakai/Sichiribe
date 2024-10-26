@@ -1,5 +1,4 @@
 import pytest
-from unittest.mock import patch
 from PySide6.QtWidgets import QStackedWidget
 from gui.views.main_view import MainWindow
 

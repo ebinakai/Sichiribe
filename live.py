@@ -90,14 +90,17 @@ def main(device,
     fc.show_camera_feed()
 
     frame = fc.capture()
+    if frame is None:
+        logger.error("Failed to capture the frame.")
+        return
     click_points = fe.region_select(frame)
 
     start_time = time.time()
     end_time = time.time() + total_sampling_sec
     frame_count = 0
-    timestamps = []
-    results = []
-    failed_rates = []
+    timestamps = list()
+    results = list()
+    failed_rates = list()
     while time.time() < end_time:
         temp_time = time.time()
         frames = []
@@ -109,6 +112,8 @@ def main(device,
                 continue
 
             cropped_frame = fe.crop(frame, click_points)
+            if cropped_frame is None:
+                continue
             frames.append(cropped_frame)
 
             if save_frame:
@@ -126,8 +131,8 @@ def main(device,
             failed_rates.append(failed_rate)
 
             # タイムスタンプを "HH:MM:SS" 形式で生成
-            elapsed_time = int(time.time() - start_time)
-            timestamp = timedelta(seconds=elapsed_time)
+            elapsed_time = time.time() - start_time
+            timestamp = timedelta(seconds=int(elapsed_time))
             timestamps.append(str(timestamp))
 
         elapsed_time = time.time() - temp_time

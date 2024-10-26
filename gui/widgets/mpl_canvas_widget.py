@@ -16,7 +16,7 @@ from matplotlib import pyplot as plt
 from matplotlib.figure import Figure
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg
 import logging
-from typing import Optional, List, Union
+from typing import Optional, List, Union, cast
 logging.getLogger('matplotlib').setLevel(logging.ERROR)
 
 
@@ -84,13 +84,13 @@ class MplCanvas(FigureCanvasQTAgg):
         self.axes1.set_ylim(-0.1, 1.1)
 
         lines = [self.line1, self.line2]
-        self.axes1.legend(lines, [line.get_label()
+        self.axes1.legend(lines, [cast(str, line.get_label()) 
                           for line in lines], loc='upper left')
 
         self.draw()
 
     def update_existing_plot(
-            self, x_val: List[str], y_val1: List[Union[int, float]], y_val2: List[Union[int, float]]) -> None:
+            self, x_val: List[str], y_val1: Union[List[int], List[float]], y_val2: Union[List[int], List[float]]) -> None:
         # 時間データを数値に変換
         x_val_datetime = [datetime.strptime(t, '%H:%M:%S') for t in x_val]
         x_val_num = mdates.date2num(x_val_datetime)

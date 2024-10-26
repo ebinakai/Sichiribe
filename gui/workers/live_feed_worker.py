@@ -20,7 +20,7 @@ class LiveFeedWorker(QThread):
     cancelled = Signal()
     error = Signal()
 
-    def __init__(self, params: dict, width: int, height: int) -> None:
+    def __init__(self, params: dict, width: float, height: float) -> None:
         super().__init__()
         self.params = params
         self.width = width

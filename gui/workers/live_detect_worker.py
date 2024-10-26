@@ -17,6 +17,7 @@ from PySide6.QtCore import Signal, QThread
 from cores.capture import FrameCapture
 from cores.frame_editor import FrameEditor
 import logging
+from typing import Optional
 import time
 from datetime import timedelta
 import os
@@ -39,7 +40,7 @@ class DetectWorker(QThread):
         self.params = params
         self.logger = logging.getLogger('__main__').getChild(__name__)
         self._is_cancelled = False  # 停止フラグ
-        self.binarize_th = None
+        self.binarize_th: Optional[int] = None
         self._is_capturing = True
 
     def run(self) -> None:
@@ -79,8 +80,8 @@ class DetectWorker(QThread):
                 return None
 
             # タイムスタンプを "HH:MM:SS" 形式で生成
-            elapsed_time = int(time.time() - start_time)
-            timestamp = timedelta(seconds=elapsed_time)
+            elapsed_time = time.time() - start_time
+            timestamp = timedelta(seconds=int(elapsed_time))
             timestamp_str = str(timestamp)
             timestamps.append(timestamp_str)
 
@@ -94,6 +95,9 @@ class DetectWorker(QThread):
 
                 cropped_frame = self.fe.crop(
                     frame, self.params['click_points'])
+                if cropped_frame is None:
+                    self.logger.error("Failed to crop the frame.")
+                    continue
                 frames.append(cropped_frame)
 
                 image_bin = self.dt.preprocess_binarization(
@@ -128,7 +132,7 @@ class DetectWorker(QThread):
         self.logger.info("DetectWorker terminating...")
         self._is_cancelled = True
 
-    def update_binarize_th(self, value: int) -> None:
+    def update_binarize_th(self, value: Optional[int]) -> None:
         self.binarize_th = value
         self.logger.info(f"Update binarize_th: {self.binarize_th}")
 
@@ -136,7 +140,12 @@ class DetectWorker(QThread):
             frame = self.fc.capture()
             if frame is None:
                 self.logger.debug("Frame missing.")
+                return None
+
             cropped_frame = self.fe.crop(frame, self.params['click_points'])
+            if cropped_frame is None:
+                self.logger.debug("Failed to crop the frame.")
+                return None
             image_bin = self.dt.preprocess_binarization(
                 cropped_frame, self.binarize_th)
             self.send_image.emit(image_bin)

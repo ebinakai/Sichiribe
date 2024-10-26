@@ -1,5 +1,5 @@
 import pytest
-from unittest.mock import MagicMock, patch
+from unittest.mock import MagicMock
 from gui.utils.screen_manager import ScreenManager
 from gui.views.log_view import LogWindow
 
