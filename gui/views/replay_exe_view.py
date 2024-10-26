@@ -124,7 +124,6 @@ class ReplayExeWindow(QWidget):
         self.logger.info('Detect started.')
 
     def model_not_found(self) -> None:
-        self.term_label.setText('モデルが見つかりません')
         self.logger.error('Model not found.')
         self.clear_env()
         self.screen_manager.show_screen('menu')

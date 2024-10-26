@@ -4,12 +4,6 @@ from gui.views.replay_threshold_view import ReplayThresholdWindow
 import numpy as np
 
 
-@pytest.fixture(autouse=True)
-def prevent_window_show():
-    with patch('PySide6.QtWidgets.QWidget.show'):
-        yield
-
-
 @pytest.fixture
 def window(qtbot):
     screen_manager = MagicMock()
@@ -24,22 +18,25 @@ def window(qtbot):
     return window
 
 
-def test_initial_ui_state(window):
-    assert window.binarize_th.value() == 0
-    assert window.binarize_th_label.text() == '自動設定'
-    assert window.extracted_label.pixmap() is not None
+@pytest.mark.usefixtures("prevent_window_show")
+class TestReplayThresholdWindow:
+    def test_initial_ui_state(self, window):
+        assert window.binarize_th.value() == 0
+        assert window.binarize_th_label.text() == '自動設定'
+        assert window.extracted_label.pixmap() is not None
 
+    def test_threshold_update(self, window):
+        window.binarize_th.setValue(128)
+        assert window.binarize_th_label.text() == '128'
+        assert window.extracted_label.pixmap().isNull() == False
 
-def test_threshold_update(window):
-    window.binarize_th.setValue(128)
-    assert window.binarize_th_label.text() == '128'
-    assert window.extracted_label.pixmap().isNull() == False
+        window.binarize_th.setValue(0)
+        assert window.binarize_th_label.text() == '自動設定'
 
+    def test_next_button_action(self, window):
+        window.binarize_th.setValue(150)
+        window.next_button.click()
 
-def test_next_button_action(window):
-    window.binarize_th.setValue(150)
-    window.next_button.click()
-
-    window.screen_manager.get_screen.assert_called_with('replay_exe')
-    args, kwargs = window.screen_manager.get_screen().frame_devide_process.call_args
-    assert 'threshold' in args[0], 'Not found binarize_th in args'
+        window.screen_manager.get_screen.assert_called_with('replay_exe')
+        args, kwargs = window.screen_manager.get_screen().frame_devide_process.call_args
+        assert 'threshold' in args[0], 'Not found binarize_th in args'

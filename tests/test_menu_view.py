@@ -1,13 +1,7 @@
 import pytest
 from PySide6.QtCore import Qt
-from unittest.mock import MagicMock, patch
+from unittest.mock import MagicMock
 from gui.views.menu_view import MenuWindow
-
-
-@pytest.fixture(autouse=True)
-def prevent_window_show():
-    with patch('PySide6.QtWidgets.QWidget.show'):
-        yield
 
 
 @pytest.fixture
@@ -19,22 +13,26 @@ def window(qtbot):
     return window
 
 
-def test_buttons_creation(window):
-    assert window.live_button is not None, "Live button is not created"
-    assert window.replay_button is not None, "Replay button is not created"
-    assert window.quit_button is not None, "Quit button is not created"
+@pytest.mark.usefixtures("prevent_window_show")
+class TestMenuWindow:
+    def test_initial_ui_state(self, window):
+        assert window.live_button.text() is not None
+        assert window.replay_button.text is not None
+        assert window.quit_button is not None
 
+    def test_buttons_creation(self, window):
+        assert window.live_button is not None, "Live button is not created"
+        assert window.replay_button is not None, "Replay button is not created"
+        assert window.quit_button is not None, "Quit button is not created"
 
-def test_live_button_click(window, qtbot):
-    qtbot.mouseClick(window.live_button, Qt.LeftButton)
-    window.screen_manager.show_screen.assert_called_with('live_setting')
+    def test_live_button_click(self, window, qtbot):
+        qtbot.mouseClick(window.live_button, Qt.LeftButton)
+        window.screen_manager.show_screen.assert_called_with('live_setting')
 
+    def test_replay_button_click(self, window, qtbot):
+        qtbot.mouseClick(window.replay_button, Qt.LeftButton)
+        window.screen_manager.show_screen.assert_called_with('replay_setting')
 
-def test_replay_button_click(window, qtbot):
-    qtbot.mouseClick(window.replay_button, Qt.LeftButton)
-    window.screen_manager.show_screen.assert_called_with('replay_setting')
-
-
-def test_quit_button_click(window, qtbot):
-    qtbot.mouseClick(window.quit_button, Qt.LeftButton)
-    window.screen_manager.quit.assert_called_once()
+    def test_quit_button_click(self, window, qtbot):
+        qtbot.mouseClick(window.quit_button, Qt.LeftButton)
+        window.screen_manager.quit.assert_called_once()

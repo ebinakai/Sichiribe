@@ -25,7 +25,7 @@ class FrameCapture:
             if frame is None:
                 break
 
-            window_title = "Press 'Y' to finish."
+            window_title = "Press 'y' to finish."
             cv2.imshow(window_title, frame)
 
             if cv2.waitKey(1) & 0xFF == ord('y'):

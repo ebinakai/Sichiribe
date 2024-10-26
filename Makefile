@@ -1,4 +1,4 @@
-.PHONY: format test
+.PHONY: format test help
 
 help:
 	@echo "make format - format the code by autopep8"

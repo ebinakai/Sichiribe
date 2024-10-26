@@ -82,7 +82,7 @@ class LiveFeedWindow(QWidget):
         # 初期化
         self.results = []
         self.failed_rates = []
-        window_pos, window_size = self.screen_manager.save_screen_size()
+        _p, _s = self.screen_manager.save_screen_size()
 
         # 表示画像サイズを計算
         window_rect = self.geometry()

@@ -27,7 +27,7 @@ def sample_click_points():
 
 
 class TestFrameEditor:
-    def test_init(self, frame_editor):
+    def test_initial_ui_state(self, frame_editor):
         assert frame_editor.sampling_sec == 3
         assert frame_editor.num_frames_per_sample == 10
         assert frame_editor.num_digits == 4
@@ -41,12 +41,11 @@ class TestFrameEditor:
         # VideoCaptureのモックを設定
         mock_cap = Mock()
         mock_cap.isOpened.return_value = True
-        mock_cap.get.return_value = 30.0  # fps
+        mock_cap.get.return_value = 30.0
         mock_cap.read.side_effect = [
             (True, sample_frame)] * 100 + [(False, None)]
         mock_video_capture.return_value = mock_cap
 
-        # テスト実行
         frames = frame_editor.frame_devide(
             "dummy.mp4",
             save_frame=False,
@@ -55,19 +54,17 @@ class TestFrameEditor:
 
         assert isinstance(frames, list)
         assert isinstance(frames[0][0], np.ndarray)
-        mock_cap.release.assert_called_once()
+        assert mock_cap.release.called_once()
 
     @patch('cv2.VideoCapture')
     def test_frame_devide_single_frame(
             self, mock_video_capture, frame_editor, sample_frame):
-        # モックの設定
         mock_cap = Mock()
         mock_cap.isOpened.return_value = True
         mock_cap.get.return_value = 30.0
         mock_cap.read.return_value = (True, sample_frame)
         mock_video_capture.return_value = mock_cap
 
-        # テスト実行
         frame = frame_editor.frame_devide(
             "dummy.mp4",
             save_frame=False,
@@ -76,7 +73,7 @@ class TestFrameEditor:
         )
 
         assert isinstance(frame, np.ndarray)
-        mock_cap.release.assert_called_once()
+        assert mock_cap.release.called_once()
 
     def test_generate_timestamp(self, frame_editor):
         n = 5
@@ -88,24 +85,14 @@ class TestFrameEditor:
         assert timestamps[0] == "0:00:00"
         assert timestamps[1] == "0:00:03"
 
-    def test_order_points(self, frame_editor):
-        unordered_points = np.array([
-            [178, 616],  # bottom right
-            [179, 595],  # top right
-            [129, 596],  # top left
-            [128, 617]   # bottom left
-        ])
-        expected_points = np.array([
-            [129, 596],  # top left
-            [179, 595],  # top right
-            [178, 616],  # bottom right
-            [128, 617]   # bottom left
-        ])
+    def test_order_points(self, frame_editor, sample_click_points):
+        expected_points = sample_click_points.copy()
+        for i in range(4):
+            np.random.shuffle(sample_click_points)
+            ordered_points = frame_editor.order_points(sample_click_points)
 
-        ordered_points = frame_editor.order_points(unordered_points)
-
+            assert np.array_equal(ordered_points, expected_points)
         assert isinstance(ordered_points, np.ndarray)
-        assert np.array_equal(ordered_points, expected_points)
 
     def test_crop(self, frame_editor, sample_frame, sample_click_points):
         cropped = frame_editor.crop(sample_frame, sample_click_points)
@@ -135,22 +122,20 @@ class TestFrameEditor:
         assert frame_edited.shape == sample_frame.shape
         assert extract_edited.shape == extract_frame.shape
 
+    @pytest.mark.timeout(0.5)
+    @patch('cv2.namedWindow')
     @patch('cv2.imshow')
     @patch('cv2.waitKey')
     @patch('cv2.destroyAllWindows')
     def test_region_select(self, mock_destroy, mock_wait_key,
-                           mock_imshow, frame_editor, sample_frame):
-        # waitKeyが'y'を返すように設定
+                           mock_imshow, mock_name_window, frame_editor, sample_frame, sample_click_points):
         mock_wait_key.return_value = ord('y')
-
-        # 事前に点を設定
-        frame_editor.click_points = [[0, 0], [100, 0], [100, 100], [0, 100]]
-
+        frame_editor.click_points = sample_click_points.tolist()
         result = frame_editor.region_select(sample_frame)
 
         assert isinstance(result, list)
         assert len(result) == 4
-        mock_destroy.assert_called_once()
+        assert mock_destroy.called_once()
 
     def test_mouse_callback(self, frame_editor):
         frame_editor.mouse_callback(
