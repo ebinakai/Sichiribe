@@ -29,7 +29,7 @@ class LiveSettingWindow(CustomQWidget):
         super().__init__()
         screen_manager.add_screen('live_setting', self)
 
-    def initUI(self) -> None:
+    def initUI(self):
         main_layout = QVBoxLayout()
         form_layout = QFormLayout()
         footer_layout = QHBoxLayout()
@@ -135,4 +135,4 @@ class LiveSettingWindow(CustomQWidget):
         }
 
         self.logger.debug("Starting live feed with params: %s", params)
-        self.screen_manager.get_screen('live_feed').trigger('startup', params) 
+        self.screen_manager.get_screen('live_feed').trigger('startup', params)

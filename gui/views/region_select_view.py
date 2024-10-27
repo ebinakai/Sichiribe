@@ -18,6 +18,7 @@ from cores.frame_editor import FrameEditor
 from gui.utils.common import convert_cv_to_qimage, resize_image
 from gui.widgets.clickable_label import ClickableLabel
 
+
 class RegionSelectWindow(CustomQWidget):
     def __init__(self, screen_manager: ScreenManager) -> None:
         self.logger = logging.getLogger('__main__').getChild(__name__)
@@ -33,7 +34,7 @@ class RegionSelectWindow(CustomQWidget):
         self.target_width = int(screen_rect.width() * 0.8)
         self.target_height = int((screen_rect.height() - 100) * 0.8)
 
-    def initUI(self) -> None:
+    def initUI(self):
         main_layout = QVBoxLayout()
         header_layout = QVBoxLayout()
         image_layout = QVBoxLayout()
@@ -141,7 +142,8 @@ class RegionSelectWindow(CustomQWidget):
         extract_image = self.fe.crop(
             self.image_original, np.array(
                 self.click_points) / self.resize_scale)
-        image, extract_image = self.fe.draw_debug_info(image, extract_image, self.click_points)
+        image, extract_image = self.fe.draw_debug_info(
+            image, extract_image, self.click_points)
         height, width, channel = self.image.shape
         self.image_size = QSize(width, height)
         self.display_image(image)
@@ -190,8 +192,9 @@ class RegionSelectWindow(CustomQWidget):
         if self.prev_screen == 'replay_exe':
             self.screen_manager.show_screen('replay_setting')
         elif self.prev_screen == 'live_feed':
-            self.screen_manager.get_screen('live_feed').trigger('startup', self.params) 
-        else :
+            self.screen_manager.get_screen(
+                'live_feed').trigger('startup', self.params)
+        else:
             raise ValueError('Invalid previous screen.')
         self.prev_screen = ''
 
@@ -201,8 +204,9 @@ class RegionSelectWindow(CustomQWidget):
             self.screen_manager.get_screen(
                 'replay_threshold').trigger('startup', self.params)
         elif self.prev_screen == 'live_feed':
-            self.screen_manager.get_screen('live_exe').trigger('startup', self.params)
-        else :
+            self.screen_manager.get_screen(
+                'live_exe').trigger('startup', self.params)
+        else:
             raise ValueError('Invalid previous screen.')
         self.prev_screen = ''
 

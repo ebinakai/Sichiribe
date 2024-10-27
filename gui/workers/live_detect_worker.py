@@ -25,7 +25,10 @@ import cv2
 import numpy as np
 
 from cores.cnn import select_cnn_model
+start_time = time.time()
 Detector = select_cnn_model()
+end_time = time.time()
+print(f"Time to load model on live: {end_time - start_time:.2f}s")
 
 
 class DetectWorker(QThread):
@@ -59,10 +62,11 @@ class DetectWorker(QThread):
             self.params['cap_size'][0],
             self.params['cap_size'][1])
         self.fe = FrameEditor(num_digits=self.params['num_digits'])
-        self.dt = Detector(self.params['num_digits'])
 
-        if not self.dt.load():
-            self.logger.error("Failed to load the model.")
+        try:
+            self.dt = Detector(self.params['num_digits'])
+        except Exception as e:
+            self.logger.error(f"Failed to load the model: {e}")
             self.model_not_found.emit()
             return None
 

@@ -74,8 +74,6 @@ def main(video_path: str,
     dt = Detector(num_digits)
     ep = Exporter(format, out_dir='results')
 
-    dt.load()
-
     frames = fe.frame_devide(video_path, video_skip_sec, save_frame)
     timestamps = fe.generate_timestamp(len(frames))
 

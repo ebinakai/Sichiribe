@@ -30,7 +30,7 @@ class ReplayThresholdWindow(CustomQWidget):
         super().__init__()
         screen_manager.add_screen('replay_threshold', self)
 
-    def initUI(self) -> None:
+    def initUI(self):
         main_layout = QVBoxLayout()
         extracted_image_layout = QHBoxLayout()
         form_layout = QFormLayout()

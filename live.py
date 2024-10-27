@@ -84,8 +84,6 @@ def main(device,
     dt = Detector(num_digits=num_digits)
     ep = Exporter(format, out_dir='results')
 
-    dt.load()
-
     # 画角を調整するためにカメラフィードを表示
     fc.show_camera_feed()
 

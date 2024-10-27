@@ -39,7 +39,7 @@ class ReplayExeWindow(CustomQWidget):
         super().__init__()
         screen_manager.add_screen('replay_exe', self)
 
-    def initUI(self) -> None:
+    def initUI(self):
         main_layout = QVBoxLayout()
         graph_layout = QVBoxLayout()
         footer_layout = QHBoxLayout()
@@ -104,7 +104,8 @@ class ReplayExeWindow(CustomQWidget):
                                            extract_single_frame=True)
         self.params['first_frame'] = first_frame
 
-        self.screen_manager.get_screen('region_select').trigger('startup', self.params, 'replay_exe') 
+        self.screen_manager.get_screen('region_select').trigger(
+            'startup', self.params, 'replay_exe')
 
     def frame_devide_process(self, params: dict) -> None:
         self.params = params

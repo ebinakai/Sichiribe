@@ -13,6 +13,7 @@ from gui.widgets.custom_qwidget import CustomQWidget
 import logging
 from typing import Tuple, Dict, Optional
 
+
 class ScreenManager:
     def __init__(
             self,

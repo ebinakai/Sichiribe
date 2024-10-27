@@ -29,7 +29,7 @@ class ReplaySettingWindow(CustomQWidget):
         super().__init__()
         screen_manager.add_screen('replay_setting', self)
 
-    def initUI(self) -> None:
+    def initUI(self):
         main_layout = QVBoxLayout()
         form_layout = QFormLayout()
         footer_layout = QHBoxLayout()
@@ -128,4 +128,4 @@ class ReplaySettingWindow(CustomQWidget):
                     self.video_path.text()),
                 get_now_str())}
 
-        self.screen_manager.get_screen('replay_exe').trigger('startup', params) 
+        self.screen_manager.get_screen('replay_exe').trigger('startup', params)

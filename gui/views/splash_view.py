@@ -18,12 +18,12 @@ class SplashScreen(CustomQWidget):
         current_dir = Path(__file__).resolve().parent
         self.image_path = current_dir / '..' / 'images' / 'splash_image.png'
         self.image_path = self.image_path.resolve()
-        
+
         super().__init__()
         self.setWindowFlags(Qt.WindowType.FramelessWindowHint |
                             Qt.WindowType.WindowStaysOnTopHint)
 
-    def initUI(self) -> None:
+    def initUI(self):
         layout = QVBoxLayout()
         label = QLabel()
 
@@ -40,4 +40,3 @@ class SplashScreen(CustomQWidget):
         self.resize(pixmap.width(), pixmap.height())
 
         center_window(self)
-

@@ -1,6 +1,8 @@
+from tensorflow.keras.models import load_model
 from cores.cnn import CNNCore
 import os
 import logging
+from typing import TYPE_CHECKING
 import numpy as np
 from pathlib import Path
 
@@ -9,8 +11,13 @@ os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
 logging.getLogger('tensorflow').setLevel(logging.ERROR)
 logging.getLogger('h5py').setLevel(logging.ERROR)
 
+if TYPE_CHECKING:
+    from tensorflow.keras.models import Model
 
-class CNN(CNNCore):
+
+class CNNTf(CNNCore):
+    model: "Model"
+
     def __init__(self, num_digits: int,
                  model_filename: str = 'model_100x100.keras') -> None:
         super().__init__(num_digits)
@@ -21,24 +28,19 @@ class CNN(CNNCore):
         model_path = current_dir / '..' / 'model' / model_filename
         model_path = model_path.resolve()
         self.model_path = str(model_path)
-
-    def load(self) -> bool:
         self.logger.debug('Load model path: %s' % self.model_path)
+
         if not os.path.exists(self.model_path):
-            self.logger.error('Model file not found.')
-            return False
+            raise FileNotFoundError(f"Model file not found: {self.model_path}")
 
-        if self.model is None:
-            from tensorflow.keras.models import load_model  # type: ignore
-            self.model = load_model(self.model_path)
+        self.model = load_model(self.model_path)
         self.logger.info("CNN Model loaded.")
-        return True
 
-    def inference_7seg_classifier(self, image: np.ndarray) -> list[int]:
+    def inference_7seg_classifier(self, image):
         # 各桁に分割
         preprocessed_images = self.preprocess_image(image)
 
-        predictions = self.model.predict(  # type: ignore
+        predictions = self.model.predict(
             np.array(preprocessed_images),
             verbose=0)  # verbose=0: ログ出力を抑制
 

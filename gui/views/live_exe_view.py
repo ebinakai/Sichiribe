@@ -38,7 +38,7 @@ class LiveExeWindow(CustomQWidget):
         super().__init__()
         screen_manager.add_screen('live_exe', self)
 
-    def initUI(self) -> None:
+    def initUI(self):
         main_layout = QVBoxLayout()
         graph_layout = QVBoxLayout()
         extracted_image_layout = QHBoxLayout()

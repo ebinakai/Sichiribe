@@ -7,6 +7,7 @@
 
 from PySide6.QtWidgets import QWidget
 
+
 class CustomQWidget(QWidget):
     def __init__(self) -> None:
         super().__init__()
@@ -14,6 +15,6 @@ class CustomQWidget(QWidget):
 
     def initUI(self) -> None:
         raise NotImplementedError('initUI() must be implemented in subclass')
-      
+
     def trigger(self, action: str, *args) -> None:
         pass

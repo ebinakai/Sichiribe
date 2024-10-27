@@ -28,11 +28,7 @@ class CNNCore(Detector):
         self.cv2_color_setting = 0    # 同上。cv2.imreadではモノクロ・グレースケールの場合は「0」。カラーの場合は「1」
         self.crop_size = 100          # 画像をトリミングするサイズ
 
-    def inference_7seg_classifier(self, image_bin):
-        raise NotImplementedError(
-            "This method must be implemented in the subclass")
-
-    def load(self):
+    def inference_7seg_classifier(self, image_bin: np.ndarray) -> List[int]:
         raise NotImplementedError(
             "This method must be implemented in the subclass")
 
@@ -110,28 +106,29 @@ class CNNCore(Detector):
 
 def select_cnn_model() -> Type[CNNCore]:
     logger = logging.getLogger("__main__").getChild(__name__)
-    try:
-        # tflite-runtime のインポートを試みる
-        from tflite_runtime.interpreter import Interpreter  # type: ignore
 
+    try:
         from cores.cnn_tflite import CNNLite
-        logger.info("TFLite model selected.")
+        logger.info("TensorFlow Lite Runtime detected. Using TFLite model.")
         return CNNLite
     except ImportError:
-        logger.warning("TFLite runtime not found.")
+        logger.debug(
+            "TensorFlow Lite runtime not found. Attempting to import TensorFlow.")
 
-        try:
-            # TensorFlowのインポートを試みる
-            import tensorflow as tf  # type: ignore
+    try:
+        from cores.cnn_tf import CNNTf
+        logger.info("TensorFlow detected. Using Keras model.")
+        return CNNTf
+    except ImportError:
+        logger.debug(
+            "TensorFlow not found. Attempting to import ONNX Runtime.")
 
-            from cores.cnn_tf import CNN
-            logger.info("Keras model selected.")
-            return CNN
-        except ImportError:
-            logger.warning(
-                "TensorFlow not found. Attempting to use ONNX model.")
-
-            # ONNXモデルを使用する
-            from cores.cnn_onnx import CNNOnnx
-            logger.info("ONNX model selected.")
-            return CNNOnnx
+    try:
+        from cores.cnn_onnx import CNNOnnx
+        logger.info("ONNX Runtime detected. Using ONNX model.")
+        return CNNOnnx
+    except ImportError:
+        logger.error(
+            "No compatible machine learning library found. Cannot select a model.")
+        raise ImportError(
+            "No compatible model library found. Please install TensorFlow Lite, TensorFlow, or ONNX Runtime.")

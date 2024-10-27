@@ -7,16 +7,12 @@ from cores.cnn import CNNCore, select_cnn_model
 def detector():
     Detector = select_cnn_model()
     detector = Detector(num_digits=4)
-    detector.load()
     return detector
 
 
 class TestCNN:
     def test_detector_initialization(self, detector):
         assert isinstance(detector, CNNCore)
-
-    def test_detector_loading(self, detector):
-        assert detector.load()
 
     @pytest.mark.parametrize("test_case", [
         ("single_path", lambda path, _: path),      # Single path

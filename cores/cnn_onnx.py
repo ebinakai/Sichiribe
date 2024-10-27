@@ -1,13 +1,18 @@
 from cores.cnn import CNNCore
 import os
 import logging
-from typing import List
+from typing import TYPE_CHECKING
 import numpy as np
 from pathlib import Path
-import onnxruntime as ort  # type: ignore
+import onnxruntime as ort
+
+if TYPE_CHECKING:
+    from onnxruntime.capi.onnxruntime_inference_collection import InferenceSession
 
 
 class CNNOnnx(CNNCore):
+    model: "InferenceSession"
+
     def __init__(self, num_digits: int,
                  model_filename: str = 'model_100x100.onnx') -> None:
         super().__init__(num_digits)
@@ -18,23 +23,17 @@ class CNNOnnx(CNNCore):
         model_path = current_dir / '..' / 'model' / model_filename
         model_path = model_path.resolve()
         self.model_path = str(model_path)
-        self.model = None
-        self.session = None
-
-    def load(self) -> bool:
         self.logger.debug('Load model path: %s' % self.model_path)
+
         if not os.path.exists(self.model_path):
-            self.logger.error('Model file not found.')
-            return False
+            raise FileNotFoundError(f"Model file not found: {self.model_path}")
 
-        if self.session is None:
-            # ONNXランタイムセッションの作成
-            self.session = ort.InferenceSession(self.model_path)
-            self.input_name = self.session.get_inputs()[0].name  # type: ignore
-            self.logger.info("ONNX Model loaded.")
-        return True
+        # ONNXランタイムセッションの作成
+        self.model = ort.InferenceSession(self.model_path)
+        self.input_name = self.model.get_inputs()[0].name
+        self.logger.info("ONNX Model loaded.")
 
-    def inference_7seg_classifier(self, image: np.ndarray) -> List[int]:
+    def inference_7seg_classifier(self, image):
         # 各桁に分割
         preprocessed_images = self.preprocess_image(image)
 
@@ -43,8 +42,8 @@ class CNNOnnx(CNNCore):
             img_ = np.expand_dims(preprocessed_image, axis=0)  # バッチサイズの次元を追加
 
             # ONNX推論
-            output = self.session.run(None,   # type: ignore
-                                      {self.input_name: img_})[0]
+            output = self.model.run(None,
+                                    {self.input_name: img_})[0]
             predictions.append(output)
 
         # (num_digits, num_classes) 形状に変換

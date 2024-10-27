@@ -32,11 +32,11 @@ class QTextEditLogger(logging.Handler):
 class LogWindow(CustomQWidget):
     def __init__(self, screen_manager: ScreenManager) -> None:
         self.screen_manager = screen_manager
-        
+
         super().__init__()
         screen_manager.add_screen('log', self)
 
-    def initUI(self) -> None:
+    def initUI(self):
         layout = QVBoxLayout()
         self.setLayout(layout)
 

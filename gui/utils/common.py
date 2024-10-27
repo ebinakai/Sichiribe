@@ -60,6 +60,7 @@ def resize_image(image: np.ndarray, target_width: float,
 
     return resized_image, resize_scale
 
+
 def center_window(window: QWidget) -> None:
     screen = QApplication.primaryScreen()
     screen_rect = screen.availableGeometry()

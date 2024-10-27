@@ -112,7 +112,6 @@ curl -L -o model/model_100x100.tflite https://github.com/EbinaKai/Sichiribe/rele
 | `cores/capture.py` | カメラにアクセスする機能 |
 | `cores/frame_editor.py` | 動画のフレームに関する機能及び7セグメント表示器の領域選択機能 |
 | `cores/detector.py` | 7セグ表示器から数字を推測するプログラムの親クラス |
-| `cores/ocr.py` | OCRにて画像から数字を取得するプログラム |
 | `cores/cnn.py` | CNNモデルを用いて画像から数字を取得するプログラムのコア部分 |
 | `cores/cnn.py` | CNNモデルをTensorflowのフルバージョン(.kerasモデル)で動かす場合 |
 | `cores/cnn_lite.py` | CNNモデルをtflite-runtime(.tfliteモデル)で動かす場合 |

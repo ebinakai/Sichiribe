@@ -13,10 +13,14 @@
 from PySide6.QtCore import Signal, QThread
 import logging
 from typing import Dict, Any
+import time
 
 # モデルを読み込む
 from cores.cnn import select_cnn_model
+start_time = time.time()
 Detector = select_cnn_model()
+end_time = time.time()
+print(f"Time to load model on replay: {end_time - start_time:.2f}s")
 
 
 class DetectWorker(QThread):
@@ -27,15 +31,16 @@ class DetectWorker(QThread):
     def __init__(self, params: Dict[str, Any]) -> None:
         super().__init__()
         self.params = params
-        self.dt = Detector(params['num_digits'])
         self.logger = logging.getLogger('__main__').getChild(__name__)
         self._is_cancelled = False
 
     def run(self) -> None:
         self.logger.info("DetectWorker started.")
 
-        if not self.dt.load():
-            self.logger.error("Failed to load the model.")
+        try:
+            self.dt = Detector(self.params['num_digits'])
+        except Exception as e:
+            self.logger.error(f"Failed to load the model: {e}")
             self.model_not_found.emit()
             return None
 
