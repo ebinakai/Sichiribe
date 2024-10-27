@@ -11,8 +11,9 @@
     - メニュー画面に戻る
 '''
 
-from PySide6.QtWidgets import QWidget, QHBoxLayout, QVBoxLayout, QPushButton, QLabel
+from PySide6.QtWidgets import QHBoxLayout, QVBoxLayout, QPushButton, QLabel
 from PySide6.QtCore import Qt
+from gui.widgets.custom_qwidget import CustomQWidget
 from gui.utils.screen_manager import ScreenManager
 from gui.utils.exporter import export_result, export_params
 from gui.widgets.mpl_canvas_widget import MplCanvas
@@ -24,12 +25,10 @@ from typing import List, Dict, Union, Any
 import numpy as np
 
 
-class ReplayExeWindow(QWidget):
+class ReplayExeWindow(CustomQWidget):
     def __init__(self, screen_manager: ScreenManager) -> None:
-        super().__init__()
-
+        self.logger = logging.getLogger('__main__').getChild(__name__)
         self.screen_manager = screen_manager
-        screen_manager.add_screen('replay_exe', self)
         self.params: Dict[str, Any]
         self.results: List[int]
         self.failed_rates: List[float]
@@ -37,8 +36,8 @@ class ReplayExeWindow(QWidget):
         self.graph_failed_rates: List[float]
         self.graph_timestamps: List[str]
 
-        self.logger = logging.getLogger('__main__').getChild(__name__)
-        self.initUI()
+        super().__init__()
+        screen_manager.add_screen('replay_exe', self)
 
     def initUI(self) -> None:
         main_layout = QVBoxLayout()
@@ -66,6 +65,12 @@ class ReplayExeWindow(QWidget):
         main_layout.addLayout(graph_layout)
         main_layout.addStretch()
         main_layout.addLayout(footer_layout)
+
+    def trigger(self, action, *args):
+        if action == 'startup':
+            self.startup(*args)
+        elif action == 'continue':
+            self.frame_devide_process(*args)
 
     def cancel(self) -> None:
         if self.dt_worker is not None:
@@ -99,13 +104,11 @@ class ReplayExeWindow(QWidget):
                                            extract_single_frame=True)
         self.params['first_frame'] = first_frame
 
-        screen = self.screen_manager.get_screen('region_select')
-        screen.startup(self.params, 'replay_exe') 
+        self.screen_manager.get_screen('region_select').trigger('startup', self.params, 'replay_exe') 
 
     def frame_devide_process(self, params: dict) -> None:
         self.params = params
-        screen = self.screen_manager.get_screen('log')
-        screen.clear_log()
+        self.screen_manager.get_screen('log').trigger('clear')
         self.screen_manager.show_screen('log')
 
         self.fd_worker = FrameDivideWorker(params)

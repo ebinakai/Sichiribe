@@ -6,9 +6,10 @@
 3. 次へボタンを押すと、しきい値をパラメータに保存し、次の画面に遷移する
 '''
 
-from PySide6.QtWidgets import QWidget, QHBoxLayout, QVBoxLayout, QFormLayout, QPushButton, QLabel, QSlider
+from PySide6.QtWidgets import QHBoxLayout, QVBoxLayout, QFormLayout, QPushButton, QLabel, QSlider
 from PySide6.QtCore import Qt
 from PySide6.QtGui import QPixmap
+from gui.widgets.custom_qwidget import CustomQWidget
 from gui.utils.screen_manager import ScreenManager
 from gui.utils.common import convert_cv_to_qimage
 from cores.frame_editor import FrameEditor
@@ -18,18 +19,16 @@ from typing import Optional
 import numpy as np
 
 
-class ReplayThresholdWindow(QWidget):
+class ReplayThresholdWindow(CustomQWidget):
     def __init__(self, screen_manager: ScreenManager) -> None:
-        super().__init__()
-
+        self.logger = logging.getLogger('__main__').getChild(__name__)
         self.screen_manager = screen_manager
-        screen_manager.add_screen('replay_threshold', self)
         self.threshold: Optional[int]
         self.fe = FrameEditor()
         self.dt = Detector(4)
 
-        self.logger = logging.getLogger('__main__').getChild(__name__)
-        self.initUI()
+        super().__init__()
+        screen_manager.add_screen('replay_threshold', self)
 
     def initUI(self) -> None:
         main_layout = QVBoxLayout()
@@ -69,6 +68,12 @@ class ReplayThresholdWindow(QWidget):
         main_layout.addLayout(form_layout)
         main_layout.addStretch()
         main_layout.addLayout(footer_layout)
+
+    def trigger(self, action, *args):
+        if action == 'startup':
+            self.startup(*args)
+        else:
+            self.logger.error(f"Invalid action: {action}")
 
     def startup(self, params: dict) -> None:
         self.logger.info('Starting ReplayThresholdWindow.')
@@ -111,7 +116,7 @@ class ReplayThresholdWindow(QWidget):
         self.clear_env()
 
         self.screen_manager.get_screen(
-            'replay_exe').frame_devide_process(self.params)
+            'replay_exe').trigger('continue', self.params)
 
     def clear_env(self) -> None:
         self.extracted_label.clear()

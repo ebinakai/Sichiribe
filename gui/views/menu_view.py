@@ -5,18 +5,20 @@
 2. 処理が終わった場合はこの画面に戻って来る
 '''
 
-from PySide6.QtWidgets import QWidget, QHBoxLayout, QVBoxLayout, QPushButton
+from PySide6.QtWidgets import QHBoxLayout, QVBoxLayout, QPushButton
 from PySide6.QtCore import Qt
+from gui.widgets.custom_qwidget import CustomQWidget
 from gui.utils.screen_manager import ScreenManager
+import logging
 
 
-class MenuWindow(QWidget):
+class MenuWindow(CustomQWidget):
     def __init__(self, screen_manager: ScreenManager) -> None:
-        super().__init__()
-
+        self.logger = logging.getLogger('__main__').getChild(__name__)
         self.screen_manager = screen_manager
+
+        super().__init__()
         screen_manager.add_screen('menu', self)
-        self.initUI()
 
     def initUI(self) -> None:
         main_layout = QVBoxLayout()

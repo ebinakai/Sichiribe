@@ -38,5 +38,5 @@ class TestReplayThresholdWindow:
         window.next_button.click()
 
         window.screen_manager.get_screen.assert_called_with('replay_exe')
-        args, kwargs = window.screen_manager.get_screen().frame_devide_process.call_args
-        assert 'threshold' in args[0], 'Not found binarize_th in args'
+        params = window.screen_manager.get_screen().trigger.call_args[0][1]
+        assert 'threshold' in params, 'Not found binarize_th in args'

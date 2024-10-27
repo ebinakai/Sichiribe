@@ -5,23 +5,23 @@
 2. 表示する画像は、images フォルダ内の splash_image.png を使用
 '''
 
-from PySide6.QtWidgets import QWidget, QLabel, QVBoxLayout
+from PySide6.QtWidgets import QLabel, QVBoxLayout
 from PySide6.QtGui import QPixmap
 from PySide6.QtCore import Qt
 from pathlib import Path
+from gui.widgets.custom_qwidget import CustomQWidget
 from gui.utils.common import center_window
 
 
-class SplashScreen(QWidget):
+class SplashScreen(CustomQWidget):
     def __init__(self) -> None:
-        super().__init__()
-        self.setWindowFlags(Qt.WindowType.FramelessWindowHint |
-                            Qt.WindowType.WindowStaysOnTopHint)
-
         current_dir = Path(__file__).resolve().parent
         self.image_path = current_dir / '..' / 'images' / 'splash_image.png'
         self.image_path = self.image_path.resolve()
-        self.initUI()
+        
+        super().__init__()
+        self.setWindowFlags(Qt.WindowType.FramelessWindowHint |
+                            Qt.WindowType.WindowStaysOnTopHint)
 
     def initUI(self) -> None:
         layout = QVBoxLayout()

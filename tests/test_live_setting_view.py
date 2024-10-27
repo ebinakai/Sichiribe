@@ -46,7 +46,7 @@ class TestLiveSettingWindow:
 
         window.screen_manager.get_screen.assert_called_once_with('live_feed')
         params = window.screen_manager.get_screen(
-            'live_feed').startup.call_args[0][0]
+            'live_feed').trigger.call_args[0][1]
         assert params['device_num'] == 0
         assert params['num_digits'] == 4
         assert params['sampling_sec'] == 10

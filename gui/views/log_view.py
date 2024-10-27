@@ -6,8 +6,9 @@
 3. 処理中で、表示するコンテンツがない場合に使う
 '''
 
-from PySide6.QtWidgets import QWidget, QVBoxLayout, QTextEdit
+from PySide6.QtWidgets import QVBoxLayout, QTextEdit
 from PySide6.QtCore import Signal, QObject
+from gui.widgets.custom_qwidget import CustomQWidget
 from gui.utils.screen_manager import ScreenManager
 import logging
 
@@ -28,12 +29,12 @@ class QTextEditLogger(logging.Handler):
         self.emitter.new_log.emit(log_entry)
 
 
-class LogWindow(QWidget):
+class LogWindow(CustomQWidget):
     def __init__(self, screen_manager: ScreenManager) -> None:
-        super().__init__()
         self.screen_manager = screen_manager
+        
+        super().__init__()
         screen_manager.add_screen('log', self)
-        self.initUI()
 
     def initUI(self) -> None:
         layout = QVBoxLayout()
@@ -51,6 +52,10 @@ class LogWindow(QWidget):
 
         # シグナルとスロットの接続
         self.emitter.new_log.connect(self.append_log)
+
+    def trigger(self, action, *args):
+        if action == 'clear':
+            self.clear_log()
 
     def append_log(self, message: str) -> None:
         self.log_display.append(message)

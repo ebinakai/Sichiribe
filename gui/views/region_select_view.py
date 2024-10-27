@@ -9,30 +9,29 @@
 import logging
 from typing import List
 import numpy as np
-from PySide6.QtWidgets import QApplication, QLabel, QVBoxLayout, QHBoxLayout, QWidget, QPushButton, QSizePolicy
+from PySide6.QtWidgets import QApplication, QLabel, QVBoxLayout, QHBoxLayout, QPushButton, QSizePolicy
 from PySide6.QtGui import QPixmap, QMouseEvent
 from PySide6.QtCore import Qt, QSize, QTimer
+from gui.widgets.custom_qwidget import CustomQWidget
 from gui.utils.screen_manager import ScreenManager
 from cores.frame_editor import FrameEditor
 from gui.utils.common import convert_cv_to_qimage, resize_image
 from gui.widgets.clickable_label import ClickableLabel
 
-class RegionSelectWindow(QWidget):
+class RegionSelectWindow(CustomQWidget):
     def __init__(self, screen_manager: ScreenManager) -> None:
-        super().__init__()
-
         self.logger = logging.getLogger('__main__').getChild(__name__)
-
         self.screen_manager = screen_manager
-        screen_manager.add_screen('region_select', self)
         self.click_points: List = []
         self.image_size: QSize
+
+        super().__init__()
+        screen_manager.add_screen('region_select', self)
 
         screen = QApplication.primaryScreen()
         screen_rect = screen.availableGeometry()
         self.target_width = int(screen_rect.width() * 0.8)
         self.target_height = int((screen_rect.height() - 100) * 0.8)
-        self.initUI()
 
     def initUI(self) -> None:
         main_layout = QVBoxLayout()
@@ -84,6 +83,10 @@ class RegionSelectWindow(QWidget):
         main_layout.addLayout(image_layout)
         main_layout.addLayout(extracted_image_layout)
         main_layout.addLayout(footer_layout)
+
+    def trigger(self, action, *args) -> None:
+        if action == 'startup':
+            self.startup(*args)
 
     def set_image(self, image: np.ndarray) -> None:
         self.image_original = image
@@ -187,8 +190,7 @@ class RegionSelectWindow(QWidget):
         if self.prev_screen == 'replay_exe':
             self.screen_manager.show_screen('replay_setting')
         elif self.prev_screen == 'live_feed':
-            screen = self.screen_manager.get_screen('live_feed')
-            screen.startup(self.params) 
+            self.screen_manager.get_screen('live_feed').trigger('startup', self.params) 
         else :
             raise ValueError('Invalid previous screen.')
         self.prev_screen = ''
@@ -197,9 +199,9 @@ class RegionSelectWindow(QWidget):
         self.logger.debug("Switching to next screen(%s).", self.prev_screen)
         if self.prev_screen == 'replay_exe':
             self.screen_manager.get_screen(
-                'replay_threshold').startup(self.params)
+                'replay_threshold').trigger('startup', self.params)
         elif self.prev_screen == 'live_feed':
-            self.screen_manager.get_screen('live_exe').startup(self.params)
+            self.screen_manager.get_screen('live_exe').trigger('startup', self.params)
         else :
             raise ValueError('Invalid previous screen.')
         self.prev_screen = ''

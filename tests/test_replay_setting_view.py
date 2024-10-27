@@ -38,9 +38,9 @@ class TestReplaySettingWindow:
 
         assert window.confirm_txt.text() == ''
         window.screen_manager.get_screen(
-            'replay_exe').startup.assert_called_once()
+            'replay_exe').trigger.assert_called_once()
         params = window.screen_manager.get_screen(
-            'replay_exe').startup.call_args[0][0]
+            'replay_exe').trigger.call_args[0][1]
 
         assert params['video_path'] == '/dummy/path/video.mp4'
         assert params['num_digits'] == 4

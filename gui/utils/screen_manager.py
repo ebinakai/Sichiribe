@@ -6,9 +6,10 @@
 3. ポップアップメッセージボックスの表示を行う
 '''
 
-from PySide6.QtWidgets import QApplication, QStackedWidget, QWidget, QMainWindow, QMessageBox
+from PySide6.QtWidgets import QApplication, QStackedWidget, QMainWindow, QMessageBox
 from PySide6.QtGui import QPalette
 from PySide6.QtCore import QEventLoop, QTimer, QPoint, QSize
+from gui.widgets.custom_qwidget import CustomQWidget
 import logging
 from typing import Tuple, Dict, Optional
 
@@ -20,11 +21,11 @@ class ScreenManager:
         self.stacked_widget = stacked_widget
         self.main_window = main_window
         self.logger = logging.getLogger('__main__').getChild(__name__)
-        self.screens: Dict[str, QWidget] = {}
+        self.screens: Dict[str, CustomQWidget] = {}
         self.window_pos: Optional[QPoint] = None
         self.window_size: Optional[QSize] = None
 
-    def add_screen(self, name: str, widget: QWidget) -> None:
+    def add_screen(self, name: str, widget: CustomQWidget) -> None:
         self.screens[name] = widget
         self.stacked_widget.addWidget(widget)
 
@@ -35,7 +36,7 @@ class ScreenManager:
         else:
             self.logger.error(f"Screen '{name}' not found")
 
-    def get_screen(self, name: str) -> QWidget:
+    def get_screen(self, name: str) -> CustomQWidget:
         if name in self.screens:
             return self.screens[name]
         else:

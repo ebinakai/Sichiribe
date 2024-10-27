@@ -6,9 +6,10 @@
 3. 次へボタンを押すと、カメラフィードを停止し、7セグメント領域選択画面に遷移する
 '''
 
-from PySide6.QtWidgets import QWidget, QHBoxLayout, QVBoxLayout, QPushButton, QLabel
+from PySide6.QtWidgets import QHBoxLayout, QVBoxLayout, QPushButton, QLabel
 from PySide6.QtCore import QTimer, Qt
 from PySide6.QtGui import QPixmap
+from gui.widgets.custom_qwidget import CustomQWidget
 from gui.utils.screen_manager import ScreenManager
 from gui.utils.common import convert_cv_to_qimage, resize_image
 from gui.workers.live_feed_worker import LiveFeedWorker
@@ -17,17 +18,15 @@ from typing import List
 import numpy as np
 
 
-class LiveFeedWindow(QWidget):
+class LiveFeedWindow(CustomQWidget):
     def __init__(self, screen_manager: ScreenManager) -> None:
-        super().__init__()
+        self.logger = logging.getLogger('__main__').getChild(__name__)
+        self.screen_manager = screen_manager
         self.results: List[int]
         self.failed_rates: List[float]
 
-        self.screen_manager = screen_manager
+        super().__init__()
         screen_manager.add_screen('live_feed', self)
-
-        self.logger = logging.getLogger('__main__').getChild(__name__)
-        self.initUI()
 
     def initUI(self) -> None:
         main_layout = QVBoxLayout()
@@ -64,6 +63,12 @@ class LiveFeedWindow(QWidget):
         main_layout.addLayout(feed_layout)
         main_layout.addStretch()
         main_layout.addLayout(footer_layout)
+
+    def trigger(self, action, *args):
+        if action == 'startup':
+            self.startup(*args)
+        else:
+            self.logger.error(f"Invalid action: {action}")
 
     def back(self) -> None:
         self.logger.debug("Back button clicked.")
@@ -121,7 +126,7 @@ class LiveFeedWindow(QWidget):
         self.params['first_frame'] = first_frame
         params = self.params
         self.clear_env()
-        QTimer.singleShot(10, lambda: self.screen_manager.get_screen('region_select').startup(params, 'live_feed'))
+        QTimer.singleShot(10, lambda: self.screen_manager.get_screen('region_select').trigger('startup', params, 'live_feed'))
 
     def feed_cancelled(self) -> None:
         self.clear_env()

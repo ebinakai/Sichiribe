@@ -9,9 +9,10 @@
     - メニュー画面に戻る
 '''
 
-from PySide6.QtWidgets import QWidget, QHBoxLayout, QVBoxLayout, QFormLayout, QPushButton, QLabel, QSlider
+from PySide6.QtWidgets import QHBoxLayout, QVBoxLayout, QFormLayout, QPushButton, QLabel, QSlider
 from PySide6.QtCore import Qt
 from PySide6.QtGui import QPixmap
+from gui.widgets.custom_qwidget import CustomQWidget
 from gui.widgets.mpl_canvas_widget import MplCanvas
 from gui.utils.screen_manager import ScreenManager
 from gui.utils.common import convert_cv_to_qimage
@@ -22,12 +23,10 @@ from typing import List, Dict, Optional, Any
 import numpy as np
 
 
-class LiveExeWindow(QWidget):
+class LiveExeWindow(CustomQWidget):
     def __init__(self, screen_manager: ScreenManager) -> None:
-        super().__init__()
-
+        self.logger = logging.getLogger('__main__').getChild(__name__)
         self.screen_manager = screen_manager
-        screen_manager.add_screen('live_exe', self)
         self.params: Dict[str, Any]
         self.results: List[int]
         self.failed_rates: List[float]
@@ -36,8 +35,8 @@ class LiveExeWindow(QWidget):
         self.graph_failed_rates: List[float]
         self.graph_timestamps: List[str]
 
-        self.logger = logging.getLogger('__main__').getChild(__name__)
-        self.initUI()
+        super().__init__()
+        screen_manager.add_screen('live_exe', self)
 
     def initUI(self) -> None:
         main_layout = QVBoxLayout()
@@ -90,6 +89,12 @@ class LiveExeWindow(QWidget):
         main_layout.addStretch()
         main_layout.addLayout(footer_layout)
 
+    def trigger(self, action, *args):
+        if action == 'startup':
+            self.startup(*args)
+        else:
+            self.logger.error(f"Invalid action: {action}")
+
     def cancel(self) -> None:
         if self.worker is not None:
             self.term_label.setText('中止中...')
@@ -112,8 +117,7 @@ class LiveExeWindow(QWidget):
 
     def startup(self, params: dict) -> None:
         self.logger.info('Starting LiveExeWindow.')
-        screen = self.screen_manager.get_screen('log')
-        screen.clear_log()
+        self.screen_manager.get_screen('log').trigger('clear')
         self.screen_manager.show_screen('log')
 
         _p, _s = self.screen_manager.save_screen_size()
