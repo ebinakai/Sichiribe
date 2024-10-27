@@ -1,7 +1,7 @@
 from cores.detector import Detector
 import os
 import logging
-from typing import Optional, Union, List, Type, Tuple, Any
+from typing import Optional, Union, List, Tuple, Any
 import cv2
 import numpy as np
 
@@ -104,13 +104,15 @@ class CNNCore(Detector):
         return np.array(result), np.array(errors_per_digit)
 
 
-def select_cnn_model() -> Type[CNNCore]:
+def cnn_init(num_digits: int, model_filename: Optional[str] = None) -> CNNCore:
     logger = logging.getLogger("__main__").getChild(__name__)
 
     try:
         from cores.cnn_tflite import CNNLite
         logger.info("TensorFlow Lite Runtime detected. Using TFLite model.")
-        return CNNLite
+
+        model_filename = "model_100x100.tflite" if model_filename is None else model_filename
+        return CNNLite(num_digits=num_digits, model_filename=model_filename)
     except ImportError:
         logger.debug(
             "TensorFlow Lite runtime not found. Attempting to import TensorFlow.")
@@ -118,7 +120,8 @@ def select_cnn_model() -> Type[CNNCore]:
     try:
         from cores.cnn_tf import CNNTf
         logger.info("TensorFlow detected. Using Keras model.")
-        return CNNTf
+        model_filename = "model_100x100.keras" if model_filename is None else model_filename
+        return CNNTf(num_digits=num_digits, model_filename=model_filename)
     except ImportError:
         logger.debug(
             "TensorFlow not found. Attempting to import ONNX Runtime.")
@@ -126,7 +129,8 @@ def select_cnn_model() -> Type[CNNCore]:
     try:
         from cores.cnn_onnx import CNNOnnx
         logger.info("ONNX Runtime detected. Using ONNX model.")
-        return CNNOnnx
+        model_filename = "model_100x100.onnx" if model_filename is None else model_filename
+        return CNNOnnx(num_digits=num_digits, model_filename=model_filename)
     except ImportError:
         logger.error(
             "No compatible machine learning library found. Cannot select a model.")

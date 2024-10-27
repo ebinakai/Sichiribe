@@ -21,6 +21,6 @@ class MainWindow(QMainWindow):
         self.setCentralWidget(stacked_widget)
 
         screen_manager = init_screen_manager(stacked_widget, self)
-        screen_manager.resie_defualt()
+        screen_manager.resize_defualt()
         screen_manager.show_screen('menu')
         center_window(self)

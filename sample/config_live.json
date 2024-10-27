@@ -1,0 +1,14 @@
+{
+  "device_num": 0,
+  "num_digits": 4,
+  "sampling_sec": 2,
+  "num_frames": 10,
+  "total_sampling_sec": 6,
+  "format": "csv",
+  "save_frame": false,
+  "cap_size": [
+    640.0,
+    480.0
+  ],
+  "click_points": []
+}

@@ -139,9 +139,9 @@ class RegionSelectWindow(CustomQWidget):
         self.extracted_label.setPixmap(QPixmap.fromImage(q_image))
 
     def update_image(self, image: np.ndarray) -> None:
+        click_points = np.array(self.click_points) / self.resize_scale
         extract_image = self.fe.crop(
-            self.image_original, np.array(
-                self.click_points) / self.resize_scale)
+            self.image_original, click_points.tolist())
         image, extract_image = self.fe.draw_debug_info(
             image, extract_image, self.click_points)
         height, width, channel = self.image.shape

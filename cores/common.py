@@ -2,6 +2,8 @@ import os
 import shutil
 import logging
 import datetime
+from typing import Dict, Set, Any, Callable
+import json
 
 logger = logging.getLogger("__main__").getChild(__name__)
 
@@ -26,13 +28,27 @@ def clear_directory(directory: str) -> None:
         f"All contents in the directory '{directory}' have been deleted.")
 
 
-def ask_user_confirmation(prompt: str) -> bool:
-    while True:
-        answer = input(f"{prompt} (y/n): ").strip().lower()
-        if answer in ['y', 'n']:
-            return answer == 'y'
-        print("Please answer with 'y' or 'n'.")
-
-
 def get_now_str() -> str:
     return datetime.datetime.now().strftime('%Y%m%d%H%M%S')
+
+
+def filter_dict(data: Dict[str, Any], predicate: Callable[[
+                str, Any], bool]) -> Dict[str, Any]:
+    return {k: v for k, v in data.items() if predicate(k, v)}
+
+
+def read_config(filepath: str, required_keys: Set[str]) -> Dict[str, Any]:
+
+    if not os.path.exists(filepath):
+        raise FileNotFoundError(f"File not found: {filepath}")
+
+    with open(filepath, 'r') as file:
+        data = json.load(file)
+        if not isinstance(data, dict):
+            raise TypeError(f"Data in {filepath} is not a dictionary")
+
+        for key in required_keys:
+            if key not in data:
+                raise KeyError(f"Key '{key}' not found in {filepath}")
+
+    return filter_dict(data, lambda k, _: k in required_keys)

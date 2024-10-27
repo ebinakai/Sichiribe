@@ -1,12 +1,11 @@
 import pytest
 from unittest.mock import Mock
-from cores.cnn import CNNCore, select_cnn_model
+from cores.cnn import CNNCore, cnn_init
 
 
 @pytest.fixture
 def detector():
-    Detector = select_cnn_model()
-    detector = Detector(num_digits=4)
+    detector = cnn_init(num_digits=4)
     return detector
 
 

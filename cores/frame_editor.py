@@ -22,19 +22,22 @@ class FrameEditor:
         self.num_digits = num_digits
         self.crop_width = crop_width
         self.crop_height = crop_height
-        self.click_points: List[np.ndarray] = []
+        self.click_points: List = []
 
         self.logger = logging.getLogger("__main__").getChild(__name__)
         self.logger.debug("Frame Editor loaded.")
 
+    def get_click_points(self) -> List:
+        return self.click_points
+
     # 動画をフレームに分割
     def frame_devide(self,
                      video_path: str,
-                     skip_sec: int = 0,
+                     video_skip_sec: int = 0,
                      save_frame: bool = True,
                      out_dir: str = 'frames',
                      is_crop: bool = True,
-                     click_points: List[np.ndarray] = [],
+                     click_points: List = [],
                      extract_single_frame: bool = False,
                      ) -> Union[np.ndarray, List[List[np.ndarray]]]:
         self.click_points = click_points
@@ -51,7 +54,7 @@ class FrameEditor:
         fps = cap.get(cv2.CAP_PROP_FPS)
         interval_frames = 1 if self.sampling_sec == 0 else int(
             fps * self.sampling_sec)
-        skip_frames = fps * skip_sec
+        skip_frames = fps * video_skip_sec
         frame_count = 0
         saved_frame_count = 0
         frames = []
@@ -122,7 +125,7 @@ class FrameEditor:
     def crop(
         self,
         image: np.ndarray,
-        click_points: Union[list, np.ndarray],
+        click_points: List,
     ) -> Optional[np.ndarray]:
         if len(click_points) != 4:
             return None
@@ -160,9 +163,6 @@ class FrameEditor:
             img_clone = img.copy()
 
             extract_image = self.crop(img_clone, self.click_points)
-            if extract_image is None:
-                self.logger.error("Error: Could not crop image.")
-                continue
 
             # デバッグ情報描画
             img_clone, extract_image = self.draw_debug_info(
@@ -178,7 +178,7 @@ class FrameEditor:
 
     def mouse_callback(self, event, x, y, flags, param) -> None:
         if event == cv2.EVENT_LBUTTONDOWN:
-            new_point = np.array([x, y])
+            new_point = [x, y]
 
             if len(self.click_points) < 4:
                 self.click_points.append(new_point)
@@ -195,8 +195,8 @@ class FrameEditor:
             if len(self.click_points) == 4:
                 self.click_points = self.order_points(self.click_points)
 
-    def order_points(self, points: List) -> List[np.ndarray]:
-        _points = np.array(points)
+    def order_points(self, click_points: List) -> List:
+        _points = np.array(click_points)
 
         # x座標で昇順にソート
         sorted_by_x = _points[np.argsort(_points[:, 0])]
@@ -213,7 +213,8 @@ class FrameEditor:
         right_points = right_points[np.argsort(right_points[:, 1])]
         top_right, bottom_right = right_points
 
-        return [top_left, top_right, bottom_right, bottom_left]
+        return [top_left.tolist(), top_right.tolist(),
+                bottom_right.tolist(), bottom_left.tolist()]
 
     # 選択領域の可視化
     def draw_debug_info(

@@ -14,7 +14,7 @@ class CNNOnnx(CNNCore):
     model: "InferenceSession"
 
     def __init__(self, num_digits: int,
-                 model_filename: str = 'model_100x100.onnx') -> None:
+                 model_filename: str) -> None:
         super().__init__(num_digits)
         self.logger = logging.getLogger('__main__').getChild(__name__)
 

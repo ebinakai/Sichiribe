@@ -1,9 +1,14 @@
+from unittest.mock import Mock, patch
 from cores.exporter import Exporter
+import os
 
 
 class TestExporter:
     def setup_method(self):
-        self.exporter = Exporter('dummy', 'dummy_dir')
+        self.exporter = Exporter('dummy_dir')
+
+    def teardown_method(self):
+        os.rmdir('dummy_dir')
 
     def test_format(self):
 
@@ -22,11 +27,29 @@ class TestExporter:
         actual_output = self.exporter.format(data, data2, timestamp)
         assert actual_output == expected_output
 
-    def test_filter_dict(self):
+    @patch('cores.exporter.get_now_str')
+    def test_generate_filepath(self, mock_get_now_str):
+        mock_get_now_str.return_value = '20240535000000'
+        base_filename = 'test'
+        extension = 'csv'
+        expected_output = 'dummy_dir/test_20240535000000.csv'
 
-        dic = {'a': 1, 'b': 2, 'c': 3}
-        excluded_keys = ['b', 'c']
-        expected_output = {'a': 1}
-
-        actual_output = self.exporter.filter_dict(dic, excluded_keys)
+        actual_output = self.exporter.generate_filepath(
+            base_filename, extension)
         assert actual_output == expected_output
+
+    def test_export_csv(self):
+        data = {'a': 1, 'b': 2}
+        base_filename = 'test'
+        self.exporter.to_csv = Mock()
+        self.exporter.export(data, 'csv', base_filename)
+
+        self.exporter.to_csv.assert_called_once_with(data, base_filename)
+
+    def test_export_json(self):
+        data = {'a': 1, 'b': 2}
+        base_filename = 'test'
+        self.exporter.to_json = Mock()
+        self.exporter.export(data, 'json', base_filename)
+
+        self.exporter.to_json.assert_called_once_with(data, base_filename)

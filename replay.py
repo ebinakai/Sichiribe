@@ -3,7 +3,8 @@
 詳細については、https://github.com/EbinaKai/Sichiribe/wiki/How-to-use-CLI#execution-replay を参照
 '''
 
-from cores.cnn import select_cnn_model
+from cores.cnn import cnn_init
+from cores.common import read_config
 from cores.exporter import Exporter, get_supported_formats
 from cores.frame_editor import FrameEditor
 import argparse
@@ -19,14 +20,16 @@ logging.basicConfig(level=logging.DEBUG, format=formatter)
 logger = logging.getLogger('__main__').getChild(__name__)
 
 
-Detector = select_cnn_model()
-
-
 def get_args() -> argparse.Namespace:
     export_formats = get_supported_formats()
 
     parser = argparse.ArgumentParser(description='7セグメントディスプレイの数字を読み取る')
-    parser.add_argument('video_path', help='解析する動画のパス')
+    parser.add_argument(
+        '--video_path',
+        help='解析する動画のパス',
+        type=str,
+        default=None)
+    parser.add_argument('--config', help='設定ファイルのパス', type=str, default=None)
     parser.add_argument(
         '--num-digits',
         help="7セグメント表示器の桁数",
@@ -43,7 +46,7 @@ def get_args() -> argparse.Namespace:
         type=int,
         default=20)
     parser.add_argument(
-        '--skip-sec',
+        '--video-skip-sec', '--skip',
         help="動画の先頭からスキップする秒数",
         type=int,
         default=0)
@@ -54,7 +57,7 @@ def get_args() -> argparse.Namespace:
         default='json')
     parser.add_argument(
         '--save-frame',
-        help="キャプチャしたフレームを保存するか（保存しない場合、メモリの使用量が増加します）",
+        help="キャプチャしたフレームを保存するか",
         action='store_true')
     parser.add_argument('--debug', help="デバッグモードを有効にする", action='store_true')
     args = parser.parse_args()
@@ -62,19 +65,27 @@ def get_args() -> argparse.Namespace:
     return args
 
 
-def main(video_path: str,
-         num_digits: int,
-         sampling_sec: int,
-         num_frames: int,
-         video_skip_sec: int,
-         format: str,
-         save_frame: bool,
-         ) -> None:
-    fe = FrameEditor(sampling_sec, num_frames, num_digits)
-    dt = Detector(num_digits)
-    ep = Exporter(format, out_dir='results')
+def main(params) -> None:
+    fe = FrameEditor(
+        params['sampling_sec'],
+        params['num_frames'],
+        params['num_digits'])
+    dt = cnn_init(num_digits=params['num_digits'])
+    ep = Exporter(out_dir='results')
 
-    frames = fe.frame_devide(video_path, video_skip_sec, save_frame)
+    if 'click_points' in params and len(params['click_points']) == 4:
+        click_points = params['click_points']
+        params['is_save_config'] = False
+    else:
+        click_points = []
+        params['is_save_config'] = True
+
+    frames = fe.frame_devide(
+        video_path=params['video_path'],
+        video_skip_sec=params['video_skip_sec'],
+        save_frame=params['save_frame'],
+        click_points=click_points)
+    params['click_points'] = fe.get_click_points()
     timestamps = fe.generate_timestamp(len(frames))
 
     results = []
@@ -87,24 +98,30 @@ def main(video_path: str,
         logger.info(f"Failed Rate: {failed_rate}")
 
     data = ep.format(results, failed_rates, timestamps)
-    ep.export(data)
+    ep.export(data, method=params['format'])
+    if params['is_save_config']:
+        ep.export(params, method='json', base_filename='params')
 
 
 if __name__ == "__main__":
     args = get_args()
+    params = vars(args)
 
-    logger.setLevel(
-        logging.DEBUG) if args.debug else logger.setLevel(
-        logging.INFO)
+    if params.pop('debug'):
+        logger.setLevel(logging.DEBUG)
+    else:
+        logger.setLevel(logging.INFO)
     logger.debug("args: %s", args)
 
-    main(video_path=args.video_path,
-         num_digits=args.num_digits,
-         sampling_sec=args.sampling_sec,
-         num_frames=args.num_frames,
-         video_skip_sec=args.skip_sec,
-         format=args.format,
-         save_frame=args.save_frame,
-         )
+    config_path = params.pop('config')
+    if config_path is not None:
+        required_keys = set(params.keys())
+        required_keys.add('click_points')
+        params = read_config(config_path, required_keys)
+    elif params['video_path'] is None:
+        raise ValueError('video_path or config is required.')
 
-    logger.info("All Done!")
+    logger.debug("params: %s", params)
+    main(params)
+
+    logger.info('All Done!')

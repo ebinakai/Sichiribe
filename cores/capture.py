@@ -21,7 +21,7 @@ class FrameCapture:
 
     def show_camera_feed(self) -> None:
 
-        while True:
+        while cv2.waitKey(1) & 0xFF != ord('y'):
             frame = self.capture()
             if frame is None:
                 break
@@ -29,9 +29,7 @@ class FrameCapture:
             window_title = "Press 'y' to finish."
             cv2.imshow(window_title, frame)
 
-            if cv2.waitKey(1) & 0xFF == ord('y'):
-                break
-
+        self.logger.debug("Camera feed window closed.")
         cv2.destroyAllWindows()
         cv2.waitKey(1)
 
