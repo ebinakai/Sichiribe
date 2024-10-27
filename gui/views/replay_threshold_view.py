@@ -6,31 +6,31 @@
 3. 次へボタンを押すと、しきい値をパラメータに保存し、次の画面に遷移する
 '''
 
-from PySide6.QtWidgets import QWidget, QHBoxLayout, QVBoxLayout, QFormLayout, QPushButton, QLabel, QSlider
+from PySide6.QtWidgets import QHBoxLayout, QVBoxLayout, QFormLayout, QPushButton, QLabel, QSlider
 from PySide6.QtCore import Qt
 from PySide6.QtGui import QPixmap
+from gui.widgets.custom_qwidget import CustomQWidget
 from gui.utils.screen_manager import ScreenManager
 from gui.utils.common import convert_cv_to_qimage
-from cores.frameEditor import FrameEditor
-from cores.detector import Detector
+from cores.frame_editor import FrameEditor
+from cores.cnn import CNNCore as Detector
 import logging
+from typing import Optional
 import numpy as np
 
 
-class ReplayThresholdWindow(QWidget):
-    def __init__(self, screen_manager: ScreenManager):
-        super().__init__()
-
+class ReplayThresholdWindow(CustomQWidget):
+    def __init__(self, screen_manager: ScreenManager) -> None:
+        self.logger = logging.getLogger('__main__').getChild(__name__)
         self.screen_manager = screen_manager
+        self.threshold: Optional[int]
+        self.fe = FrameEditor()
+        self.dt = Detector(4)
+
+        super().__init__()
         screen_manager.add_screen('replay_threshold', self)
 
-        self.fe = FrameEditor()
-        self.dt = Detector()
-
-        self.logger = logging.getLogger('__main__').getChild(__name__)
-        self.initUI()
-
-    def initUI(self):
+    def initUI(self) -> None:
         main_layout = QVBoxLayout()
         extracted_image_layout = QHBoxLayout()
         form_layout = QFormLayout()
@@ -69,7 +69,13 @@ class ReplayThresholdWindow(QWidget):
         main_layout.addStretch()
         main_layout.addLayout(footer_layout)
 
-    def startup(self, params):
+    def trigger(self, action, *args):
+        if action == 'startup':
+            self.startup(*args)
+        else:
+            self.logger.error(f"Invalid action: {action}")
+
+    def startup(self, params: dict) -> None:
         self.logger.info('Starting ReplayThresholdWindow.')
         self.screen_manager.show_screen('replay_threshold')
 
@@ -83,32 +89,36 @@ class ReplayThresholdWindow(QWidget):
         self.binarize_th_label.setText('自動設定')
         self.update_binarize_th(0)
 
-    def update_binarize_th(self, value):
+    def update_binarize_th(self, value: int) -> None:
         self.threshold = None if value == 0 else value
         binarize_th_str = '自動設定' if self.threshold is None else str(
             self.threshold)
         self.binarize_th_label.setText(binarize_th_str)
 
+        if self.first_frame is None:
+            self.logger.error("Frame lost.")
+            self.clear_env()
+            self.screen_manager.restore_screen_size()
+            self.screen_manager.show_screen('menu')
+            return
+
         image_bin = self.dt.preprocess_binarization(
             self.first_frame, self.threshold)
         self.display_extract_image(image_bin)
 
-    def display_extract_image(self, image: np.ndarray):
+    def display_extract_image(self, image: np.ndarray) -> None:
         q_image = convert_cv_to_qimage(image)
         self.extracted_label.setPixmap(QPixmap.fromImage(q_image))
 
-    def next(self):
+    def next(self) -> None:
         self.logger.info("Set threshold finished.")
         self.params['threshold'] = self.threshold
         self.clear_env()
 
         self.screen_manager.get_screen(
-            'replay_exe').frame_devide_process(self.params)
-        self.params = None
+            'replay_exe').trigger('continue', self.params)
 
-    def clear_env(self):
+    def clear_env(self) -> None:
         self.extracted_label.clear()
-        self.first_frame = None
-        self.threshold = None
         self.logger.info('Environment cleared.')
         self.screen_manager.restore_screen_size()

@@ -14,7 +14,6 @@ frames_*/
 results/
 result_*.csv
 result_*.json
-test_*.py
 
 # カスタムビルドライブラリ
 externals/
@@ -46,3 +45,9 @@ result_*.csv
 result_*.json
 parameters_*.csv
 parameters_*.json
+
+# vocode
+.vscode/
+
+# pytest
+.pytest_cache/

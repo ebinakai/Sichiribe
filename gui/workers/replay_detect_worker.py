@@ -12,9 +12,10 @@
 
 from PySide6.QtCore import Signal, QThread
 import logging
+from typing import Dict, Any
 
 # モデルを読み込む
-from cores.cnn_core import select_cnn_model
+from cores.cnn import select_cnn_model
 Detector = select_cnn_model()
 
 
@@ -23,14 +24,14 @@ class DetectWorker(QThread):
     cancelled = Signal()
     model_not_found = Signal()
 
-    def __init__(self, params):
+    def __init__(self, params: Dict[str, Any]) -> None:
         super().__init__()
         self.params = params
         self.dt = Detector(params['num_digits'])
         self.logger = logging.getLogger('__main__').getChild(__name__)
         self._is_cancelled = False
 
-    def run(self):
+    def run(self) -> None:
         self.logger.info("DetectWorker started.")
 
         if not self.dt.load():
@@ -42,10 +43,9 @@ class DetectWorker(QThread):
                 self.params['frames'], self.params['timestamps']):
             if self._is_cancelled:
                 self.cancelled.emit()
-                self.params = None
                 return None
 
-            result, failed_rate = self.dt.detect(
+            result, failed_rate = self.dt.predict(
                 frame, binarize_th=self.params['threshold'])
             self.logger.info(f"Detected Result: {result}")
             self.logger.info(f"Failed Rate: {failed_rate}")
@@ -53,6 +53,6 @@ class DetectWorker(QThread):
 
         return None
 
-    def cancel(self):
+    def cancel(self) -> None:
         self.logger.info("DetectWorker terminating...")
         self._is_cancelled = True

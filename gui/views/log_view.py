@@ -6,8 +6,9 @@
 3. 処理中で、表示するコンテンツがない場合に使う
 '''
 
-from PySide6.QtWidgets import QWidget, QVBoxLayout, QTextEdit
+from PySide6.QtWidgets import QVBoxLayout, QTextEdit
 from PySide6.QtCore import Signal, QObject
+from gui.widgets.custom_qwidget import CustomQWidget
 from gui.utils.screen_manager import ScreenManager
 import logging
 
@@ -19,23 +20,23 @@ class LogEmitter(QObject):
 
 
 class QTextEditLogger(logging.Handler):
-    def __init__(self, emitter: LogEmitter):
+    def __init__(self, emitter: LogEmitter) -> None:
         super().__init__()
         self.emitter = emitter
 
-    def emit(self, record):
+    def emit(self, record) -> None:
         log_entry = self.format(record)
         self.emitter.new_log.emit(log_entry)
 
 
-class LogWindow(QWidget):
-    def __init__(self, screen_manager: ScreenManager):
-        super().__init__()
+class LogWindow(CustomQWidget):
+    def __init__(self, screen_manager: ScreenManager) -> None:
         self.screen_manager = screen_manager
+        
+        super().__init__()
         screen_manager.add_screen('log', self)
-        self.initUI()
 
-    def initUI(self):
+    def initUI(self) -> None:
         layout = QVBoxLayout()
         self.setLayout(layout)
 
@@ -52,8 +53,12 @@ class LogWindow(QWidget):
         # シグナルとスロットの接続
         self.emitter.new_log.connect(self.append_log)
 
-    def append_log(self, message):
+    def trigger(self, action, *args):
+        if action == 'clear':
+            self.clear_log()
+
+    def append_log(self, message: str) -> None:
         self.log_display.append(message)
 
-    def clear_log(self):
+    def clear_log(self) -> None:
         self.log_display.clear()

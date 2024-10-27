@@ -1,4 +1,5 @@
 import os
+from typing import Union, List, Optional, Tuple
 import cv2
 import logging
 import numpy as np
@@ -8,47 +9,41 @@ from cores.common import clear_directory
 
 class FrameEditor:
     def __init__(self,
-                 sampling_sec=3,
-                 num_frames_per_sample=10,
-                 num_digits=4,
-                 crop_width=100,
-                 crop_height=100,
-                 ):
+                 sampling_sec: int = 3,
+                 num_frames_per_sample: int = 10,
+                 num_digits: int = 4,
+                 crop_width: int = 100,
+                 crop_height: int = 100,
+                 ) -> None:
 
-        self.return_frames = []
-        self.sampling_sec = sampling_sec                   # サンプリング間隔（秒）
-        self.num_frames_per_sample = num_frames_per_sample  # サンプリングするフレーム数
-        self.num_digits = num_digits    # 読み取り桁数
-        self.crop_width = crop_width    # 1文字ごとのクロップ幅
-        self.crop_height = crop_height  # 1文字ごとのクロップ高さ
-        self.click_points = []
+        self.return_frames: List[List[Union[str, np.ndarray]]] = []
+        self.sampling_sec = sampling_sec
+        self.num_frames_per_sample = num_frames_per_sample
+        self.num_digits = num_digits
+        self.crop_width = crop_width
+        self.crop_height = crop_height
+        self.click_points: List[np.ndarray] = []
 
-        # ロガーの設定
         self.logger = logging.getLogger("__main__").getChild(__name__)
-
         self.logger.debug("Frame Editor loaded.")
 
     # 動画をフレームに分割
     def frame_devide(self,
-                     video_path,
-                     skip_sec=0,
-                     save_frame=True,
-                     out_dir='frames',
-                     is_crop=True,
-                     click_points=[],
-                     extract_single_frame=False,
-                     ):
+                     video_path: str,
+                     skip_sec: int = 0,
+                     save_frame: bool = True,
+                     out_dir: str = 'frames',
+                     is_crop: bool = True,
+                     click_points: List[np.ndarray] = [],
+                     extract_single_frame: bool = False,
+                     ) -> Union[np.ndarray, List[List[np.ndarray]]]:
         self.click_points = click_points
 
-        # フレーム保存用のディレクトリ
         if save_frame:
             os.makedirs(out_dir, exist_ok=True)
             clear_directory(out_dir)
 
-        # 動画の読み込み
         cap = cv2.VideoCapture(video_path)
-
-        # 動画が正常に読み込まれたか確認
         if not cap.isOpened():
             self.logger.error("Error: Could not open video file.")
             exit(1)
@@ -61,12 +56,12 @@ class FrameEditor:
         saved_frame_count = 0
         frames = []
         return_frames = []
+        return_frame = None
 
         # 指定の開始位置までスキップ
         cap.set(cv2.CAP_PROP_POS_FRAMES, skip_frames)
 
         while True:
-            # フレームの読み込み
             ret, frame = cap.read()
             if not ret:
                 self.logger.debug("Finsish: Could not read frame.")
@@ -74,39 +69,35 @@ class FrameEditor:
 
             # サンプリング間隔に基づいてフレームを保存
             if frame_count % interval_frames < self.num_frames_per_sample:
+
                 if is_crop:
-                    # 切り取り領域を選択
                     if len(self.click_points) != 4:
                         self.region_select(frame)
-
-                    # フレームの切り取り
-                    frame = self.crop(frame, self.click_points)
+                    cropped_frame = self.crop(frame, self.click_points)
+                    if cropped_frame is None:
+                        self.logger.error("Error: Could not crop image.")
+                        continue
+                    frame = cropped_frame
 
                 # 最初の位置フレームだけ取得
                 if extract_single_frame:
-                    return_frames = frame
+                    return_frame = frame
                     break
 
-                # 保存
                 if save_frame:
                     frame_filename = os.path.join(
                         out_dir, f'frame_{frame_count:06d}.jpg')
                     cv2.imwrite(frame_filename, frame)
+                    saved_frame_count += 1
                     self.logger.debug(f"Frame saved to '{frame_filename}'.")
-
-                    frames.append(frame_filename)
-                else:
-                    frames.append(frame)
-                saved_frame_count += 1
+                frames.append(frame)
 
             elif len(frames) != 0:
                 return_frames.append(frames)
                 frames = []
 
-            # フレームカウントの更新
             frame_count += 1
 
-        # リソースの解放
         cap.release()
         self.logger.debug("Capture resources released.")
 
@@ -114,13 +105,12 @@ class FrameEditor:
             self.logger.info(
                 f"Extracted {saved_frame_count} frames were saved to '{out_dir}' directory.")
 
-        return return_frames
+        return return_frames if return_frame is None else return_frame
 
     # 切り出したフレームの間隔からタイムスタンプを生成
-    def generate_timestamp(self, n):
+    def generate_timestamp(self, n: int) -> List[str]:
         timestamps = []
 
-        # タイムスタンプの生成
         for i in range(0, n):
             timestamp = timedelta(seconds=self.sampling_sec * i)
             # タイムスタンプを "HH:MM:SS" 形式でリストに追加
@@ -131,44 +121,48 @@ class FrameEditor:
     # クリックポイント4点から画像を切り出す
     def crop(
         self,
-        image,
-        click_points,
-    ):
-        extract_image = None
+        image: np.ndarray,
+        click_points: Union[list, np.ndarray],
+    ) -> Optional[np.ndarray]:
+        if len(click_points) != 4:
+            return None
 
-        if len(click_points) == 4:
-            # 射影変換
-            pts1 = np.float32([
-                click_points[0],
-                click_points[1],
-                click_points[2],
-                click_points[3],
-            ])
-            pts2 = np.float32([
-                [0, 0],
-                [self.crop_width * self.num_digits, 0],
-                [self.crop_width * self.num_digits, self.crop_height],
-                [0, self.crop_height],
-            ])
-            M = cv2.getPerspectiveTransform(pts1, pts2)
-            extract_image = cv2.warpPerspective(
-                image, M, (self.crop_width * self.num_digits, self.crop_height))
+        # 射影変換
+        pts1 = np.array([click_points[0],
+                         click_points[1],
+                         click_points[2],
+                         click_points[3]], dtype=np.float32)
+
+        pts2 = np.array([[0, 0],
+                         [self.crop_width * self.num_digits, 0],
+                         [self.crop_width * self.num_digits, self.crop_height],
+                         [0, self.crop_height]], dtype=np.float32)
+        M = cv2.getPerspectiveTransform(pts1, pts2)
+        extract_image = cv2.warpPerspective(
+            image, M, (self.crop_width * self.num_digits, self.crop_height))
 
         return extract_image
 
-    # 7セグメント領域を選択
-    def region_select(self, image):
+    def region_select(self, image: Union[str, np.ndarray]) -> List[np.ndarray]:
         img = image if isinstance(image, np.ndarray) else cv2.imread(image)
 
-        # GUI準備
         window_name = "Select 7seg Region"
         cv2.namedWindow(window_name)
         cv2.setMouseCallback(window_name, self.mouse_callback)
 
         while True:
+            key = cv2.waitKey(100)
+            if key == ord('y') and len(self.click_points) == 4:  # yキーで選択終了
+                cv2.destroyAllWindows()
+                cv2.waitKey(1)
+                return self.click_points
+
             img_clone = img.copy()
 
             extract_image = self.crop(img_clone, self.click_points)
+            if extract_image is None:
+                self.logger.error("Error: Could not crop image.")
+                continue
 
             # デバッグ情報描画
             img_clone, extract_image = self.draw_debug_info(
@@ -182,21 +176,11 @@ class FrameEditor:
             if extract_image is not None:
                 cv2.imshow('Result', extract_image)
 
-            # キー入力(ESC:プログラム終了)
-            key = cv2.waitKey(100)
-            if key == ord('y') and len(self.click_points) == 4:  # yキーで選択終了
-                cv2.destroyAllWindows()
-                cv2.waitKey(1)
-                return self.click_points if len(
-                    self.click_points) == 4 else None
-
-    # マウスイベントのコールバック関数
-    def mouse_callback(self, event, x, y, flags, param):
+    def mouse_callback(self, event, x, y, flags, param) -> None:
         if event == cv2.EVENT_LBUTTONDOWN:
             new_point = np.array([x, y])
 
             if len(self.click_points) < 4:
-                # 4点未満なら普通に追加
                 self.click_points.append(new_point)
             else:
                 # 4点以上の場合、最も近い点を入れ替える
@@ -211,12 +195,11 @@ class FrameEditor:
             if len(self.click_points) == 4:
                 self.click_points = self.order_points(self.click_points)
 
-    # クリックポイントをソート
-    def order_points(self, points):
-        points = np.array(points)
+    def order_points(self, points: List) -> List[np.ndarray]:
+        _points = np.array(points)
 
         # x座標で昇順にソート
-        sorted_by_x = points[np.argsort(points[:, 0])]
+        sorted_by_x = _points[np.argsort(_points[:, 0])]
 
         # 左側の2点と右側の2点に分ける
         left_points = sorted_by_x[:2]
@@ -230,16 +213,15 @@ class FrameEditor:
         right_points = right_points[np.argsort(right_points[:, 1])]
         top_right, bottom_right = right_points
 
-        # ソートされた点を順番に返す
-        return np.array([top_left, top_right, bottom_right, bottom_left])
+        return [top_left, top_right, bottom_right, bottom_left]
 
-    # クリックポイントを描画
+    # 選択領域の可視化
     def draw_debug_info(
         self,
-        image,
-        extract_image,
-        click_points_,
-    ):
+        image: np.ndarray,
+        extract_image: Optional[np.ndarray],
+        click_points_: List[np.ndarray],
+    ) -> Tuple[np.ndarray, Optional[np.ndarray]]:
         for click_point in click_points_:
             cv2.circle(
                 image, (click_point[0], click_point[1]), 5, (0, 255, 0), -1
@@ -258,11 +240,3 @@ class FrameEditor:
                     cv2.line(extract_image, (temp_x, 0), (temp_x, temp_y),
                              (0, 255, 0), 1)
         return image, extract_image
-
-
-if __name__ == "__main__":
-    file_path = "test/sample.jpg"
-
-    fe = FrameEditor()
-    click_points = fe.region_select(file_path)
-    print(click_points)

@@ -11,28 +11,35 @@
     - メニュー画面に戻る
 '''
 
-from PySide6.QtWidgets import QWidget, QHBoxLayout, QVBoxLayout, QPushButton, QLabel
+from PySide6.QtWidgets import QHBoxLayout, QVBoxLayout, QPushButton, QLabel
 from PySide6.QtCore import Qt
+from gui.widgets.custom_qwidget import CustomQWidget
 from gui.utils.screen_manager import ScreenManager
 from gui.utils.exporter import export_result, export_params
 from gui.widgets.mpl_canvas_widget import MplCanvas
 from gui.workers.frame_devide_worker import FrameDivideWorker
 from gui.workers.replay_detect_worker import DetectWorker
-from cores.frameEditor import FrameEditor
+from cores.frame_editor import FrameEditor
 import logging
+from typing import List, Dict, Union, Any
+import numpy as np
 
 
-class ReplayExeWindow(QWidget):
-    def __init__(self, screen_manager: ScreenManager):
-        super().__init__()
-
+class ReplayExeWindow(CustomQWidget):
+    def __init__(self, screen_manager: ScreenManager) -> None:
+        self.logger = logging.getLogger('__main__').getChild(__name__)
         self.screen_manager = screen_manager
+        self.params: Dict[str, Any]
+        self.results: List[int]
+        self.failed_rates: List[float]
+        self.graph_results: List[int]
+        self.graph_failed_rates: List[float]
+        self.graph_timestamps: List[str]
+
+        super().__init__()
         screen_manager.add_screen('replay_exe', self)
 
-        self.logger = logging.getLogger('__main__').getChild(__name__)
-        self.initUI()
-
-    def initUI(self):
+    def initUI(self) -> None:
         main_layout = QVBoxLayout()
         graph_layout = QVBoxLayout()
         footer_layout = QHBoxLayout()
@@ -59,13 +66,18 @@ class ReplayExeWindow(QWidget):
         main_layout.addStretch()
         main_layout.addLayout(footer_layout)
 
-    def cancel(self):
-        if self.worker is not None:
+    def trigger(self, action, *args):
+        if action == 'startup':
+            self.startup(*args)
+        elif action == 'continue':
+            self.frame_devide_process(*args)
+
+    def cancel(self) -> None:
+        if self.dt_worker is not None:
             self.term_label.setText('中止中...')
-            self.worker.cancel()
+            self.dt_worker.cancel()
 
-    def startup(self, params):
-
+    def startup(self, params: dict) -> None:
         self.graph_label.gen_graph(
             title='Results',
             xlabel='Timestamp',
@@ -92,48 +104,49 @@ class ReplayExeWindow(QWidget):
                                            extract_single_frame=True)
         self.params['first_frame'] = first_frame
 
-        self.screen_manager.get_screen(
-            'region_select').startup(self.params, 'replay_exe')
+        self.screen_manager.get_screen('region_select').trigger('startup', self.params, 'replay_exe') 
 
-    def frame_devide_process(self, params):
+    def frame_devide_process(self, params: dict) -> None:
         self.params = params
-        self.screen_manager.get_screen('log').clear_log()
+        self.screen_manager.get_screen('log').trigger('clear')
         self.screen_manager.show_screen('log')
 
-        self.worker = FrameDivideWorker(params)
-        self.worker.end.connect(self.frame_devide_finished)
-        self.worker.start()
+        self.fd_worker = FrameDivideWorker(params)
+        self.fd_worker.end.connect(self.frame_devide_finished)
+        self.fd_worker.start()
         self.logger.info('Frame Devide started.')
 
-    def frame_devide_finished(self, frames, timestamps):
+    def frame_devide_finished(
+            self, frames: List[Union[str, np.ndarray]], timestamps: List[str]) -> None:
         self.logger.debug('timestamps: %s' % timestamps)
         self.logger.info('Frame Devide finished.')
         self.params['frames'] = frames
         self.params['timestamps'] = timestamps
         self.detect_process()
 
-    def detect_process(self):
-        self.worker = DetectWorker(self.params)
-        self.worker.progress.connect(self.detect_progress)
-        self.worker.finished.connect(self.detect_finished)
-        self.worker.cancelled.connect(self.detect_cancelled)
-        self.worker.model_not_found.connect(self.model_not_found)
-        self.worker.start()
+    def detect_process(self) -> None:
+        self.dt_worker = DetectWorker(self.params)
+        self.dt_worker.progress.connect(self.detect_progress)
+        self.dt_worker.finished.connect(self.detect_finished)
+        self.dt_worker.cancelled.connect(self.detect_cancelled)
+        self.dt_worker.model_not_found.connect(self.model_not_found)
+        self.dt_worker.start()
         self.logger.info('Detect started.')
 
-    def model_not_found(self):
-        self.term_label.setText('モデルが見つかりません')
+    def model_not_found(self) -> None:
         self.logger.error('Model not found.')
         self.clear_env()
         self.screen_manager.show_screen('menu')
 
-    def detect_progress(self, result, failed_rate, timestamp):
+    def detect_progress(self, result: int, failed_rate: float,
+                        timestamp: str) -> None:
         self.screen_manager.show_screen('replay_exe')
         self.results.append(result)
         self.failed_rates.append(failed_rate)
         self.update_graph(result, failed_rate, timestamp)
 
-    def update_graph(self, result, failed_rate, timestamp):
+    def update_graph(self, result: int, failed_rate: float,
+                     timestamp: str) -> None:
         self.graph_results.append(result)
         self.graph_failed_rates.append(failed_rate)
         self.graph_timestamps.append(timestamp)
@@ -142,7 +155,7 @@ class ReplayExeWindow(QWidget):
             self.graph_failed_rates,
             self.graph_results)
 
-    def detect_finished(self):
+    def detect_finished(self) -> None:
         self.graph_label.clear()
         self.logger.info('Detect finished.')
         self.logger.info(f"Results: {self.results}")
@@ -152,13 +165,13 @@ class ReplayExeWindow(QWidget):
         self.clear_env()
         self.export_process(params)
 
-    def detect_cancelled(self):
+    def detect_cancelled(self) -> None:
         self.term_label.setText('中止しました')
         self.logger.info('Detect cancelled.')
         self.params['timestamps'] = self.params['timestamps'][:len(
             self.results)]
 
-    def export_process(self, params):
+    def export_process(self, params: dict) -> None:
         self.logger.info('Data exporting...')
 
         export_result(params)
@@ -167,15 +180,8 @@ class ReplayExeWindow(QWidget):
         self.screen_manager.popup(f"保存場所：{params['out_dir']}")
         self.screen_manager.show_screen('menu')
 
-    def clear_env(self):
+    def clear_env(self) -> None:
         self.graph_label.clear()
         self.term_label.setText('')
-        self.params = None
-        self.results = None
-        self.failed_rates = None
-        self.graph_results = None
-        self.graph_failed_rates = None
-        self.graph_timestamps = None
-        self.fe = None
         self.logger.info('Environment cleared.')
         self.screen_manager.restore_screen_size()

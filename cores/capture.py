@@ -1,13 +1,15 @@
 import cv2
+import numpy as np
 import time
 import logging
+from typing import Optional
 
 
 class FrameCapture:
     def __init__(
         self,
         device_num=0,
-    ):
+    ) -> None:
 
         self.logger = logging.getLogger("__main__").getChild(__name__)
 
@@ -17,35 +19,35 @@ class FrameCapture:
         # カメラに接続するまで待機
         time.sleep(0.1)
 
-    def show_camera_feed(self):
+    def show_camera_feed(self) -> None:
 
         while True:
             frame = self.capture()
             if frame is None:
                 break
 
-            window_title = "Press 'Y' to finish."
+            window_title = "Press 'y' to finish."
             cv2.imshow(window_title, frame)
 
-            # 'q' キーが押されたらループを抜ける
             if cv2.waitKey(1) & 0xFF == ord('y'):
                 break
 
         cv2.destroyAllWindows()
         cv2.waitKey(1)
 
-    def capture(self):
+    def capture(self) -> Optional[np.ndarray]:
         ret, frame = self.cap.read()
         if ret:
             return frame
         else:
             self.logger.error("Failed to capture frame")
+            return None
 
-    def release(self):
+    def release(self) -> None:
         self.cap.release()
         cv2.destroyAllWindows()
 
-    def set_cap_size(self, width, height):
+    def set_cap_size(self, width: float, height: float) -> tuple[float, float]:
         self.cap.set(cv2.CAP_PROP_FRAME_WIDTH, width)
         self.cap.set(cv2.CAP_PROP_FRAME_HEIGHT, height)
         self.logger.debug(

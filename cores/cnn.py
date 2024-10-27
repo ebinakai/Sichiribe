@@ -1,6 +1,7 @@
 from cores.detector import Detector
 import os
 import logging
+from typing import Optional, Union, List, Type, Tuple, Any
 import cv2
 import numpy as np
 
@@ -11,8 +12,9 @@ logging.getLogger('h5py').setLevel(logging.ERROR)
 
 
 class CNNCore(Detector):
-    def __init__(self, num_digits):
+    def __init__(self, num_digits: int) -> None:
         self.num_digits = num_digits
+        self.model: Optional[Any]
 
         self.logger = logging.getLogger("__main__").getChild(__name__)
 
@@ -25,7 +27,6 @@ class CNNCore(Detector):
         self.color_setting = 1        # 学習済みモデルと同じ画像のカラー設定にする。モノクロ・グレースケールの場合は「1」。カラーの場合は「3」
         self.cv2_color_setting = 0    # 同上。cv2.imreadではモノクロ・グレースケールの場合は「0」。カラーの場合は「1」
         self.crop_size = 100          # 画像をトリミングするサイズ
-        self.model = None
 
     def inference_7seg_classifier(self, image_bin):
         raise NotImplementedError(
@@ -50,18 +51,14 @@ class CNNCore(Detector):
             images.append(img_)
         return np.array(images, dtype=np.float32)
 
-    def detect(self, images, binarize_th=None) -> tuple[int, float]:
-        # [引数] images: ファイルパスまたはnumpy画像データまたはそれを含んだリスト
-        if self.model is None:
-            self.logger.error("CNN Model unloaded.")
+    def predict(self, images: Union[str, np.ndarray, List[np.ndarray], List[str]],
+                binarize_th: Optional[int] = None) -> tuple[int, float]:
+
+        _images = images if isinstance(images, list) else [images]
 
         results = np.zeros((0, self.num_digits))
 
-        # リスト化する
-        if not isinstance(images, list):
-            images = [images]
-
-        for image in images:
+        for image in _images:
 
             image_gs = self.load_image(image)
 
@@ -94,7 +91,7 @@ class CNNCore(Detector):
         return result_int, failed_rate
 
     def find_mode_per_column_np(
-            self, predictions: np.ndarray) -> list[np.ndarray, np.ndarray]:
+            self, predictions: np.ndarray) -> Tuple[np.ndarray, np.ndarray]:
         result = []
         errors_per_digit = []
         for i in range(predictions.shape[1]):  # 各桁に対して
@@ -111,11 +108,11 @@ class CNNCore(Detector):
         return np.array(result), np.array(errors_per_digit)
 
 
-def select_cnn_model() -> CNNCore:
+def select_cnn_model() -> Type[CNNCore]:
     logger = logging.getLogger("__main__").getChild(__name__)
     try:
         # tflite-runtime のインポートを試みる
-        from tflite_runtime.interpreter import Interpreter
+        from tflite_runtime.interpreter import Interpreter  # type: ignore
 
         from cores.cnn_tflite import CNNLite
         logger.info("TFLite model selected.")
@@ -125,7 +122,7 @@ def select_cnn_model() -> CNNCore:
 
         try:
             # TensorFlowのインポートを試みる
-            import tensorflow as tf
+            import tensorflow as tf  # type: ignore
 
             from cores.cnn_tf import CNN
             logger.info("Keras model selected.")

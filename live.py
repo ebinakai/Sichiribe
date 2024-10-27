@@ -3,14 +3,14 @@
 詳細については、https://github.com/EbinaKai/Sichiribe/wiki/How-to-use-CLI#execution-live を参照
 '''
 
-from cores.cnn_core import select_cnn_model
+from cores.cnn import select_cnn_model
 import cv2
 import os
 from datetime import timedelta
 import time
 from cores.common import get_now_str
 from cores.exporter import Exporter, get_supported_formats
-from cores.frameEditor import FrameEditor
+from cores.frame_editor import FrameEditor
 from cores.capture import FrameCapture
 import argparse
 import logging
@@ -29,7 +29,7 @@ logger = logging.getLogger('__main__').getChild(__name__)
 Detector = select_cnn_model()
 
 
-def get_args():
+def get_args() -> argparse.Namespace:
     export_formats = get_supported_formats()
 
     # 引数を取得
@@ -71,19 +71,18 @@ def get_args():
 
 
 def main(device,
-         num_digits,
-         sampling_sec,
-         num_frames,
-         total_sampling_sec,
-         format,
-         save_frame,
-         out_dir='results',
-         ):
+         num_digits: int,
+         sampling_sec: int,
+         num_frames: int,
+         total_sampling_sec: int,
+         format: str,
+         save_frame: bool,
+         ) -> None:
 
     fc = FrameCapture(device_num=device)
     fe = FrameEditor(num_digits=num_digits)
     dt = Detector(num_digits=num_digits)
-    ep = Exporter(format, out_dir)
+    ep = Exporter(format, out_dir='results')
 
     dt.load()
 
@@ -91,14 +90,17 @@ def main(device,
     fc.show_camera_feed()
 
     frame = fc.capture()
+    if frame is None:
+        logger.error("Failed to capture the frame.")
+        return
     click_points = fe.region_select(frame)
 
     start_time = time.time()
     end_time = time.time() + total_sampling_sec
     frame_count = 0
-    timestamps = []
-    results = []
-    failed_rates = []
+    timestamps = list()
+    results = list()
+    failed_rates = list()
     while time.time() < end_time:
         temp_time = time.time()
         frames = []
@@ -110,6 +112,8 @@ def main(device,
                 continue
 
             cropped_frame = fe.crop(frame, click_points)
+            if cropped_frame is None:
+                continue
             frames.append(cropped_frame)
 
             if save_frame:
@@ -121,14 +125,14 @@ def main(device,
                 frame_count += 1
 
         if len(frames) != 0:
-            value, failed_rate = dt.detect(frames)
+            value, failed_rate = dt.predict(frames)
             logger.info(f"Detected: {value}, Failed rate: {failed_rate}")
             results.append(value)
             failed_rates.append(failed_rate)
 
             # タイムスタンプを "HH:MM:SS" 形式で生成
-            elapsed_time = int(time.time() - start_time)
-            timestamp = timedelta(seconds=elapsed_time)
+            elapsed_time = time.time() - start_time
+            timestamp = timedelta(seconds=int(elapsed_time))
             timestamps.append(str(timestamp))
 
         elapsed_time = time.time() - temp_time
@@ -153,9 +157,11 @@ if __name__ == "__main__":
         save_dir = f"frames_{now}"
         os.makedirs(save_dir)
 
-    logger.setLevel(
-        logging.DEBUG) if args.debug else logger.setLevel(
-        logging.INFO)
+    if args.debug:
+        logger.setLevel(logging.DEBUG)
+    else:
+        logger.setLevel(logging.INFO)
+
     logger.debug("args: %s", args)
 
     main(

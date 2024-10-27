@@ -9,29 +9,36 @@
     - メニュー画面に戻る
 '''
 
-from PySide6.QtWidgets import QWidget, QHBoxLayout, QVBoxLayout, QFormLayout, QPushButton, QLabel, QSlider
+from PySide6.QtWidgets import QHBoxLayout, QVBoxLayout, QFormLayout, QPushButton, QLabel, QSlider
 from PySide6.QtCore import Qt
 from PySide6.QtGui import QPixmap
+from gui.widgets.custom_qwidget import CustomQWidget
 from gui.widgets.mpl_canvas_widget import MplCanvas
 from gui.utils.screen_manager import ScreenManager
 from gui.utils.common import convert_cv_to_qimage
 from gui.utils.exporter import export_result, export_params
 from gui.workers.live_detect_worker import DetectWorker
 import logging
+from typing import List, Dict, Optional, Any
 import numpy as np
 
 
-class LiveExeWindow(QWidget):
-    def __init__(self, screen_manager: ScreenManager):
-        super().__init__()
-
+class LiveExeWindow(CustomQWidget):
+    def __init__(self, screen_manager: ScreenManager) -> None:
+        self.logger = logging.getLogger('__main__').getChild(__name__)
         self.screen_manager = screen_manager
+        self.params: Dict[str, Any]
+        self.results: List[int]
+        self.failed_rates: List[float]
+        self.timestamps: List[str]
+        self.graph_results: List[int]
+        self.graph_failed_rates: List[float]
+        self.graph_timestamps: List[str]
+
+        super().__init__()
         screen_manager.add_screen('live_exe', self)
 
-        self.logger = logging.getLogger('__main__').getChild(__name__)
-        self.initUI()
-
-    def initUI(self):
+    def initUI(self) -> None:
         main_layout = QVBoxLayout()
         graph_layout = QVBoxLayout()
         extracted_image_layout = QHBoxLayout()
@@ -43,7 +50,7 @@ class LiveExeWindow(QWidget):
         extracted_image_layout.setAlignment(Qt.AlignmentFlag.AlignCenter)
         form_layout.setAlignment(Qt.AlignmentFlag.AlignCenter)
 
-        self.graph_label = MplCanvas(self)
+        self.graph_label = MplCanvas()
         graph_layout.addWidget(self.graph_label)
 
         self.extracted_label = QLabel()
@@ -82,19 +89,25 @@ class LiveExeWindow(QWidget):
         main_layout.addStretch()
         main_layout.addLayout(footer_layout)
 
-    def cancel(self):
+    def trigger(self, action, *args):
+        if action == 'startup':
+            self.startup(*args)
+        else:
+            self.logger.error(f"Invalid action: {action}")
+
+    def cancel(self) -> None:
         if self.worker is not None:
             self.term_label.setText('中止中...')
             self.worker.cancel()
 
-    def update_binarize_th(self, value):
+    def update_binarize_th(self, value: Optional[int]) -> None:
         value = None if value == 0 else value
         binarize_th_str = '自動設定' if value is None else str(value)
         self.binarize_th_label.setText(binarize_th_str)
         if self.worker is not None:
             self.worker.update_binarize_th(value)
 
-    def graph_clear(self):
+    def graph_clear(self) -> None:
         self.graph_results = []
         self.graph_failed_rates = []
         self.graph_timestamps = []
@@ -102,9 +115,9 @@ class LiveExeWindow(QWidget):
                           self.failed_rates[-1],
                           self.timestamps[-1])
 
-    def startup(self, params):
+    def startup(self, params: dict) -> None:
         self.logger.info('Starting LiveExeWindow.')
-        self.screen_manager.get_screen('log').clear_log()
+        self.screen_manager.get_screen('log').trigger('clear')
         self.screen_manager.show_screen('log')
 
         _p, _s = self.screen_manager.save_screen_size()
@@ -138,23 +151,25 @@ class LiveExeWindow(QWidget):
         self.worker.start()
         self.logger.info('Detect started.')
 
-    def model_not_found(self):
+    def model_not_found(self) -> None:
         self.term_label.setText('モデルが見つかりません')
         self.logger.error('Model not found.')
         self.clear_env()
         self.screen_manager.show_screen('menu')
 
-    def detect_progress(self, result, failed_rate, timestamp):
+    def detect_progress(self, result: int, failed_rate: float,
+                        timestamp: str) -> None:
         self.screen_manager.show_screen('live_exe')
         self.results.append(result)
         self.failed_rates.append(failed_rate)
         self.timestamps.append(timestamp)
         self.update_graph(result, failed_rate, timestamp)
 
-    def detect_error(self):
+    def detect_error(self) -> None:
         self.screen_manager.popup("カメラにアクセスできませんでした")
 
-    def update_graph(self, result, failed_rate, timestamp):
+    def update_graph(self, result: int, failed_rate: float,
+                     timestamp: str) -> None:
         self.graph_results.append(result)
         self.graph_failed_rates.append(failed_rate)
         self.graph_timestamps.append(timestamp)
@@ -163,11 +178,11 @@ class LiveExeWindow(QWidget):
             self.graph_failed_rates,
             self.graph_results)
 
-    def display_extract_image(self, image: np.ndarray):
+    def display_extract_image(self, image: np.ndarray) -> None:
         q_image = convert_cv_to_qimage(image)
         self.extracted_label.setPixmap(QPixmap.fromImage(q_image))
 
-    def detect_finished(self):
+    def detect_finished(self) -> None:
         self.logger.info('Detect finished.')
         self.params['results'] = self.results
         self.params['failed_rates'] = self.failed_rates
@@ -176,11 +191,11 @@ class LiveExeWindow(QWidget):
         self.clear_env()
         self.export_process(params)
 
-    def detect_cancelled(self):
+    def detect_cancelled(self) -> None:
         self.logger.info('Detect cancelled.')
         self.term_label.setText('中止しました')
 
-    def export_process(self, params):
+    def export_process(self, params: dict) -> None:
         self.logger.info('Data exporting...')
 
         export_result(params)
@@ -189,16 +204,9 @@ class LiveExeWindow(QWidget):
         self.screen_manager.popup(f"保存場所：{params['out_dir']}")
         self.screen_manager.show_screen('menu')
 
-    def clear_env(self):
+    def clear_env(self) -> None:
         self.graph_label.clear()
         self.extracted_label.clear()
         self.term_label.setText('')
-        self.params = None
-        self.results = None
-        self.failed_rates = None
-        self.timestamps = None
-        self.graph_results = None
-        self.graph_failed_rates = None
-        self.graph_timestamps = None
         self.logger.info("Environment cleared.")
         self.screen_manager.restore_screen_size()

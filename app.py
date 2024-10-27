@@ -4,17 +4,17 @@ GUIアプリケーションを起動するためのメインプログラムこ�
 '''
 
 import logging
+formatter = '%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+logging.basicConfig(level=logging.INFO, format=formatter)
+
 import sys
 from PySide6.QtWidgets import QApplication
 from PySide6.QtCore import QTimer
 from gui.views.splash_view import SplashScreen
 from gui.views.main_view import MainWindow
 
-formatter = '%(asctime)s - %(name)s - %(levelname)s - %(message)s'
-logging.basicConfig(level=logging.INFO, format=formatter)
 
-
-def main():
+def main() -> None:
     show_splash_ms = 2000
 
     app = QApplication([])

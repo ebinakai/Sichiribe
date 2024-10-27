@@ -3,9 +3,9 @@
 詳細については、https://github.com/EbinaKai/Sichiribe/wiki/How-to-use-CLI#execution-replay を参照
 '''
 
-from cores.cnn_core import select_cnn_model
+from cores.cnn import select_cnn_model
 from cores.exporter import Exporter, get_supported_formats
-from cores.frameEditor import FrameEditor
+from cores.frame_editor import FrameEditor
 import argparse
 import logging
 import warnings
@@ -22,7 +22,7 @@ logger = logging.getLogger('__main__').getChild(__name__)
 Detector = select_cnn_model()
 
 
-def get_args():
+def get_args() -> argparse.Namespace:
     export_formats = get_supported_formats()
 
     parser = argparse.ArgumentParser(description='7セグメントディスプレイの数字を読み取る')
@@ -62,18 +62,17 @@ def get_args():
     return args
 
 
-def main(video_path,
-         num_digits,
-         sampling_sec,
-         num_frames,
-         video_skip_sec,
-         format,
-         save_frame,
-         out_dir='results',
-         ):
+def main(video_path: str,
+         num_digits: int,
+         sampling_sec: int,
+         num_frames: int,
+         video_skip_sec: int,
+         format: str,
+         save_frame: bool,
+         ) -> None:
     fe = FrameEditor(sampling_sec, num_frames, num_digits)
     dt = Detector(num_digits)
-    ep = Exporter(format, out_dir)
+    ep = Exporter(format, out_dir='results')
 
     dt.load()
 
@@ -83,7 +82,7 @@ def main(video_path,
     results = []
     failed_rates = []
     for frame in frames:
-        result, failed_rate = dt.detect(frame)
+        result, failed_rate = dt.predict(frame)
         results.append(result)
         failed_rates.append(failed_rate)
         logger.info(f"Detected Result: {result}")

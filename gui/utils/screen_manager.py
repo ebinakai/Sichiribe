@@ -6,11 +6,12 @@
 3. ポップアップメッセージボックスの表示を行う
 '''
 
-from PySide6.QtWidgets import QApplication, QStackedWidget, QWidget, QMainWindow, QMessageBox
+from PySide6.QtWidgets import QApplication, QStackedWidget, QMainWindow, QMessageBox
 from PySide6.QtGui import QPalette
-from PySide6.QtCore import QEventLoop, QTimer
+from PySide6.QtCore import QEventLoop, QTimer, QPoint, QSize
+from gui.widgets.custom_qwidget import CustomQWidget
 import logging
-
+from typing import Tuple, Dict, Optional
 
 class ScreenManager:
     def __init__(
@@ -20,53 +21,44 @@ class ScreenManager:
         self.stacked_widget = stacked_widget
         self.main_window = main_window
         self.logger = logging.getLogger('__main__').getChild(__name__)
-        self.screens = {}
+        self.screens: Dict[str, CustomQWidget] = {}
+        self.window_pos: Optional[QPoint] = None
+        self.window_size: Optional[QSize] = None
 
-    def add_screen(self, name, widget: QWidget):
+    def add_screen(self, name: str, widget: CustomQWidget) -> None:
         self.screens[name] = widget
         self.stacked_widget.addWidget(widget)
 
-    def show_screen(self, name):
+    def show_screen(self, name: str) -> None:
         if name in self.screens:
             self.stacked_widget.setCurrentWidget(self.screens[name])
             self.main_window.setFocus()
         else:
             self.logger.error(f"Screen '{name}' not found")
 
-    def get_screen(self, name) -> QWidget:
+    def get_screen(self, name: str) -> CustomQWidget:
         if name in self.screens:
             return self.screens[name]
         else:
-            self.logger.error(f"Screen '{name}' not found")
-            return None
+            raise ValueError(f"Screen '{name}' not found")
 
-    def check_if_dark_mode(self):
+    def check_if_dark_mode(self) -> bool:
         palette = QApplication.palette()
         return palette.color(QPalette.ColorRole.Window).value() < 128
 
-    def resie_defualt(self):
+    def resie_defualt(self) -> None:
         self.main_window.resize(640, 480)
 
-    def center(self):
-        screen = QApplication.primaryScreen()
-        screen_rect = screen.availableGeometry()
-        window_rect = self.main_window.frameGeometry()
-
-        x = (screen_rect.width() - window_rect.width()) // 2
-        y = (screen_rect.height() - window_rect.height()) // 2
-
-        self.main_window.move(x, y)
-
-    def quit(self):
+    def quit(self) -> None:
         self.logger.info("Quitting application")
         QApplication.quit()
 
-    def save_screen_size(self):
+    def save_screen_size(self) -> Tuple[QPoint, QSize]:
         self.window_pos = self.main_window.frameGeometry().topLeft()
         self.window_size = self.main_window.size()
         return self.window_pos, self.window_size
 
-    def restore_screen_size(self):
+    def restore_screen_size(self) -> None:
         QApplication.processEvents()
         if self.window_pos is not None and self.window_size is not None:
             self.logger.info("Screen geometry restoring...")
@@ -74,7 +66,7 @@ class ScreenManager:
             # 現在の画面内のオブジェクトが処理を終えるまで10ms待つ
             loop = QEventLoop()
             QTimer.singleShot(10, loop.quit)
-            loop.exec_()
+            loop.exec()
 
             self.main_window.move(self.window_pos)
             self.main_window.resize(self.window_size)
@@ -84,12 +76,12 @@ class ScreenManager:
         else:
             self.logger.error("No screen size saved")
 
-    def popup(self, message: str, is_modal=False):
+    def popup(self, message: str, is_modal: bool = False) -> None:
         self.logger.debug("Popup message: %s" % message)
 
         msg_box = QMessageBox(self.main_window)
         msg_box.setText(message)
-        msg_box.setStandardButtons(QMessageBox.Ok)
+        msg_box.setStandardButtons(QMessageBox.StandardButton.Ok)
 
         # 同期処理または非同期処理
         if is_modal:

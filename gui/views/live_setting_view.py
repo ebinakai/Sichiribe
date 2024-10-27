@@ -12,7 +12,8 @@
 2. 実行ボタンを押すと、次の画面に遷移する
 '''
 
-from PySide6.QtWidgets import QWidget, QHBoxLayout, QVBoxLayout, QFormLayout, QPushButton, QComboBox, QSpinBox, QCheckBox, QLineEdit, QFileDialog, QLabel
+from PySide6.QtWidgets import QHBoxLayout, QVBoxLayout, QFormLayout, QPushButton, QComboBox, QSpinBox, QCheckBox, QLineEdit, QFileDialog, QLabel
+from gui.widgets.custom_qwidget import CustomQWidget
 from gui.utils.screen_manager import ScreenManager
 from cores.exporter import get_supported_formats
 from cores.common import get_now_str
@@ -20,16 +21,15 @@ import logging
 import os
 
 
-class LiveSettingsWindow(QWidget):
-    def __init__(self, screen_manager: ScreenManager):
-        super().__init__()
-
-        self.screen_manager = screen_manager
-        screen_manager.add_screen('live_setting', self)
-        self.initUI()
+class LiveSettingWindow(CustomQWidget):
+    def __init__(self, screen_manager: ScreenManager) -> None:
         self.logger = logging.getLogger('__main__').getChild(__name__)
+        self.screen_manager = screen_manager
 
-    def initUI(self):
+        super().__init__()
+        screen_manager.add_screen('live_setting', self)
+
+    def initUI(self) -> None:
         main_layout = QVBoxLayout()
         form_layout = QFormLayout()
         footer_layout = QHBoxLayout()
@@ -106,17 +106,17 @@ class LiveSettingsWindow(QWidget):
         main_layout.addLayout(form_layout)
         main_layout.addLayout(footer_layout)
 
-    def select_folder(self):
+    def select_folder(self) -> None:
         folder_path = QFileDialog.getExistingDirectory(self, 'フォルダを選択', '')
 
         if folder_path:
             self.out_dir.setText(folder_path)
 
-    def calc_max_frames(self):
+    def calc_max_frames(self) -> None:
         sampling_sec = self.sampling_sec.value()
         self.num_frames.setMaximum(sampling_sec * 5)
 
-    def startup(self):
+    def startup(self) -> None:
         if self.out_dir.text() == '':
             self.confirm_txt.setText('保存場所を選択してください')
             return
@@ -135,4 +135,4 @@ class LiveSettingsWindow(QWidget):
         }
 
         self.logger.debug("Starting live feed with params: %s", params)
-        self.screen_manager.get_screen('live_feed').startup(params)
+        self.screen_manager.get_screen('live_feed').trigger('startup', params) 

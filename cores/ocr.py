@@ -3,19 +3,22 @@ from cores.detector import Detector
 import easyocr
 import logging
 import statistics
+from typing import List, Union
+import numpy as np
 
 
 class OCR(Detector):
-    def __init__(self):
+    def __init__(self) -> None:
         self.logger = logging.getLogger("__main__").getChild(__name__)
 
-    def load(self):
+    def load(self) -> None:
         self.reader = easyocr.Reader(['en'])
         self.logger.info("OCR Model loaded.")
 
-    def detect(self, images, result_idx=0):
-        # [引数] images: ファイルパスまたはnumpy画像データまたはそれを含んだリスト
-        # [引数] result_idx: OCRの結果のうち、何番目の結果を取得するか（デフォルトは0）
+    def predict(self, images: Union[str, np.ndarray, List[Union[str,
+                                                                np.ndarray]]], result_idx: int = 0) -> tuple[float, float]:
+        # [引数] result_idx: OCRの結果のうち、何番目の結果を取得するか
+
         if self.reader is None:
             self.logger.error("OCR Model unloaded.")
 
@@ -68,3 +71,12 @@ class OCR(Detector):
         failed_rate = self.get_failed_rate(detect_nums, detect_num)
 
         return detect_num, failed_rate
+
+    def get_failed_rate(self, data: list, correct_value: float) -> float:
+        total = len(data)
+        if total == 0:
+            return 1.0
+
+        correct = data.count(correct_value)
+        failed = total - correct
+        return failed / total if total > 0 else 0

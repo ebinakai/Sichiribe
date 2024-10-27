@@ -1,4 +1,4 @@
-from cores.cnn_core import CNNCore
+from cores.cnn import CNNCore
 import os
 import logging
 import numpy as np
@@ -11,7 +11,8 @@ logging.getLogger('h5py').setLevel(logging.ERROR)
 
 
 class CNNLite(CNNCore):
-    def __init__(self, num_digits, model_filename='model_100x100.tflite'):
+    def __init__(self, num_digits: int,
+                 model_filename: str = 'model_100x100.tflite') -> None:
         super().__init__(num_digits)
         self.logger = logging.getLogger('__main__').getChild(__name__)
 
@@ -21,14 +22,14 @@ class CNNLite(CNNCore):
         model_path = model_path.resolve()
         self.model_path = str(model_path)
 
-    def load(self):
+    def load(self) -> bool:
         self.logger.debug('Load model path: %s' % self.model_path)
         if not os.path.exists(self.model_path):
             self.logger.error('Model file not found.')
             return False
 
         if self.model is None:
-            import tflite_runtime.interpreter as tflite
+            import tflite_runtime.interpreter as tflite  # type: ignore
             # TensorFlow Lite モデルの読み込み
             self.model = tflite.Interpreter(model_path=self.model_path)
             self.model.allocate_tensors()
@@ -38,7 +39,7 @@ class CNNLite(CNNCore):
         return True
 
     # 画像から数字を推論
-    def inference_7seg_classifier(self, image: np.ndarray) -> list:
+    def inference_7seg_classifier(self, image: np.ndarray) -> list[int]:
         # 各桁に分割
         preprocessed_images = self.preprocess_image(image)
 
@@ -47,14 +48,16 @@ class CNNLite(CNNCore):
         for preprocessed_image in preprocessed_images:
             img_ = np.expand_dims(preprocessed_image, axis=0)  # バッチサイズの次元を追加
 
-            self.model.set_tensor(self.input_details[0]['index'], img_)
-            self.model.invoke()
-            output_data = self.model.get_tensor(
+            self.model.set_tensor(  # type: ignore
+                self.input_details[0]['index'],
+                img_)
+            self.model.invoke()  # type: ignore
+            output_data = self.model.get_tensor(  # type: ignore
                 self.output_details[0]['index'])
             predictions.append(output_data)
 
         # (num_digits, num_classes) 形状に変換
-        predictions = np.array(predictions).squeeze()
-        argmax_indices = predictions.argmax(axis=1)  # 各行に対して最大値のインデックスを取得
+        _predictions = np.array(predictions).squeeze()
+        argmax_indices = _predictions.argmax(axis=1)    # 各行に対して最大値のインデックスを取得
 
         return argmax_indices

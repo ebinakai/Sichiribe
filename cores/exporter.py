@@ -2,29 +2,27 @@ import logging
 import json
 import csv
 import os
+from typing import Union, List, Dict, Any
 from cores.common import get_now_str
 
-# クラス外部で使用可能なサポートフォーマットを取得する関数
 
-
-def get_supported_formats():
+def get_supported_formats() -> list:
     return Exporter.aveilable_formats
 
 
 class Exporter:
-    # クラス変数としてサポートフォーマットを定義
+    # インスタンス化しなくてもサポートフォーマットを取得するためにクラス変数として定義
     aveilable_formats = ['csv', 'json']
 
-    def __init__(self, method, out_dir, base_filename='result'):
+    def __init__(self, method: str, out_dir: str,
+                 base_filename: str = 'result'):
         self.method = method
         self.base_filename = base_filename
         self.out_dir = out_dir
-
-        # ロガーの設定
         self.logger = logging.getLogger("__main__").getChild(__name__)
 
-        # 出力ディレクトリが存在しない場合は作成
-        os.makedirs(out_dir, exist_ok=True)
+        if method in self.aveilable_formats:
+            os.makedirs(out_dir, exist_ok=True)
 
         if method == 'csv':
             self.save = self.to_csv
@@ -37,18 +35,16 @@ class Exporter:
 
         self.logger.debug("Exporter loaded.")
 
-    # データを保存
-    def export(self, data):
+    def export(self, data: List[Any] | Dict) -> None:
         self.save(data)
 
     # ファイル名を時刻を含めて生成
-    def generate_filepath(self, extension):
+    def generate_filepath(self, extension: str) -> str:
         now = get_now_str()
         filename = f"{self.base_filename}_{now}.{extension}"
         return os.path.join(self.out_dir, filename)
 
-    # csv形式で保存
-    def to_csv(self, data):
+    def to_csv(self, data: List[Dict] | List | Dict) -> None:
         if not data:
             self.logger.debug("No data to export.")
             return
@@ -60,8 +56,7 @@ class Exporter:
             dict_writer.writerows(data)
         self.logger.debug("Exported data to csv.")
 
-    # json形式で保存
-    def to_json(self, data):
+    def to_json(self, data: Union[Dict, List]) -> None:
         if not data:
             self.logger.debug("No data to export.")
             return
@@ -70,26 +65,17 @@ class Exporter:
             json.dump(data, f)
         self.logger.debug("Exported data to json.")
 
-    # 出力しない
-    def to_dummy(self, data):
+    def to_dummy(self, data) -> None:
         self.logger.debug("No exported data, it's dummy.")
 
-    # データを辞書型に整形
-    def format(self, data, timestamp):
-        formatted_data = []
-        for data, timestamp in zip(data, timestamp):
-            formatted_data.append({"timestamp": timestamp, "value": data})
-        return formatted_data
-
-    def format(self, data, data2, timestamp):
+    def format(self, data: list, data2: list, timestamp: list) -> list:
         formatted_data = []
         for data, data2, timestamp in zip(data, data2, timestamp):
             formatted_data.append(
                 {"timestamp": timestamp, "value": data, "failed": data2})
         return formatted_data
 
-    # 指定されたキーを除外してフィルタリングされた辞書型を返す
-    def filter_dict(self, dic: dict, excluded_keys) -> dict:
+    def filter_dict(self, dic: dict, excluded_keys: list) -> dict:
         filtered_params = {
             k: v for k,
             v in dic.items() if k not in excluded_keys}
