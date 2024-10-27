@@ -4,7 +4,7 @@
 '''
 
 from cores.cnn import cnn_init
-from cores.common import read_config
+from cores.common import load_config
 from cores.exporter import Exporter, get_supported_formats
 from cores.frame_editor import FrameEditor
 import argparse
@@ -117,7 +117,7 @@ if __name__ == "__main__":
     if config_path is not None:
         required_keys = set(params.keys())
         required_keys.add('click_points')
-        params = read_config(config_path, required_keys)
+        params = load_config(config_path, required_keys)
     elif params['video_path'] is None:
         raise ValueError('video_path or config is required.')
 

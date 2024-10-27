@@ -6,6 +6,7 @@
   "video_skip_sec": 0,
   "format": "json",
   "save_frame": true,
+  "out_dir": "sample/20241028014655",
   "click_points": [
     [
       142.22222222222223,

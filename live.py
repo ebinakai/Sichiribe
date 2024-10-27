@@ -9,7 +9,7 @@ import os
 from datetime import timedelta
 import time
 from pathlib import Path
-from cores.common import get_now_str, read_config
+from cores.common import get_now_str, load_config
 from cores.exporter import Exporter, get_supported_formats
 from cores.frame_editor import FrameEditor
 from cores.capture import FrameCapture
@@ -177,7 +177,7 @@ if __name__ == '__main__':
     if config_path is not None:
         required_keys = set(params.keys())
         required_keys.add('click_points')
-        params = read_config(config_path, required_keys)
+        params = load_config(config_path, required_keys)
 
     logger.debug("params: %s", params)
     main(params)

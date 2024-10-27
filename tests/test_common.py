@@ -1,5 +1,5 @@
 import pytest
-from cores.common import read_config, filter_dict
+from cores.common import load_config, filter_dict
 import os
 import json
 
@@ -23,20 +23,20 @@ class TestReadConfig:
         if os.path.exists(self.config_path):
             os.remove(self.config_path)
 
-    def test_read_config(self):
-        returned_config = read_config(
+    def test_load_config(self):
+        returned_config = load_config(
             self.config_path, set(
                 self.expected_config.keys()))
         assert returned_config == self.expected_config
 
-    def test_read_config_missing_file(self):
+    def test_load_config_missing_file(self):
         with pytest.raises(FileNotFoundError):
-            read_config("dummy/missing.json", [])
+            load_config("dummy/missing.json", [])
 
-    def test_read_config_missing_key(self):
+    def test_load_config_missing_key(self):
         required_keys = ["a", "b", "d"]
         with pytest.raises(KeyError):
-            read_config(self.config_path, required_keys)
+            load_config(self.config_path, required_keys)
 
 
 class TestExcludeFilterDict:

@@ -15,6 +15,7 @@
 
 from PySide6.QtCore import Signal, QThread
 from cores.capture import FrameCapture
+from cores.cnn import cnn_init
 from cores.frame_editor import FrameEditor
 import logging
 from typing import Optional
@@ -23,11 +24,6 @@ from datetime import timedelta
 import os
 import cv2
 import numpy as np
-
-from cores.cnn import cnn_init
-start_time = time.time()
-end_time = time.time()
-print(f"Time to load model on live: {end_time - start_time:.2f}s")
 
 
 class DetectWorker(QThread):
