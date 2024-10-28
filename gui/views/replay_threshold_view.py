@@ -64,6 +64,7 @@ class ReplayThresholdWindow(CustomQWidget):
         footer_layout.addStretch()
         footer_layout.addWidget(self.next_button)
 
+        main_layout.addStretch()
         main_layout.addLayout(extracted_image_layout)
         main_layout.addLayout(form_layout)
         main_layout.addStretch()
