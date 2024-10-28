@@ -1,5 +1,5 @@
 import pytest
-from unittest.mock import MagicMock, patch
+from unittest.mock import Mock, MagicMock, patch
 import numpy as np
 from PySide6.QtCore import QPoint, QSize
 from PySide6.QtGui import QMouseEvent
@@ -9,7 +9,7 @@ from tests.test_helper import create_mouse_event
 
 @pytest.fixture
 def mock_screen_manager():
-    manager = MagicMock()
+    manager = Mock()
     manager.save_screen_size.return_value = (MagicMock(), None)
     return manager
 
@@ -30,7 +30,7 @@ def mock_frame_editor():
 @pytest.fixture
 def window(qtbot, mock_screen_manager, mock_frame_editor):
     with patch("PySide6.QtWidgets.QApplication.primaryScreen") as mock_screen:
-        mock_geometry = MagicMock()
+        mock_geometry = Mock()
         mock_geometry.width.return_value = 1920
         mock_geometry.height.return_value = 1080
         mock_screen.return_value.availableGeometry.return_value = mock_geometry
@@ -51,6 +51,16 @@ class TestSelectRegionWindow:
         assert window.confirm_txt is not None
         assert window.back_button is not None
         assert window.next_button is not None
+
+    def test_trigger(self, window):
+        window.startup = Mock()
+        expected_params = {"a": 1, "b": 2}
+        window.trigger("startup", expected_params.copy())
+
+        window.startup.assert_called_once_with(expected_params)
+
+        with pytest.raises(ValueError):
+            window.trigger("invalid", expected_params.copy())
 
     def test_startup(self, window):
         params = {

@@ -1,12 +1,12 @@
 import pytest
-from unittest.mock import MagicMock, patch
+from unittest.mock import Mock, patch
 from gui.views.live_exe_view import LiveExeWindow
 import numpy as np
 
 
 @pytest.fixture
 def mock_screen_manager():
-    manager = MagicMock()
+    manager = Mock()
     manager.check_if_dark_mode.return_value = False
     return manager
 
@@ -40,6 +40,16 @@ class TestMethods:
         assert window.binarize_th.minimum() == 0
         assert window.binarize_th.maximum() == 255
 
+    def test_trigger(self, window):
+        window.startup = Mock()
+        expected_params = {"a": 1, "b": 2}
+        window.trigger("startup", expected_params.copy())
+
+        window.startup.assert_called_once_with(expected_params)
+
+        with pytest.raises(ValueError):
+            window.trigger("invalid", expected_params.copy())
+
     def test_display_extract_image(self, window):
         sample_image = np.zeros((100, 100, 3), dtype=np.uint8)
         window.display_extract_image(sample_image)
@@ -48,7 +58,7 @@ class TestMethods:
         assert not window.extracted_label.pixmap().isNull()
 
     def test_detect_progress_updates(self, window):
-        window.graph_label = MagicMock()
+        window.graph_label = Mock()
 
         result, failed_rate, timestamp = 42, 0.15, "10:00:00"
         window.detect_progress(result, failed_rate, timestamp)
@@ -75,7 +85,7 @@ class TestMethods:
 @pytest.mark.usefixtures("prevent_window_show")
 class TestUserActions:
     def test_cancel_action(self, window):
-        window.worker = MagicMock()
+        window.worker = Mock()
         window.cancel()
 
         assert window.worker.cancel.called_once()
@@ -85,7 +95,7 @@ class TestUserActions:
         "value, expected_text", [(0, "自動設定"), (100, "100"), (255, "255")]
     )
     def test_binarize_threshold_update(self, window, value, expected_text):
-        window.worker = MagicMock()
+        window.worker = Mock()
         window.update_binarize_th(value)
         expected_value = None if value == 0 else value
 
@@ -96,7 +106,7 @@ class TestUserActions:
         window.results = [1, 2, 3]
         window.failed_rates = [0.1, 0.2, 0.3]
         window.timestamps = ["00:00:01", "00:00:02", "00:00:03"]
-        window.graph_label = MagicMock()
+        window.graph_label = Mock()
 
         window.graph_results = window.results.copy()
         window.graph_failed_rates = window.failed_rates.copy()
@@ -122,8 +132,8 @@ class TestWorkerCallbacks:
         window.results = expected_params["results"]
         window.failed_rates = expected_params["failed_rates"]
         window.timestamps = expected_params["timestamps"]
-        window.export_process = MagicMock()
-        window.graph_label = MagicMock()
+        window.export_process = Mock()
+        window.graph_label = Mock()
         window.detect_finished()
 
         window.export_process.assert_called_once_with(expected_params)

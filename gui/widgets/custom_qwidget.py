@@ -16,4 +16,4 @@ class CustomQWidget(QWidget):
         raise NotImplementedError("initUI() must be implemented in subclass")
 
     def trigger(self, action: str, *args) -> None:
-        pass
+        raise NotImplementedError("trigger() must be implemented in subclass if used")

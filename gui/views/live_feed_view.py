@@ -68,7 +68,7 @@ class LiveFeedWindow(CustomQWidget):
         if action == "startup":
             self.startup(*args)
         else:
-            self.logger.error(f"Invalid action: {action}")
+            raise ValueError(f"Invalid action: {action}")
 
     def back(self) -> None:
         self.logger.debug("Back button clicked.")

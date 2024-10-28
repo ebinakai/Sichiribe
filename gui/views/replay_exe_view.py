@@ -76,6 +76,8 @@ class ReplayExeWindow(CustomQWidget):
             self.startup(*args)
         elif action == "continue":
             self.frame_devide_process(*args)
+        else:
+            raise ValueError(f"Invalid action: {action}")
 
     def startup(self, params: Dict) -> None:
         self.graph_label.gen_graph(

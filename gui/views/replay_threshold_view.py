@@ -81,7 +81,7 @@ class ReplayThresholdWindow(CustomQWidget):
         if action == "startup":
             self.startup(*args)
         else:
-            self.logger.error(f"Invalid action: {action}")
+            raise ValueError("Invalid action.")
 
     def startup(self, params: dict) -> None:
         self.logger.info("Starting ReplayThresholdWindow.")

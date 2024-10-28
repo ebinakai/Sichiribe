@@ -25,12 +25,12 @@ class TestScreenManager:
         screen_manager.show_screen("screen1")
         assert stacked_widget.currentWidget() == screen1
 
-    def test_screen_not_found(self, main_window, caplog):
+    def test_screen_not_found(self, main_window):
         window, stacked_widget = main_window
         screen_manager = ScreenManager(stacked_widget, window)
 
-        screen_manager.show_screen("non_existent_screen")
-        assert "Screen 'non_existent_screen' not found" in caplog.text
+        with pytest.raises(ValueError):
+            screen_manager.show_screen("non_existent_screen")
 
     def test_save_and_restore_screen_size(self, main_window):
         window, stacked_widget = main_window

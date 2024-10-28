@@ -1,6 +1,5 @@
 import pytest
-from unittest.mock import MagicMock, patch, ANY
-from gui.utils.screen_manager import ScreenManager
+from unittest.mock import Mock, patch, ANY
 from gui.views.live_feed_view import LiveFeedWindow
 from PySide6.QtCore import Qt
 from PySide6.QtGui import QPixmap
@@ -9,7 +8,7 @@ import numpy as np
 
 @pytest.fixture
 def window(qtbot):
-    screen_manager = MagicMock(spec=ScreenManager)
+    screen_manager = Mock()
     window = LiveFeedWindow(screen_manager)
     window.params = {}
     qtbot.addWidget(window)
@@ -22,9 +21,19 @@ class TestLiveFeedWindow:
     def test_initial_ui_state(self, window):
         assert window.feed_label.text() == ""
 
+    def test_trigger(self, window):
+        window.startup = Mock()
+        expected_params = {"a": 1, "b": 2}
+        window.trigger("startup", expected_params.copy())
+
+        window.startup.assert_called_once_with(expected_params)
+
+        with pytest.raises(ValueError):
+            window.trigger("invalid", expected_params.copy())
+
     @patch("gui.views.live_feed_view.LiveFeedWorker")
     def test_startup(self, mock_worker_class, window):
-        mock_worker_instance = MagicMock()
+        mock_worker_instance = Mock()
         mock_worker_class.return_value = mock_worker_instance
         window.screen_manager.save_screen_size.return_value = (1920, 1080)
         test_params = {"a": 0, "b": 2}
@@ -50,12 +59,12 @@ class TestLiveFeedWindow:
         assert mock_worker_instance.start.called_once()
 
     def test_back_button(self, window, qtbot):
-        window.worker = MagicMock()
+        window.worker = Mock()
         qtbot.mouseClick(window.back_button, Qt.MouseButton.LeftButton)
         window.worker.cancel.assert_called_once()
 
     def test_next_button(self, window, qtbot):
-        window.worker = MagicMock()
+        window.worker = Mock()
         qtbot.mouseClick(window.next_button, Qt.MouseButton.LeftButton)
         window.worker.stop.assert_called_once()
 

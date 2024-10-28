@@ -95,6 +95,8 @@ class RegionSelectWindow(CustomQWidget):
     def trigger(self, action, *args) -> None:
         if action == "startup":
             self.startup(*args)
+        else:
+            raise ValueError(f"Invalid action: {action}")
 
     def set_image(self, image: np.ndarray) -> None:
         self.image_original = image

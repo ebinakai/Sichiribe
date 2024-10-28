@@ -100,7 +100,7 @@ class LiveExeWindow(CustomQWidget):
         if action == "startup":
             self.startup(*args)
         else:
-            self.logger.error(f"Invalid action: {action}")
+            raise ValueError(f"Invalid action: {action}")
 
     def cancel(self) -> None:
         if self.worker is not None:

@@ -1,12 +1,12 @@
 import pytest
-from unittest.mock import MagicMock
+from unittest.mock import Mock
 from gui.views.replay_threshold_view import ReplayThresholdWindow
 import numpy as np
 
 
 @pytest.fixture
 def window(qtbot):
-    screen_manager = MagicMock()
+    screen_manager = Mock()
     screen_manager.save_screen_size.return_value = (800, 600)
     window = ReplayThresholdWindow(screen_manager)
     qtbot.addWidget(window)
@@ -26,6 +26,16 @@ class TestReplayThresholdWindow:
         assert window.binarize_th.value() == 0
         assert window.binarize_th_label.text() == "自動設定"
         assert window.extracted_label.pixmap() is not None
+
+    def test_trigger(self, window):
+        window.startup = Mock()
+        expected_params = {"a": 1, "b": 2}
+        window.trigger("startup", expected_params.copy())
+
+        window.startup.assert_called_once_with(expected_params)
+
+        with pytest.raises(ValueError):
+            window.trigger("invalid", expected_params.copy())
 
     def test_threshold_update(self, window):
         window.binarize_th.setValue(128)

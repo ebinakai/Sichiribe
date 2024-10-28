@@ -32,7 +32,7 @@ class ScreenManager:
             self.stacked_widget.setCurrentWidget(self.screens[name])
             self.main_window.setFocus()
         else:
-            self.logger.error(f"Screen '{name}' not found")
+            raise ValueError(f"Screen '{name}' not found")
 
     def get_screen(self, name: str) -> CustomQWidget:
         if name in self.screens:

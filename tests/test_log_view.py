@@ -1,12 +1,11 @@
 import pytest
-from unittest.mock import MagicMock
-from gui.utils.screen_manager import ScreenManager
+from unittest.mock import Mock
 from gui.views.log_view import LogWindow
 
 
 @pytest.fixture
 def window(qtbot):
-    screen_manager = MagicMock(spec=ScreenManager)
+    screen_manager = Mock()
     window = LogWindow(screen_manager)
     qtbot.addWidget(window)
     window.show()
@@ -17,6 +16,15 @@ def window(qtbot):
 class TestLogWindow:
     def test_initial_ui_state(self, window):
         assert window.log_display.toPlainText() == ""
+
+    def test_trigger(self, window):
+        window.clear_log = Mock()
+        expected_output = "This is a test log message."
+        window.trigger("clear")
+        assert window.clear_log.called_once()
+
+        with pytest.raises(ValueError):
+            window.trigger("invalid", expected_output)
 
     def test_log_emission(self, window):
         log_message = "This is a test log message."

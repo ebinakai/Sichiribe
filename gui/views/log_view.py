@@ -56,6 +56,8 @@ class LogWindow(CustomQWidget):
     def trigger(self, action, *args):
         if action == "clear":
             self.clear_log()
+        else:
+            raise ValueError(f"Invalid action: {action}")
 
     def append_log(self, message: str) -> None:
         self.log_display.append(message)

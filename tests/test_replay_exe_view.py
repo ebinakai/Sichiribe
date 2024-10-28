@@ -23,6 +23,20 @@ class TestMethods:
         assert window.term_label.text() == ""
         assert window.graph_label is not None
 
+    def test_trigger(self, window):
+        window.startup = Mock()
+        expected_params = {"a": 1, "b": 2}
+        window.trigger("startup", expected_params.copy())
+
+        window.startup.assert_called_once_with(expected_params)
+
+        window.frame_devide_process = Mock()
+        window.trigger("continue", expected_params.copy())
+        window.frame_devide_process.assert_called_once_with(expected_params)
+
+        with pytest.raises(ValueError):
+            window.trigger("invalid", expected_params.copy())
+
     @patch("gui.views.replay_exe_view.FrameEditor")
     def test_startup(self, mock_frame_editor, window):
         extracted_frame = Mock()
