@@ -119,6 +119,8 @@ class DetectWorker(QThread):
                 self.logger.debug(f"Waiting for {time_to_wait:.2f}s")
                 time.sleep(time_to_wait)
 
+        self.fc.release()
+
         return None
 
     def cancel(self) -> None:
