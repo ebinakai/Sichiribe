@@ -16,7 +16,7 @@ def window(qtbot):
 @pytest.mark.usefixtures("prevent_window_show")
 class TestLogWindow:
     def test_initial_ui_state(self, window):
-        assert window.log_display.toPlainText() == ''
+        assert window.log_display.toPlainText() == ""
 
     def test_log_emission(self, window):
         log_message = "This is a test log message."
@@ -31,4 +31,4 @@ class TestLogWindow:
         assert window.log_display.toPlainText() == log_message
 
         window.clear_log()
-        assert window.log_display.toPlainText() == ''
+        assert window.log_display.toPlainText() == ""

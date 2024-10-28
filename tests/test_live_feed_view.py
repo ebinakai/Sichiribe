@@ -22,7 +22,7 @@ class TestLiveFeedWindow:
     def test_initial_ui_state(self, window):
         assert window.feed_label.text() == ""
 
-    @patch('gui.views.live_feed_view.LiveFeedWorker')
+    @patch("gui.views.live_feed_view.LiveFeedWorker")
     def test_startup(self, mock_worker_class, window):
         mock_worker_instance = MagicMock()
         mock_worker_class.return_value = mock_worker_instance
@@ -36,18 +36,17 @@ class TestLiveFeedWindow:
         assert window.failed_rates == []
         assert window.feed_label.text() != ""
         assert window.screen_manager.save_screen_size.called_once()
-        window.screen_manager.show_screen.assert_called_once_with('live_feed')
+        window.screen_manager.show_screen.assert_called_once_with("live_feed")
         mock_worker_class.assert_called_once_with(test_params, ANY, ANY)
         mock_worker_instance.cap_size.connect.assert_called_once_with(
-            window.recieve_cap_size)
-        mock_worker_instance.progress.connect.assert_called_once_with(
-            window.show_feed)
-        mock_worker_instance.end.connect.assert_called_once_with(
-            window.feed_finished)
+            window.recieve_cap_size
+        )
+        mock_worker_instance.progress.connect.assert_called_once_with(window.show_feed)
+        mock_worker_instance.end.connect.assert_called_once_with(window.feed_finished)
         mock_worker_instance.cancelled.connect.assert_called_once_with(
-            window.feed_cancelled)
-        mock_worker_instance.error.connect.assert_called_once_with(
-            window.feed_error)
+            window.feed_cancelled
+        )
+        mock_worker_instance.error.connect.assert_called_once_with(window.feed_error)
         assert mock_worker_instance.start.called_once()
 
     def test_back_button(self, window, qtbot):
@@ -65,12 +64,13 @@ class TestLiveFeedWindow:
         window.feed_finished(frame)
 
         qtbot.wait(20)
-        window.screen_manager.get_screen.assert_called_once_with(
-            "region_select")
+        window.screen_manager.get_screen.assert_called_once_with("region_select")
 
     def test_feed_error(self, window):
         window.feed_error()
-        window.screen_manager.popup.assert_called_once_with("カメラにアクセスできませんでした")
+        window.screen_manager.popup.assert_called_once_with(
+            "カメラにアクセスできませんでした"
+        )
 
     def test_clear_env(self, window):
         window.feed_label.setPixmap(QPixmap(10, 10))

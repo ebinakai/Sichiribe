@@ -1,15 +1,22 @@
-'''
+"""
 映像中の7セグメント領域を選択する画面のViewクラス
 
 1. 4点を選択することで7セグメント領域を囲むことができる
 2. opencvの画像処理を行うため、FrameEditorクラスを利用する
 3. 選択が終わると次の画面に遷移する
-'''
+"""
 
 import logging
 from typing import List
 import numpy as np
-from PySide6.QtWidgets import QApplication, QLabel, QVBoxLayout, QHBoxLayout, QPushButton, QSizePolicy
+from PySide6.QtWidgets import (
+    QApplication,
+    QLabel,
+    QVBoxLayout,
+    QHBoxLayout,
+    QPushButton,
+    QSizePolicy,
+)
 from PySide6.QtGui import QPixmap, QMouseEvent
 from PySide6.QtCore import Qt, QSize, QTimer
 from gui.widgets.custom_qwidget import CustomQWidget
@@ -21,13 +28,13 @@ from gui.widgets.clickable_label import ClickableLabel
 
 class RegionSelectWindow(CustomQWidget):
     def __init__(self, screen_manager: ScreenManager) -> None:
-        self.logger = logging.getLogger('__main__').getChild(__name__)
+        self.logger = logging.getLogger("__main__").getChild(__name__)
         self.screen_manager = screen_manager
         self.click_points: List = []
         self.image_size: QSize
 
         super().__init__()
-        screen_manager.add_screen('region_select', self)
+        screen_manager.add_screen("region_select", self)
 
         screen = QApplication.primaryScreen()
         screen_rect = screen.availableGeometry()
@@ -52,15 +59,15 @@ class RegionSelectWindow(CustomQWidget):
         self.main_label = ClickableLabel(self, self.label_clicked)
         # サイズポリシーを設定して、ラベルが画像サイズに合わせて変わるようにする
         self.main_label.setSizePolicy(
-            QSizePolicy.Policy.Fixed,
-            QSizePolicy.Policy.Fixed)
+            QSizePolicy.Policy.Fixed, QSizePolicy.Policy.Fixed
+        )
         image_layout.addWidget(self.main_label)
 
         self.extracted_label = QLabel()
         self.extracted_label.setMinimumHeight(100)
         extracted_image_layout.addWidget(self.extracted_label)
 
-        self.back_button = QPushButton('戻る')
+        self.back_button = QPushButton("戻る")
         self.back_button.setFixedWidth(100)
         self.back_button.clicked.connect(self.cancel_select)
         footer_layout.addWidget(self.back_button)
@@ -69,9 +76,9 @@ class RegionSelectWindow(CustomQWidget):
 
         footer_right_layout = QHBoxLayout()
         self.confirm_txt = QLabel()
-        self.confirm_txt.setStyleSheet('color: red')
+        self.confirm_txt.setStyleSheet("color: red")
         footer_right_layout.addWidget(self.confirm_txt)
-        self.next_button = QPushButton('次へ')
+        self.next_button = QPushButton("次へ")
         self.next_button.setDefault(True)  # 強調表示されるデフォルトボタンに設定
         self.next_button.setAutoDefault(True)
         self.next_button.setFixedWidth(100)
@@ -86,41 +93,44 @@ class RegionSelectWindow(CustomQWidget):
         main_layout.addLayout(footer_layout)
 
     def trigger(self, action, *args) -> None:
-        if action == 'startup':
+        if action == "startup":
             self.startup(*args)
 
     def set_image(self, image: np.ndarray) -> None:
         self.image_original = image
         self.image, self.resize_scale = resize_image(
-            image, self.target_width, self.target_height)
+            image, self.target_width, self.target_height
+        )
 
         self.update_image(self.image.copy())
 
     def label_clicked(self, event: QMouseEvent) -> None:
-        if event.button() == Qt.MouseButton.LeftButton or event.button(
-        ) == Qt.MouseButton.NoButton and len(self.click_points) == 4:
+        if (
+            event.button() == Qt.MouseButton.LeftButton
+            or event.button() == Qt.MouseButton.NoButton
+            and len(self.click_points) == 4
+        ):
 
             # QLabel内の座標を取得
             label_pos = event.position().toPoint()
 
-            if label_pos.x() <= 0 or \
-                    label_pos.x() >= self.image_size.width() or \
-                    label_pos.y() <= 0 or \
-                    label_pos.y() >= self.image_size.height():
+            if (
+                label_pos.x() <= 0
+                or label_pos.x() >= self.image_size.width()
+                or label_pos.y() <= 0
+                or label_pos.y() >= self.image_size.height()
+            ):
                 return
 
-            new_point = np.array(
-                [label_pos.x(), label_pos.y()]).astype(np.int32)
+            new_point = np.array([label_pos.x(), label_pos.y()]).astype(np.int32)
 
             if len(self.click_points) < 4:
                 self.click_points.append(new_point)
             else:
                 # 最も近い点を入れ替える
                 distances = np.linalg.norm(
-                    np.array(
-                        self.click_points) -
-                    new_point,
-                    axis=1)
+                    np.array(self.click_points) - new_point, axis=1
+                )
                 closest_index = np.argmin(distances)
                 self.click_points[closest_index] = new_point
 
@@ -140,10 +150,10 @@ class RegionSelectWindow(CustomQWidget):
 
     def update_image(self, image: np.ndarray) -> None:
         click_points = np.array(self.click_points) / self.resize_scale
-        extract_image = self.fe.crop(
-            self.image_original, click_points.tolist())
+        extract_image = self.fe.crop(self.image_original, click_points.tolist())
         image, extract_image = self.fe.draw_debug_info(
-            image, extract_image, self.click_points)
+            image, extract_image, self.click_points
+        )
         height, width, channel = self.image.shape
         self.image_size = QSize(width, height)
         self.display_image(image)
@@ -152,10 +162,10 @@ class RegionSelectWindow(CustomQWidget):
             self.display_extract_image(extract_image)
 
     def startup(self, params: dict, prev_screen: str) -> None:
-        self.logger.info('Starting RegionSelectWindow.')
+        self.logger.info("Starting RegionSelectWindow.")
         self.params = params
         self.prev_screen = prev_screen
-        self.fe = FrameEditor(num_digits=params['num_digits'])
+        self.fe = FrameEditor(num_digits=params["num_digits"])
 
         window_pos, _s = self.screen_manager.save_screen_size()
 
@@ -164,18 +174,18 @@ class RegionSelectWindow(CustomQWidget):
         self.target_width = int(screen_rect.width() * 0.8)
         self.target_height = int((screen_rect.height() - 100) * 0.8)
 
-        self.set_image(params['first_frame'])
-        self.screen_manager.show_screen('region_select')
+        self.set_image(params["first_frame"])
+        self.screen_manager.show_screen("region_select")
         QTimer.singleShot(1, lambda: self.window().move(window_pos.x(), 1))
 
     def finish_select(self) -> None:
         if len(self.click_points) != 4:
-            self.confirm_txt.setText('7セグメント領域を囲ってください')
+            self.confirm_txt.setText("7セグメント領域を囲ってください")
             return
 
         self.logger.info("Region selection finished.")
         click_points = np.array(self.click_points) / self.resize_scale
-        self.params['click_points'] = click_points.tolist()
+        self.params["click_points"] = click_points.tolist()
 
         self.clear_env()
 
@@ -189,31 +199,30 @@ class RegionSelectWindow(CustomQWidget):
 
     def switch_back(self) -> None:
         self.logger.debug("Switching to back screen(%s).", self.prev_screen)
-        if self.prev_screen == 'replay_exe':
-            self.screen_manager.show_screen('replay_setting')
-        elif self.prev_screen == 'live_feed':
-            self.screen_manager.get_screen(
-                'live_feed').trigger('startup', self.params)
+        if self.prev_screen == "replay_exe":
+            self.screen_manager.show_screen("replay_setting")
+        elif self.prev_screen == "live_feed":
+            self.screen_manager.get_screen("live_feed").trigger("startup", self.params)
         else:
-            raise ValueError('Invalid previous screen.')
-        self.prev_screen = ''
+            raise ValueError("Invalid previous screen.")
+        self.prev_screen = ""
 
     def switch_next(self) -> None:
         self.logger.debug("Switching to next screen(%s).", self.prev_screen)
-        if self.prev_screen == 'replay_exe':
-            self.screen_manager.get_screen(
-                'replay_threshold').trigger('startup', self.params)
-        elif self.prev_screen == 'live_feed':
-            self.screen_manager.get_screen(
-                'live_exe').trigger('startup', self.params)
+        if self.prev_screen == "replay_exe":
+            self.screen_manager.get_screen("replay_threshold").trigger(
+                "startup", self.params
+            )
+        elif self.prev_screen == "live_feed":
+            self.screen_manager.get_screen("live_exe").trigger("startup", self.params)
         else:
-            raise ValueError('Invalid previous screen.')
-        self.prev_screen = ''
+            raise ValueError("Invalid previous screen.")
+        self.prev_screen = ""
 
     def clear_env(self) -> None:
         self.main_label.clear()
         self.extracted_label.clear()
         self.click_points = []
-        self.confirm_txt.setText('')
-        self.logger.info('Environment cleared.')
+        self.confirm_txt.setText("")
+        self.logger.info("Environment cleared.")
         self.screen_manager.restore_screen_size()

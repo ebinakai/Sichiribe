@@ -1,11 +1,11 @@
-'''
+"""
 カメラの画角をキャプチャするためのワーカークラス
 
 1. キャプチャデバイスを設定し、キャプチャサイズを取得する
 2. キャプチャデバイスからフレームを取得し、進捗を通知する
 3. キャンセルフラグが立った場合は、キャンセルを通知し、キャプチャを終了する
 4. 終了フラグが立った場合は、終了を通知し、キャプチャを終了する
-'''
+"""
 
 from PySide6.QtCore import Signal, QThread
 from cores.capture import FrameCapture
@@ -25,19 +25,15 @@ class LiveFeedWorker(QThread):
         self.params = params
         self.width = width
         self.height = height
-        self.logger = logging.getLogger('__main__').getChild(__name__)
+        self.logger = logging.getLogger("__main__").getChild(__name__)
         self._is_cancelled = False
         self._is_finished = False
 
     def run(self) -> None:
-        fc = FrameCapture(self.params['device_num'])
-        self.logger.info(
-            'Capture device(%s) loaded.' %
-            self.params['device_num'])
+        fc = FrameCapture(self.params["device_num"])
+        self.logger.info("Capture device(%s) loaded." % self.params["device_num"])
         cap_width, cap_height = fc.set_cap_size(self.width, self.height)
-        self.logger.debug(
-            'Capture size set to %d x %d' %
-            (cap_width, cap_height))
+        self.logger.debug("Capture size set to %d x %d" % (cap_width, cap_height))
         self.cap_size.emit((cap_width, cap_height))
 
         while True:

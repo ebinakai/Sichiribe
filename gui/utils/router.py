@@ -1,9 +1,9 @@
-'''
+"""
 ルーティングを行うためのモジュール
 
 1. 画面遷移を行うためのビュークラスをインスタンス化し、スタックウィジェットに追加する
 2. 新たなビュークラスを追加する場合は、ここに追記する
-'''
+"""
 
 from PySide6.QtWidgets import QStackedWidget, QMainWindow
 from gui.utils.screen_manager import ScreenManager
@@ -19,8 +19,8 @@ from gui.views.live_exe_view import LiveExeWindow
 
 
 def init_screen_manager(
-        stacked_widget: QStackedWidget,
-        main_window: QMainWindow) -> ScreenManager:
+    stacked_widget: QStackedWidget, main_window: QMainWindow
+) -> ScreenManager:
 
     screen_manager = ScreenManager(stacked_widget, main_window)
 

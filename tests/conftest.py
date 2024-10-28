@@ -5,7 +5,7 @@ import numpy as np
 
 @pytest.fixture()
 def prevent_window_show():
-    with patch('PySide6.QtWidgets.QWidget.show'):
+    with patch("PySide6.QtWidgets.QWidget.show"):
         yield
 
 

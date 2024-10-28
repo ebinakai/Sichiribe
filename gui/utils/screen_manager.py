@@ -1,10 +1,10 @@
-'''
+"""
 画面の管理を行うクラス
 
 1. 画面遷移を行う
 2. 画面サイズの保存、復元を行う
 3. ポップアップメッセージボックスの表示を行う
-'''
+"""
 
 from PySide6.QtWidgets import QApplication, QStackedWidget, QMainWindow, QMessageBox
 from PySide6.QtGui import QPalette
@@ -15,13 +15,10 @@ from typing import Tuple, Dict, Optional
 
 
 class ScreenManager:
-    def __init__(
-            self,
-            stacked_widget: QStackedWidget,
-            main_window: QMainWindow):
+    def __init__(self, stacked_widget: QStackedWidget, main_window: QMainWindow):
         self.stacked_widget = stacked_widget
         self.main_window = main_window
-        self.logger = logging.getLogger('__main__').getChild(__name__)
+        self.logger = logging.getLogger("__main__").getChild(__name__)
         self.screens: Dict[str, CustomQWidget] = {}
         self.window_pos: Optional[QPoint] = None
         self.window_size: Optional[QSize] = None

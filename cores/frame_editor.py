@@ -8,13 +8,14 @@ from cores.common import clear_directory
 
 
 class FrameEditor:
-    def __init__(self,
-                 sampling_sec: int = 3,
-                 num_frames_per_sample: int = 10,
-                 num_digits: int = 4,
-                 crop_width: int = 100,
-                 crop_height: int = 100,
-                 ) -> None:
+    def __init__(
+        self,
+        sampling_sec: int = 3,
+        num_frames_per_sample: int = 10,
+        num_digits: int = 4,
+        crop_width: int = 100,
+        crop_height: int = 100,
+    ) -> None:
 
         self.return_frames: List[List[Union[str, np.ndarray]]] = []
         self.sampling_sec = sampling_sec
@@ -31,15 +32,16 @@ class FrameEditor:
         return self.click_points
 
     # 動画をフレームに分割
-    def frame_devide(self,
-                     video_path: str,
-                     video_skip_sec: int = 0,
-                     save_frame: bool = True,
-                     out_dir: str = 'frames',
-                     is_crop: bool = True,
-                     click_points: List = [],
-                     extract_single_frame: bool = False,
-                     ) -> Union[np.ndarray, List[List[np.ndarray]]]:
+    def frame_devide(
+        self,
+        video_path: str,
+        video_skip_sec: int = 0,
+        save_frame: bool = True,
+        out_dir: str = "frames",
+        is_crop: bool = True,
+        click_points: List = [],
+        extract_single_frame: bool = False,
+    ) -> Union[np.ndarray, List[List[np.ndarray]]]:
         self.click_points = click_points
 
         if save_frame:
@@ -52,8 +54,7 @@ class FrameEditor:
             exit(1)
 
         fps = cap.get(cv2.CAP_PROP_FPS)
-        interval_frames = 1 if self.sampling_sec == 0 else int(
-            fps * self.sampling_sec)
+        interval_frames = 1 if self.sampling_sec == 0 else int(fps * self.sampling_sec)
         skip_frames = fps * video_skip_sec
         frame_count = 0
         saved_frame_count = 0
@@ -89,7 +90,8 @@ class FrameEditor:
 
                 if save_frame:
                     frame_filename = os.path.join(
-                        out_dir, f'frame_{frame_count:06d}.jpg')
+                        out_dir, f"frame_{frame_count:06d}.jpg"
+                    )
                     cv2.imwrite(frame_filename, frame)
                     saved_frame_count += 1
                     self.logger.debug(f"Frame saved to '{frame_filename}'.")
@@ -106,7 +108,8 @@ class FrameEditor:
 
         if saved_frame_count > 0:
             self.logger.info(
-                f"Extracted {saved_frame_count} frames were saved to '{out_dir}' directory.")
+                f"Extracted {saved_frame_count} frames were saved to '{out_dir}' directory."
+            )
 
         return return_frames if return_frame is None else return_frame
 
@@ -131,18 +134,24 @@ class FrameEditor:
             return None
 
         # 射影変換
-        pts1 = np.array([click_points[0],
-                         click_points[1],
-                         click_points[2],
-                         click_points[3]], dtype=np.float32)
+        pts1 = np.array(
+            [click_points[0], click_points[1], click_points[2], click_points[3]],
+            dtype=np.float32,
+        )
 
-        pts2 = np.array([[0, 0],
-                         [self.crop_width * self.num_digits, 0],
-                         [self.crop_width * self.num_digits, self.crop_height],
-                         [0, self.crop_height]], dtype=np.float32)
+        pts2 = np.array(
+            [
+                [0, 0],
+                [self.crop_width * self.num_digits, 0],
+                [self.crop_width * self.num_digits, self.crop_height],
+                [0, self.crop_height],
+            ],
+            dtype=np.float32,
+        )
         M = cv2.getPerspectiveTransform(pts1, pts2)
         extract_image = cv2.warpPerspective(
-            image, M, (self.crop_width * self.num_digits, self.crop_height))
+            image, M, (self.crop_width * self.num_digits, self.crop_height)
+        )
 
         return extract_image
 
@@ -155,7 +164,7 @@ class FrameEditor:
 
         while True:
             key = cv2.waitKey(100)
-            if key == ord('y') and len(self.click_points) == 4:  # yキーで選択終了
+            if key == ord("y") and len(self.click_points) == 4:  # yキーで選択終了
                 cv2.destroyAllWindows()
                 cv2.waitKey(1)
                 return self.click_points
@@ -174,7 +183,7 @@ class FrameEditor:
             # 描画更新
             cv2.imshow(window_name, img_clone)
             if extract_image is not None:
-                cv2.imshow('Result', extract_image)
+                cv2.imshow("Result", extract_image)
 
     def mouse_callback(self, event, x, y, flags, param) -> None:
         if event == cv2.EVENT_LBUTTONDOWN:
@@ -185,10 +194,8 @@ class FrameEditor:
             else:
                 # 4点以上の場合、最も近い点を入れ替える
                 distances = np.linalg.norm(
-                    np.array(
-                        self.click_points) -
-                    new_point,
-                    axis=1)
+                    np.array(self.click_points) - new_point, axis=1
+                )
                 closest_index = np.argmin(distances)
                 self.click_points[closest_index] = new_point
 
@@ -213,8 +220,12 @@ class FrameEditor:
         right_points = right_points[np.argsort(right_points[:, 1])]
         top_right, bottom_right = right_points
 
-        return [top_left.tolist(), top_right.tolist(),
-                bottom_right.tolist(), bottom_left.tolist()]
+        return [
+            top_left.tolist(),
+            top_right.tolist(),
+            bottom_right.tolist(),
+            bottom_left.tolist(),
+        ]
 
     # 選択領域の可視化
     def draw_debug_info(
@@ -224,20 +235,16 @@ class FrameEditor:
         click_points_: List[np.ndarray],
     ) -> Tuple[np.ndarray, Optional[np.ndarray]]:
         for click_point in click_points_:
-            cv2.circle(
-                image, (click_point[0], click_point[1]), 5, (0, 255, 0), -1
-            )
+            cv2.circle(image, (click_point[0], click_point[1]), 5, (0, 255, 0), -1)
         if len(click_points_) >= 3:
-            cv2.drawContours(
-                image, [np.array(click_points_)], -1, (0, 255, 0), 2
-            )
+            cv2.drawContours(image, [np.array(click_points_)], -1, (0, 255, 0), 2)
         if extract_image is not None:
             for index in range(self.num_digits):
-                temp_x = int(
-                    (extract_image.shape[1] / self.num_digits) * index)
+                temp_x = int((extract_image.shape[1] / self.num_digits) * index)
                 temp_y = extract_image.shape[0]
 
                 if index > 0:
-                    cv2.line(extract_image, (temp_x, 0), (temp_x, temp_y),
-                             (0, 255, 0), 1)
+                    cv2.line(
+                        extract_image, (temp_x, 0), (temp_x, temp_y), (0, 255, 0), 1
+                    )
         return image, extract_image

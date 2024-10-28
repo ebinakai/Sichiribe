@@ -21,7 +21,7 @@ class FrameCapture:
 
     def show_camera_feed(self) -> None:
 
-        while cv2.waitKey(1) & 0xFF != ord('y'):
+        while cv2.waitKey(1) & 0xFF != ord("y"):
             frame = self.capture()
             if frame is None:
                 break
@@ -50,9 +50,10 @@ class FrameCapture:
         self.cap.set(cv2.CAP_PROP_FRAME_HEIGHT, height)
         self.logger.debug(
             "set_cap_size called: {0} x {1}".format(
-                self.cap.get(
-                    cv2.CAP_PROP_FRAME_WIDTH), self.cap.get(
-                    cv2.CAP_PROP_FRAME_HEIGHT)))
+                self.cap.get(cv2.CAP_PROP_FRAME_WIDTH),
+                self.cap.get(cv2.CAP_PROP_FRAME_HEIGHT),
+            )
+        )
         width = self.cap.get(cv2.CAP_PROP_FRAME_WIDTH)
         height = self.cap.get(cv2.CAP_PROP_FRAME_HEIGHT)
         self.logger.debug("set to {0} x {1}".format(width, height))

@@ -12,7 +12,7 @@ def get_supported_formats() -> list:
 
 class Exporter:
     # インスタンス化しなくてもサポートフォーマットを取得するためにクラス変数として定義
-    aveilable_formats = ['csv', 'json']
+    aveilable_formats = ["csv", "json"]
 
     def __init__(self, out_dir: str):
         self.out_dir = out_dir
@@ -21,13 +21,14 @@ class Exporter:
 
         self.logger.debug("Exporter loaded.")
 
-    def export(self, data: List[Any] | Dict, method: str,
-               base_filename: str = 'result') -> None:
-        if method == 'csv':
+    def export(
+        self, data: List[Any] | Dict, method: str, base_filename: str = "result"
+    ) -> None:
+        if method == "csv":
             self.to_csv(data, base_filename)
-        elif method == 'json':
+        elif method == "json":
             self.to_json(data, base_filename)
-        elif method == 'dummy':
+        elif method == "dummy":
             pass
         else:
             self.logger.error("Invalid export method.")
@@ -38,14 +39,13 @@ class Exporter:
         filename = f"{base_filename}_{now}.{extension}"
         return os.path.join(self.out_dir, filename)
 
-    def to_csv(self, data: List[Dict] | List |
-               Dict, base_filename: str) -> None:
+    def to_csv(self, data: List[Dict] | List | Dict, base_filename: str) -> None:
         if not data:
             self.logger.debug("No data to export.")
             return
         out_path = self.generate_filepath(base_filename, "csv")
         keys = data[0].keys()
-        with open(out_path, 'w', newline='') as f:
+        with open(out_path, "w", newline="") as f:
             dict_writer = csv.DictWriter(f, fieldnames=keys)
             dict_writer.writeheader()
             dict_writer.writerows(data)
@@ -56,7 +56,7 @@ class Exporter:
             self.logger.debug("No data to export.")
             return
         out_path = self.generate_filepath(base_filename, "json")
-        with open(out_path, 'w') as f:
+        with open(out_path, "w") as f:
             json.dump(data, f)
         self.logger.debug("Exported data to json.")
 
@@ -64,5 +64,6 @@ class Exporter:
         formatted_data = []
         for data, data2, timestamp in zip(data, data2, timestamp):
             formatted_data.append(
-                {"timestamp": timestamp, "value": data, "failed": data2})
+                {"timestamp": timestamp, "value": data, "failed": data2}
+            )
         return formatted_data
