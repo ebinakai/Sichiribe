@@ -29,7 +29,12 @@ from PySide6.QtWidgets import (
 )
 from gui.widgets.custom_qwidget import CustomQWidget
 from gui.utils.screen_manager import ScreenManager
-from cores.common import get_now_str, load_config
+from cores.common import (
+    get_now_str,
+    load_config,
+    validate_output_directory,
+    validate_params,
+)
 from cores.exporter import get_supported_formats
 import logging
 from pathlib import Path
@@ -39,6 +44,16 @@ class ReplaySettingWindow(CustomQWidget):
     def __init__(self, screen_manager: ScreenManager) -> None:
         self.logger = logging.getLogger("__main__").getChild(__name__)
         self.screen_manager = screen_manager
+        self.required_keys = {
+            "video_path": lambda x: isinstance(x, str) and Path(x).exists(),
+            "num_digits": lambda x: isinstance(x, int) and x >= 1,
+            "sampling_sec": lambda x: isinstance(x, int) and x >= 1,
+            "num_frames": lambda x: isinstance(x, int) and x >= 1,
+            "video_skip_sec": lambda x: isinstance(x, int) and x >= 0,
+            "format": lambda x: x in get_supported_formats(),
+            "save_frame": lambda x: isinstance(x, bool),
+            "out_dir": lambda x: validate_output_directory(Path(x).parent),
+        }
 
         super().__init__()
         screen_manager.add_screen("replay_setting", self)
@@ -135,17 +150,9 @@ class ReplaySettingWindow(CustomQWidget):
             self, "ファイルを選択", "", "設定ファイル(*.json)"
         )
 
-        required_keys = {
-            "video_path",
-            "num_digits",
-            "sampling_sec",
-            "num_frames",
-            "video_skip_sec",
-            "format",
-            "save_frame",
-            "out_dir",
-            "click_points",
-        }
+        required_keys = set(self.required_keys.keys())
+        required_keys.add("click_points")
+
         try:
             params = load_config(folder_path, required_keys)
         except Exception:
@@ -153,8 +160,12 @@ class ReplaySettingWindow(CustomQWidget):
             self.confirm_txt.setText("ファイルが読み込めませんでした")
             return
 
-        out_dir = Path(params["out_dir"]).parent / get_now_str()
-        params["out_dir"] = str(out_dir)
+        out_dir_parent = Path(params["out_dir"]).parent
+        params["out_dir"] = str(out_dir_parent / get_now_str())
+        if not validate_params(params, self.required_keys):
+            self.logger.info(f"Invalid config file")
+            self.confirm_txt.setText("不正なファイルです")
+            return
 
         self.screen_manager.get_screen("replay_exe").trigger("startup", params)
 
@@ -176,5 +187,9 @@ class ReplaySettingWindow(CustomQWidget):
             "save_frame": self.save_frame.isChecked(),
             "out_dir": str(out_dir),
         }
+
+        if not validate_params(params, self.required_keys):
+            self.confirm_txt.setText("不正な値が入力されています")
+            return
 
         self.screen_manager.get_screen("replay_exe").trigger("startup", params)

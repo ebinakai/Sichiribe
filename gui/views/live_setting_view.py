@@ -30,7 +30,12 @@ from PySide6.QtWidgets import (
 from gui.widgets.custom_qwidget import CustomQWidget
 from gui.utils.screen_manager import ScreenManager
 from cores.exporter import get_supported_formats
-from cores.common import get_now_str, load_config
+from cores.common import (
+    get_now_str,
+    load_config,
+    validate_output_directory,
+    validate_params,
+)
 import logging
 from pathlib import Path
 
@@ -39,6 +44,16 @@ class LiveSettingWindow(CustomQWidget):
     def __init__(self, screen_manager: ScreenManager) -> None:
         self.logger = logging.getLogger("__main__").getChild(__name__)
         self.screen_manager = screen_manager
+        self.required_keys = {
+            "device_num": lambda x: isinstance(x, int) and x >= 0,
+            "num_digits": lambda x: isinstance(x, int) and x >= 1,
+            "sampling_sec": lambda x: isinstance(x, int) and x >= 1,
+            "num_frames": lambda x: isinstance(x, int) and x >= 1,
+            "total_sampling_sec": lambda x: isinstance(x, int) and x >= 1,
+            "format": lambda x: x in get_supported_formats(),
+            "save_frame": lambda x: isinstance(x, bool),
+            "out_dir": lambda x: validate_output_directory(Path(x).parent),
+        }
 
         super().__init__()
         screen_manager.add_screen("live_setting", self)
@@ -141,18 +156,9 @@ class LiveSettingWindow(CustomQWidget):
             self, "ファイルを選択", "", "設定ファイル(*.json)"
         )
 
-        required_keys = {
-            "device_num",
-            "num_digits",
-            "sampling_sec",
-            "num_frames",
-            "total_sampling_sec",
-            "format",
-            "save_frame",
-            "out_dir",
-            "cap_size",
-            "click_points",
-        }
+        required_keys = set(self.required_keys.keys())
+        required_keys.add("click_points")
+        required_keys.add("cap_size")
         try:
             params = load_config(folder_path, required_keys)
         except Exception:
@@ -160,8 +166,12 @@ class LiveSettingWindow(CustomQWidget):
             self.confirm_txt.setText("ファイルが読み込めませんでした")
             return
 
-        out_dir = Path(params["out_dir"]).parent / get_now_str()
-        params["out_dir"] = str(out_dir)
+        out_dir_parent = Path(params["out_dir"]).parent
+        params["out_dir"] = str(out_dir_parent / get_now_str())
+        if not validate_params(params, self.required_keys):
+            self.logger.info(f"Invalid config file")
+            self.confirm_txt.setText("不正なファイルです")
+            return
 
         if len(params["click_points"]) == 4:
             self.screen_manager.get_screen("live_exe").trigger("startup", params)
@@ -185,6 +195,10 @@ class LiveSettingWindow(CustomQWidget):
             "save_frame": self.save_frame.isChecked(),
             "out_dir": str(Path(self.out_dir.text()) / get_now_str()),
         }
+
+        if not validate_params(params, self.required_keys):
+            self.confirm_txt.setText("不正な値が入力されています")
+            return
 
         self.logger.debug("Starting live feed with params: %s", params)
         self.screen_manager.get_screen("live_feed").trigger("startup", params)

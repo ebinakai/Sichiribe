@@ -6,7 +6,7 @@ from typing import Union, List, Dict, Any
 from cores.common import get_now_str
 
 
-def get_supported_formats() -> list:
+def get_supported_formats() -> List[str]:
     return Exporter.aveilable_formats
 
 

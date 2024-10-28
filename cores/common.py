@@ -4,18 +4,34 @@ import logging
 import datetime
 from typing import Dict, Set, Any, Callable
 import json
+from pathlib import Path
 
 logger = logging.getLogger("__main__").getChild(__name__)
 
 
-def validate_output_directory(directory_path: str) -> bool:
-    if not os.path.exists(directory_path):
+def validate_output_directory(directory_path: Path) -> bool:
+    if not directory_path.exists():
         logger.error(f"Directory not found: {directory_path}")
         return False
 
-    if not os.access(directory_path, os.W_OK):
+    if not directory_path.is_dir() or not os.access(directory_path, os.W_OK):
         logger.error(f"Directory '{directory_path}' is not writable.")
         return False
+
+    return True
+
+
+def validate_params(
+    params: Dict[str, Any], required_keys: Dict[str, Callable[[Any], bool]]
+) -> bool:
+    for key, value in required_keys.items():
+        param_value = params.get(key)
+        if param_value is None:
+            logger.error(f"Missing key: {key}")
+            return False
+        if not value(param_value):
+            logger.error(f"Invalid value: {key}={param_value}")
+            return False
     return True
 
 

@@ -5,6 +5,20 @@ from gui.views.live_setting_view import LiveSettingWindow
 
 
 @pytest.fixture
+def expected_params():
+    return {
+        "device_num": 0,
+        "num_digits": 4,
+        "sampling_sec": 10,
+        "num_frames": 10,
+        "total_sampling_sec": 60,
+        "format": "csv",
+        "save_frame": False,
+        "out_dir": "/dummy/path",
+    }
+
+
+@pytest.fixture
 def window(qtbot):
     screen_manager = Mock()
     window = LiveSettingWindow(screen_manager)
@@ -15,6 +29,23 @@ def window(qtbot):
 
 @pytest.mark.usefixtures("prevent_window_show")
 class TestLiveSettingWindow:
+    @classmethod
+    def setup_class(cls):
+        cls.get_now_str_patcher = patch(
+            "gui.views.live_setting_view.get_now_str", return_value="now"
+        )
+        cls.validate_patcher = patch(
+            "gui.views.live_setting_view.validate_output_directory", return_value=True
+        )
+
+        cls.mock_get_now_str = cls.get_now_str_patcher.start()
+        cls.mock_validate = cls.validate_patcher.start()
+
+    @classmethod
+    def teardown_class(cls):
+        cls.mock_get_now_str.stop()
+        cls.mock_validate.stop()
+
     def test_initial_ui_state(self, window):
         assert window.device_num.value() == 0
         assert window.num_digits.value() == 4
@@ -44,26 +75,26 @@ class TestLiveSettingWindow:
             {"click_points": [], "expected_screen": "live_feed"},
         ],
     )
-    @patch("gui.views.live_setting_view.get_now_str", return_value="now")
     @patch(
         "gui.views.live_setting_view.QFileDialog.getOpenFileName",
         return_value=["/dummy/path.json", ""],
     )
-    def test_load_config(self, mock_dialog, mock_now, test_data, window, qtbot):
+    def test_load_config(self, mock_dialog, test_data, window, expected_params, qtbot):
         next_screen = Mock()
         window.screen_manager.get_screen.return_value = next_screen
-        params = {"click_points": test_data["click_points"], "out_dir": "/dummy/path"}
+        expected_params["click_points"] = test_data["click_points"]
 
         with patch(
-            "gui.views.live_setting_view.load_config", return_value=params.copy()
+            "gui.views.live_setting_view.load_config",
+            return_value=expected_params.copy(),
         ):
             qtbot.mouseClick(window.load_button, Qt.LeftButton)
 
         window.screen_manager.get_screen.assert_called_once_with(
             test_data["expected_screen"]
         )
-        params["out_dir"] = "/dummy/now"
-        next_screen.trigger.assert_called_once_with("startup", params)
+        expected_params["out_dir"] = "/dummy/now"
+        next_screen.trigger.assert_called_once_with("startup", expected_params)
 
     def test_next_with_empty_folder(self, window, qtbot):
         qtbot.mouseClick(window.next_button, Qt.LeftButton)

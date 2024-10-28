@@ -3,6 +3,7 @@ from unittest.mock import Mock, patch
 from gui.views.replay_exe_view import ReplayExeWindow
 import numpy as np
 
+
 @pytest.fixture
 def window(qtbot):
     screen_manager = Mock()

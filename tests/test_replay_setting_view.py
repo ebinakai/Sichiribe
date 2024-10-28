@@ -5,6 +5,20 @@ from gui.views.replay_setting_view import ReplaySettingWindow
 
 
 @pytest.fixture
+def expected_params():
+    return {
+        "video_path": "sample/sample.mp4",  # このファイルは実在する必要がある
+        "num_digits": 4,
+        "sampling_sec": 10,
+        "num_frames": 10,
+        "video_skip_sec": 0,
+        "format": "csv",
+        "save_frame": False,
+        "out_dir": "/dummy/path",
+    }
+
+
+@pytest.fixture
 def window(qtbot):
     screen_manager = Mock()
     window = ReplaySettingWindow(screen_manager)
@@ -15,6 +29,23 @@ def window(qtbot):
 
 @pytest.mark.usefixtures("prevent_window_show")
 class TestReplaySettingWindow:
+    @classmethod
+    def setup_class(cls):
+        cls.get_now_str_patcher = patch(
+            "gui.views.replay_setting_view.get_now_str", return_value="now"
+        )
+        cls.validate_patcher = patch(
+            "gui.views.replay_setting_view.validate_output_directory", return_value=True
+        )
+
+        cls.mock_get_now_str = cls.get_now_str_patcher.start()
+        cls.mock_validate = cls.validate_patcher.start()
+
+    @classmethod
+    def teardown_class(cls):
+        cls.mock_get_now_str.stop()
+        cls.mock_validate.stop()
+
     def test_initial_ui_state(self, window):
         assert window.video_path.text() == ""
         assert window.num_digits.value() == 4
@@ -32,32 +63,32 @@ class TestReplaySettingWindow:
         qtbot.mouseClick(window.video_path_button, Qt.LeftButton)
         assert window.video_path.text() == "/dummy/path/video.mp4"
 
-    @patch("gui.views.replay_setting_view.get_now_str", return_value="now")
     @patch(
         "gui.views.replay_setting_view.QFileDialog.getOpenFileName",
         return_value=["/dummy/path/dammy.json", ""],
     )
-    def test_load_config(self, mock_dialog, mock_now, window, qtbot):
+    def test_load_config(self, mock_dialog, window, expected_params, qtbot):
         next_screen = Mock()
         window.screen_manager.get_screen.return_value = next_screen
+        expected_params["click_points"] = []
 
         with patch(
             "gui.views.replay_setting_view.load_config",
-            return_value={"out_dir": "/dummy/path"},
-        ):
+            return_value=expected_params.copy(),
+        ) as mock_load_config:
             qtbot.mouseClick(window.load_button, Qt.LeftButton)
+            mock_load_config.assert_called_once()
 
-        next_screen.trigger.assert_called_once_with(
-            "startup", {"out_dir": "/dummy/now"}
-        )
+        expected_params["out_dir"] = "/dummy/now"
+        next_screen.trigger.assert_called_once_with("startup", expected_params)
 
-    def test_startup_with_empty_video_path(self, window):
+    def test_startup(self, window):
         window.startup()
         assert window.confirm_txt.text() == "動画ファイルを選択してください"
 
-    def test_startup_with_valid_params(self, window):
         window.video_path.setText("/dummy/path/video.mp4")
-        window.startup()
+        with patch("gui.views.replay_setting_view.validate_params", return_value=True):
+            window.startup()
 
         assert window.confirm_txt.text() == ""
         window.screen_manager.get_screen("replay_exe").trigger.assert_called_once()
