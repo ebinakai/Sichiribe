@@ -1,7 +1,7 @@
 import pytest
 from unittest.mock import Mock, patch
 from gui.views.replay_exe_view import ReplayExeWindow
-
+import numpy as np
 
 @pytest.fixture
 def window(qtbot):
@@ -20,6 +20,10 @@ def window(qtbot):
 @pytest.mark.usefixtures("prevent_window_show")
 class TestMethods:
     def test_initial_ui_state(self, window):
+        assert (
+            window.extracted_label.pixmap() is None
+            or window.extracted_label.pixmap().isNull()
+        )
         assert window.term_label.text() == ""
         assert window.graph_label is not None
 
@@ -156,6 +160,10 @@ class TestWorkerCallback:
         assert window.results[-1] == 1
         assert window.failed_rates[-1] == 0.2
         window.update_graph.assert_called_once()
+
+    def test_display_extract_image(self, window):
+        window.display_extract_image(np.zeros((100, 100, 3), dtype=np.uint8))
+        assert not window.extracted_label.pixmap().isNull()
 
     def test_detect_finished(self, window):
         window.export_process = Mock()

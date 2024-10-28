@@ -75,19 +75,19 @@ def main(params) -> None:
         click_points = []
         params["is_save_config"] = True
 
-    frames = fe.frame_devide(
+    sampled_frames = fe.frame_devide(
         video_path=params["video_path"],
         video_skip_sec=params["video_skip_sec"],
         save_frame=params["save_frame"],
         click_points=click_points,
     )
     params["click_points"] = fe.get_click_points()
-    timestamps = fe.generate_timestamp(len(frames))
+    timestamps = fe.generate_timestamp(len(sampled_frames))
 
     results = []
     failed_rates = []
-    for frame in frames:
-        result, failed_rate = dt.predict(frame)
+    for frames in sampled_frames:
+        result, failed_rate = dt.predict(frames)
         results.append(result)
         failed_rates.append(failed_rate)
         logger.info(f"Detected Result: {result}")

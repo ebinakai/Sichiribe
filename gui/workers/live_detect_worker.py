@@ -31,7 +31,7 @@ class DetectWorker(QThread):
     send_image = Signal(np.ndarray)
     cancelled = Signal()
     model_not_found = Signal()
-    error = Signal()
+    missed_frame = Signal()
 
     def __init__(self, params: dict) -> None:
         super().__init__()
@@ -83,7 +83,7 @@ class DetectWorker(QThread):
                 frame = self.fc.capture()
 
                 if frame is None:
-                    self.error.emit()
+                    self.missed_frame.emit()
                     return None
 
                 cropped_frame = self.fe.crop(frame, self.params["click_points"])
@@ -91,11 +91,6 @@ class DetectWorker(QThread):
                     self.logger.error("Failed to crop the frame.")
                     continue
                 frames.append(cropped_frame)
-
-                image_bin = self.dt.preprocess_binarization(
-                    cropped_frame, self.binarize_th
-                )
-                self.send_image.emit(image_bin)
 
                 if self.params["save_frame"]:
                     frame_filename = os.path.join(
@@ -108,7 +103,10 @@ class DetectWorker(QThread):
                     frame_count += 1
             self._is_capturing = False
 
-            # 推論処理
+            # GUI への送信用の画像二値化であり、predict 内で再度処理する
+            image_bin = self.dt.preprocess_binarization(frames[0], self.binarize_th)
+            self.send_image.emit(image_bin)
+
             value, failed_rate = self.dt.predict(frames, self.binarize_th)
             self.logger.info(f"Detected: {value}, Failed rate: {failed_rate}")
 

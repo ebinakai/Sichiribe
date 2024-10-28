@@ -13,8 +13,10 @@
 
 from PySide6.QtWidgets import QHBoxLayout, QVBoxLayout, QPushButton, QLabel
 from PySide6.QtCore import Qt
+from PySide6.QtGui import QPixmap
 from gui.widgets.custom_qwidget import CustomQWidget
 from gui.utils.screen_manager import ScreenManager
+from gui.utils.common import convert_cv_to_qimage
 from gui.utils.exporter import export_result, export_params
 from gui.widgets.mpl_canvas_widget import MplCanvas
 from gui.workers.frame_devide_worker import FrameDivideWorker
@@ -42,13 +44,19 @@ class ReplayExeWindow(CustomQWidget):
     def initUI(self):
         main_layout = QVBoxLayout()
         graph_layout = QVBoxLayout()
+        extracted_image_layout = QHBoxLayout()
         footer_layout = QHBoxLayout()
         self.setLayout(main_layout)
 
         graph_layout.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        extracted_image_layout.setAlignment(Qt.AlignmentFlag.AlignCenter)
 
         self.graph_label = MplCanvas()
         graph_layout.addWidget(self.graph_label)
+
+        self.extracted_label = QLabel()
+        self.extracted_label.setMinimumHeight(100)
+        extracted_image_layout.addWidget(self.extracted_label)
 
         self.term_button = QPushButton("中止")
         self.term_button.setFixedWidth(100)
@@ -61,8 +69,8 @@ class ReplayExeWindow(CustomQWidget):
 
         footer_layout.addStretch()
 
-        main_layout.addStretch()
         main_layout.addLayout(graph_layout)
+        main_layout.addLayout(extracted_image_layout)
         main_layout.addStretch()
         main_layout.addLayout(footer_layout)
 
@@ -141,6 +149,7 @@ class ReplayExeWindow(CustomQWidget):
     def detect_process(self) -> None:
         self.dt_worker = DetectWorker(self.params)
         self.dt_worker.progress.connect(self.detect_progress)
+        self.dt_worker.send_image.connect(self.display_extract_image)
         self.dt_worker.finished.connect(self.detect_finished)
         self.dt_worker.cancelled.connect(self.detect_cancelled)
         self.dt_worker.model_not_found.connect(self.model_not_found)
@@ -165,6 +174,10 @@ class ReplayExeWindow(CustomQWidget):
         self.graph_label.update_existing_plot(
             self.graph_timestamps, self.graph_failed_rates, self.graph_results
         )
+
+    def display_extract_image(self, image: np.ndarray) -> None:
+        q_image = convert_cv_to_qimage(image)
+        self.extracted_label.setPixmap(QPixmap.fromImage(q_image))
 
     def detect_finished(self) -> None:
         self.graph_label.clear()
@@ -193,5 +206,6 @@ class ReplayExeWindow(CustomQWidget):
     def clear_env(self) -> None:
         self.graph_label.clear()
         self.term_label.setText("")
+        self.extracted_label.clear()
         self.logger.info("Environment cleared.")
         self.screen_manager.restore_screen_size()

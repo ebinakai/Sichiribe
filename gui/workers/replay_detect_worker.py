@@ -14,10 +14,12 @@ from PySide6.QtCore import Signal, QThread
 from cores.cnn import cnn_init
 import logging
 from typing import Dict, Any
+import numpy as np
 
 
 class DetectWorker(QThread):
     progress = Signal(int, float, str)
+    send_image = Signal(np.ndarray)
     cancelled = Signal()
     model_not_found = Signal()
 
@@ -37,13 +39,19 @@ class DetectWorker(QThread):
             self.model_not_found.emit()
             return None
 
-        for frame, timestamp in zip(self.params["frames"], self.params["timestamps"]):
+        for frames, timestamp in zip(self.params["frames"], self.params["timestamps"]):
             if self._is_cancelled:
                 self.cancelled.emit()
                 return None
 
+            # GUI への送信用の画像二値化であり、predict 内で再度処理する
+            image_bin = self.dt.preprocess_binarization(
+                frames[0], self.params["threshold"]
+            )
+            self.send_image.emit(image_bin)
+
             result, failed_rate = self.dt.predict(
-                frame, binarize_th=self.params["threshold"]
+                frames, binarize_th=self.params["threshold"]
             )
             self.logger.info(f"Detected Result: {result}")
             self.logger.info(f"Failed Rate: {failed_rate}")

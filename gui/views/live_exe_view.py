@@ -152,7 +152,7 @@ class LiveExeWindow(CustomQWidget):
         self.worker.finished.connect(self.detect_finished)
         self.worker.cancelled.connect(self.detect_cancelled)
         self.worker.model_not_found.connect(self.model_not_found)
-        self.worker.error.connect(self.detect_error)
+        self.worker.missed_frame.connect(self.missed_frame)
 
         self.worker.start()
         self.logger.info("Detect started.")
@@ -170,7 +170,7 @@ class LiveExeWindow(CustomQWidget):
         self.timestamps.append(timestamp)
         self.update_graph(result, failed_rate, timestamp)
 
-    def detect_error(self) -> None:
+    def missed_frame(self) -> None:
         self.screen_manager.popup("カメラにアクセスできませんでした")
 
     def update_graph(self, result: int, failed_rate: float, timestamp: str) -> None:

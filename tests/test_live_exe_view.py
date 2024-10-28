@@ -39,6 +39,7 @@ class TestMethods:
         assert window.binarize_th_label.text() == ""
         assert window.binarize_th.minimum() == 0
         assert window.binarize_th.maximum() == 255
+        assert window.graph_label is not None
 
     def test_trigger(self, window):
         window.startup = Mock()
@@ -123,6 +124,10 @@ class TestUserActions:
 
 @pytest.mark.usefixtures("prevent_window_show")
 class TestWorkerCallbacks:
+    def test_display_extract_image(self, window):
+        window.display_extract_image(np.zeros((100, 100, 3), dtype=np.uint8))
+        assert not window.extracted_label.pixmap().isNull()
+
     def test_detect_finished(self, window):
         expected_params = {
             "results": [1, 2, 3],
