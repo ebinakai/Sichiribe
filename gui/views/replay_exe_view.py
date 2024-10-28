@@ -39,7 +39,7 @@ class ReplayExeWindow(CustomQWidget):
         super().__init__()
         screen_manager.add_screen('replay_exe', self)
 
-    def initUI(self) -> None:
+    def initUI(self):
         main_layout = QVBoxLayout()
         graph_layout = QVBoxLayout()
         footer_layout = QHBoxLayout()
@@ -66,18 +66,18 @@ class ReplayExeWindow(CustomQWidget):
         main_layout.addStretch()
         main_layout.addLayout(footer_layout)
 
+    def cancel(self) -> None:
+        if self.dt_worker is not None:
+            self.term_label.setText('中止中...')
+            self.dt_worker.cancel()
+
     def trigger(self, action, *args):
         if action == 'startup':
             self.startup(*args)
         elif action == 'continue':
             self.frame_devide_process(*args)
 
-    def cancel(self) -> None:
-        if self.dt_worker is not None:
-            self.term_label.setText('中止中...')
-            self.dt_worker.cancel()
-
-    def startup(self, params: dict) -> None:
+    def startup(self, params: Dict) -> None:
         self.graph_label.gen_graph(
             title='Results',
             xlabel='Timestamp',
@@ -104,9 +104,12 @@ class ReplayExeWindow(CustomQWidget):
                                            extract_single_frame=True)
         self.params['first_frame'] = first_frame
 
-        self.screen_manager.get_screen('region_select').trigger('startup', self.params, 'replay_exe') 
+        if 'click_points' in self.params and len(self.params['click_points']):
+            self.screen_manager.get_screen('replay_threshold').trigger('startup', self.params)
+        else: 
+            self.screen_manager.get_screen('region_select').trigger('startup', self.params, 'replay_exe')
 
-    def frame_devide_process(self, params: dict) -> None:
+    def frame_devide_process(self, params: Dict) -> None:
         self.params = params
         self.screen_manager.get_screen('log').trigger('clear')
         self.screen_manager.show_screen('log')
@@ -171,7 +174,7 @@ class ReplayExeWindow(CustomQWidget):
         self.params['timestamps'] = self.params['timestamps'][:len(
             self.results)]
 
-    def export_process(self, params: dict) -> None:
+    def export_process(self, params: Dict) -> None:
         self.logger.info('Data exporting...')
 
         export_result(params)

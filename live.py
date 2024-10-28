@@ -3,17 +3,19 @@
 詳細については、https://github.com/EbinaKai/Sichiribe/wiki/How-to-use-CLI#execution-live を参照
 '''
 
-from cores.cnn import select_cnn_model
+from cores.cnn import cnn_init
 import cv2
 import os
 from datetime import timedelta
 import time
-from cores.common import get_now_str
+from pathlib import Path
+from cores.common import get_now_str, load_config
 from cores.exporter import Exporter, get_supported_formats
 from cores.frame_editor import FrameEditor
 from cores.capture import FrameCapture
 import argparse
 import logging
+from typing import Dict, Any
 import warnings
 
 # 警告がだるいので非表示
@@ -24,9 +26,8 @@ formatter = '%(asctime)s - %(name)s - %(levelname)s - %(message)s'
 logging.basicConfig(level=logging.DEBUG, format=formatter)
 logger = logging.getLogger('__main__').getChild(__name__)
 
-
-# モデルを読み込む
-Detector = select_cnn_model()
+FILE = Path(__file__).resolve()
+ROOT = FILE.parents[0]
 
 
 def get_args() -> argparse.Namespace:
@@ -34,78 +35,87 @@ def get_args() -> argparse.Namespace:
 
     # 引数を取得
     parser = argparse.ArgumentParser(description='7セグメントディスプレイの数字を読み取る')
-    parser.add_argument('--device', help="カメラデバイスの番号", type=int, default=0)
+    parser.add_argument('--config', help='設定ファイルのパス', type=str, default=None)
+    parser.add_argument(
+        '--device_num',
+        '--device',
+        help='カメラデバイスの番号',
+        type=int,
+        default=0)
     parser.add_argument(
         '--num-digits',
-        help="7セグメント表示器の桁数",
+        help='7セグメント表示器の桁数',
         type=int,
         default=4)
     parser.add_argument(
         '--num-frames',
-        help="サンプリングするフレーム数",
+        help='サンプリングするフレーム数',
         type=int,
         default=20)
     parser.add_argument(
         '--sampling-sec',
-        help="サンプリング間隔（秒）",
+        help='サンプリング間隔（秒）',
         type=int,
         default=10)
     parser.add_argument(
         '--total-sampling-min',
-        help="サンプリングする合計時間（分）",
+        help='サンプリングする合計時間（分）',
         type=float,
         default=20)
     parser.add_argument(
         '--format',
-        help="出力形式 (json または csv)",
+        help='出力形式 (json または csv)',
         choices=export_formats,
         default='json')
     parser.add_argument(
         '--save-frame',
-        help="キャプチャしたフレームを保存するか",
+        help='キャプチャしたフレームを保存するか',
         action='store_true')
-    parser.add_argument('--debug', help="デバッグモードを有効にする", action='store_true')
+    parser.add_argument('--debug', help='デバッグモードを有効にする', action='store_true')
     args = parser.parse_args()
 
     return args
 
 
-def main(device,
-         num_digits: int,
-         sampling_sec: int,
-         num_frames: int,
-         total_sampling_sec: int,
-         format: str,
-         save_frame: bool,
-         ) -> None:
+def main(params: Dict[str, Any]) -> None:
 
-    fc = FrameCapture(device_num=device)
-    fe = FrameEditor(num_digits=num_digits)
-    dt = Detector(num_digits=num_digits)
-    ep = Exporter(format, out_dir='results')
+    if params['save_frame']:
+        now = get_now_str()
+        out_dir = ROOT / f"frames_{now}"
+        os.makedirs(out_dir)
 
-    dt.load()
+    fc = FrameCapture(device_num=params['device_num'])
+    fe = FrameEditor(num_digits=params['num_digits'])
+    dt = cnn_init(num_digits=params['num_digits'])
+    ep = Exporter(out_dir='results')
 
-    # 画角を調整するためにカメラフィードを表示
-    fc.show_camera_feed()
+    if 'click_points' in params and len(params['click_points']) == 4:
+        click_points = params['click_points']
+        params['is_save_config'] = False
 
-    frame = fc.capture()
-    if frame is None:
-        logger.error("Failed to capture the frame.")
-        return
-    click_points = fe.region_select(frame)
+    else:
+        # 画角を調整するためにカメラフィードを表示
+        fc.show_camera_feed()
+
+        frame = fc.capture()
+        if frame is None:
+            logger.error('Failed to capture the frame.')
+            return
+        click_points = fe.region_select(frame)
+        params['is_save_config'] = True
+    params['click_points'] = click_points
 
     start_time = time.time()
-    end_time = time.time() + total_sampling_sec
+    end_time = time.time() + params['total_sampling_sec']
     frame_count = 0
-    timestamps = list()
-    results = list()
-    failed_rates = list()
+    timestamps = []
+    results = []
+    failed_rates = []
     while time.time() < end_time:
         temp_time = time.time()
         frames = []
 
-        for i in range(num_frames):
+        for i in range(params['num_frames']):
             frame = fc.capture()
 
             if frame is None:
@@ -116,9 +126,9 @@ def main(device,
                 continue
             frames.append(cropped_frame)
 
-            if save_frame:
+            if params['save_frame']:
                 frame_filename = os.path.join(
-                    save_dir, f"frame_{frame_count}.jpg")
+                    out_dir, f"frame_{frame_count}.jpg")
                 cv2.imwrite(frame_filename, cropped_frame)
                 logger.debug(
                     f"Frame {frame_count} has been saved as: {frame_filename}")
@@ -136,7 +146,7 @@ def main(device,
             timestamps.append(str(timestamp))
 
         elapsed_time = time.time() - temp_time
-        time_to_wait = max(0, sampling_sec - elapsed_time)
+        time_to_wait = max(0, params['sampling_sec'] - elapsed_time)
 
         if time_to_wait > 0:
             logger.debug(f"Waiting for {time_to_wait:.2f}s")
@@ -145,33 +155,31 @@ def main(device,
     fc.release()
 
     data = ep.format(results, failed_rates, timestamps)
-    ep.export(data)
+    ep.export(data, method=params['format'])
+    if params['is_save_config']:
+        ep.export(params, method='json', base_filename='params')
 
 
-if __name__ == "__main__":
+if __name__ == '__main__':
 
     args = get_args()
+    params = vars(args)
 
-    if args.save_frame:
-        now = get_now_str()
-        save_dir = f"frames_{now}"
-        os.makedirs(save_dir)
-
-    if args.debug:
+    if params.pop('debug'):
         logger.setLevel(logging.DEBUG)
     else:
         logger.setLevel(logging.INFO)
-
     logger.debug("args: %s", args)
 
-    main(
-        device=args.device,
-        num_digits=args.num_digits,
-        sampling_sec=args.sampling_sec,
-        num_frames=args.num_frames,
-        total_sampling_sec=args.total_sampling_min * 60,
-        format=args.format,
-        save_frame=args.save_frame,
-    )
+    params['total_sampling_sec'] = params.pop('total_sampling_min') * 60
 
-    logger.info("All Done!")
+    config_path = params.pop('config')
+    if config_path is not None:
+        required_keys = set(params.keys())
+        required_keys.add('click_points')
+        params = load_config(config_path, required_keys)
+
+    logger.debug("params: %s", params)
+    main(params)
+
+    logger.info('All Done!')

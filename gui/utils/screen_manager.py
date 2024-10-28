@@ -13,6 +13,7 @@ from gui.widgets.custom_qwidget import CustomQWidget
 import logging
 from typing import Tuple, Dict, Optional
 
+
 class ScreenManager:
     def __init__(
             self,
@@ -46,7 +47,7 @@ class ScreenManager:
         palette = QApplication.palette()
         return palette.color(QPalette.ColorRole.Window).value() < 128
 
-    def resie_defualt(self) -> None:
+    def resize_defualt(self) -> None:
         self.main_window.resize(640, 480)
 
     def quit(self) -> None:
@@ -76,15 +77,10 @@ class ScreenManager:
         else:
             self.logger.error("No screen size saved")
 
-    def popup(self, message: str, is_modal: bool = False) -> None:
+    def popup(self, message: str) -> None:
         self.logger.debug("Popup message: %s" % message)
 
         msg_box = QMessageBox(self.main_window)
         msg_box.setText(message)
         msg_box.setStandardButtons(QMessageBox.StandardButton.Ok)
-
-        # 同期処理または非同期処理
-        if is_modal:
-            msg_box.exec()
-        else:
-            msg_box.show()
+        msg_box.show()

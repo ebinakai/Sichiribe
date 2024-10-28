@@ -1,22 +1,17 @@
 import pytest
 from unittest.mock import Mock
-from cores.cnn import CNNCore, select_cnn_model
+from cores.cnn import CNNCore, cnn_init
 
 
 @pytest.fixture
 def detector():
-    Detector = select_cnn_model()
-    detector = Detector(num_digits=4)
-    detector.load()
+    detector = cnn_init(num_digits=4)
     return detector
 
 
 class TestCNN:
     def test_detector_initialization(self, detector):
         assert isinstance(detector, CNNCore)
-
-    def test_detector_loading(self, detector):
-        assert detector.load()
 
     @pytest.mark.parametrize("test_case", [
         ("single_path", lambda path, _: path),      # Single path

@@ -56,31 +56,6 @@ python3 -m pip install --upgrade pip
 pip install -r requirements.txt
 ```
 
-### TensorFlowのインストール
-
-環境に応じて、以下のいずれかの方法でTensorFlowをインストールしてほしい。
-
-1. フルバージョンのTensorFlow (MacOS/Linux/Windows向け)  
-   フル機能を備えたTensorFlowを利用する場合:
-
-   ```bash
-   pip install tensorflow==2.17.0
-   ```
-
-2. TensorFlow Metal (MacOS向けの追加インストール)  
-   MacOSで Python 3.11 以前のバージョンを使用し、Metal APIを活用してGPUでの学習・推論を行う場合、追加で以下をインストールする:
-
-   ```bash
-   pip install tensorflow-metal
-   ```
-
-3. TensorFlow Lite Runtime (Linux環境、推論のみの場合)  
-   軽量でモデルの推論のみを行い、学習をしない場合:
-
-   ```bash
-   pip install tflite-runtime
-   ```
-
 ## モデルの用意
 
 学習済モデルは、[Github | Release v0.1.1](https://github.com/EbinaKai/Sichiribe/releases/tag/v0.1.1) または [Github | Release v0.1.2](https://github.com/EbinaKai/Sichiribe/releases/tag/v0.1.2) においてあるので、そこからダウンロードして `model/` フォルダを作成して設置する。
@@ -98,8 +73,8 @@ curl -L -o model/model_100x100.tflite https://github.com/EbinaKai/Sichiribe/rele
 ## 使い方
 
 - [GUIアプリの使い方](https://github.com/EbinaKai/Sichiribe/wiki/How-to-use-GUI-App)
-- [CLIによるカメラ映像のリアルタイム解析のやり方](https://github.com/EbinaKai/Sichiribe/wiki/How-to-use-CLI#%E3%82%AB%E3%83%A1%E3%83%A9%E6%98%A0%E5%83%8F%E3%81%AE%E3%83%AA%E3%82%A2%E3%83%AB%E3%82%BF%E3%82%A4%E3%83%A0%E8%A7%A3%E6%9E%90-by-livepy)
-- [CLIによる動画ファイルの解析のやり方](https://github.com/EbinaKai/Sichiribe/wiki/How-to-use-CLI#%E5%8B%95%E7%94%BB%E3%83%95%E3%82%A1%E3%82%A4%E3%83%AB%E3%81%AE%E8%A7%A3%E6%9E%90-by-replaypy)
+- [CLIによるカメラ映像のリアルタイム解析のやり方](https://github.com/EbinaKai/Sichiribe/wiki/How-to-use-CLI#execution-live)
+- [CLIによる動画ファイルの解析のやり方](https://github.com/EbinaKai/Sichiribe/wiki/How-to-use-CLI#execution-replay)
 
 ## ファイル構造
 
@@ -112,7 +87,6 @@ curl -L -o model/model_100x100.tflite https://github.com/EbinaKai/Sichiribe/rele
 | `cores/capture.py` | カメラにアクセスする機能 |
 | `cores/frame_editor.py` | 動画のフレームに関する機能及び7セグメント表示器の領域選択機能 |
 | `cores/detector.py` | 7セグ表示器から数字を推測するプログラムの親クラス |
-| `cores/ocr.py` | OCRにて画像から数字を取得するプログラム |
 | `cores/cnn.py` | CNNモデルを用いて画像から数字を取得するプログラムのコア部分 |
 | `cores/cnn.py` | CNNモデルをTensorflowのフルバージョン(.kerasモデル)で動かす場合 |
 | `cores/cnn_lite.py` | CNNモデルをtflite-runtime(.tfliteモデル)で動かす場合 |

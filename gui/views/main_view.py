@@ -11,6 +11,7 @@ from PySide6.QtWidgets import QMainWindow, QStackedWidget
 from gui.utils.router import init_screen_manager
 from gui.utils.common import center_window
 
+
 class MainWindow(QMainWindow):
     def __init__(self) -> None:
         super().__init__()
@@ -20,6 +21,6 @@ class MainWindow(QMainWindow):
         self.setCentralWidget(stacked_widget)
 
         screen_manager = init_screen_manager(stacked_widget, self)
-        screen_manager.resie_defualt()
+        screen_manager.resize_defualt()
         screen_manager.show_screen('menu')
         center_window(self)

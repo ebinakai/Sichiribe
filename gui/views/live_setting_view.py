@@ -10,15 +10,18 @@
     - 出力形式
     - キャプチャしたフレームを保存するか
 2. 実行ボタンを押すと、次の画面に遷移する
+3. 構成ファイルから実行ボタンを押すと、設定ファイルからパラメータを読み込んで実行する
+    - 構成ファイルとして、設定ファイル(*.json)を指定する
+    - 構成ファイルの click_points に 4 つの座標が含まれている場合、カメラフィードと領域選択画面をスキップして実行する
 '''
 
 from PySide6.QtWidgets import QHBoxLayout, QVBoxLayout, QFormLayout, QPushButton, QComboBox, QSpinBox, QCheckBox, QLineEdit, QFileDialog, QLabel
 from gui.widgets.custom_qwidget import CustomQWidget
 from gui.utils.screen_manager import ScreenManager
 from cores.exporter import get_supported_formats
-from cores.common import get_now_str
+from cores.common import get_now_str, load_config
 import logging
-import os
+from pathlib import Path
 
 
 class LiveSettingWindow(CustomQWidget):
@@ -29,7 +32,7 @@ class LiveSettingWindow(CustomQWidget):
         super().__init__()
         screen_manager.add_screen('live_setting', self)
 
-    def initUI(self) -> None:
+    def initUI(self):
         main_layout = QVBoxLayout()
         form_layout = QFormLayout()
         footer_layout = QHBoxLayout()
@@ -58,7 +61,7 @@ class LiveSettingWindow(CustomQWidget):
         self.num_frames.setFixedWidth(50)
         self.num_frames.setMinimum(1)
         self.num_frames.setMaximum(60)
-        form_layout.addRow('1回のサンプリング取得するフレーム数：', self.num_frames)
+        form_layout.addRow('取得するフレーム数 / サンプリング：', self.num_frames)
 
         self.total_sampling_min = QSpinBox()
         self.total_sampling_min.setValue(1)
@@ -96,11 +99,15 @@ class LiveSettingWindow(CustomQWidget):
         self.confirm_txt.setStyleSheet('color: red')
         footer_layout.addWidget(self.confirm_txt)
 
+        self.load_button = QPushButton('構成ファイルから実行')
+        self.load_button.clicked.connect(self.load_config)
+        footer_layout.addWidget(self.load_button)
+
         self.next_button = QPushButton('実行')
         self.next_button.setFixedWidth(100)
         self.next_button.setDefault(True)  # 強調表示されるデフォルトボタンに設定
         self.next_button.setAutoDefault(True)
-        self.next_button.clicked.connect(self.startup)
+        self.next_button.clicked.connect(self.next)
         footer_layout.addWidget(self.next_button)
 
         main_layout.addLayout(form_layout)
@@ -116,7 +123,40 @@ class LiveSettingWindow(CustomQWidget):
         sampling_sec = self.sampling_sec.value()
         self.num_frames.setMaximum(sampling_sec * 5)
 
-    def startup(self) -> None:
+    def load_config(self) -> None:
+        self.confirm_txt.setText('')
+        folder_path, _ = QFileDialog.getOpenFileName(
+            self, 'ファイルを選択', '', '設定ファイル(*.json)')
+
+        required_keys = {
+            'device_num',
+            'num_digits',
+            'sampling_sec',
+            'num_frames',
+            'total_sampling_sec',
+            'format',
+            'save_frame',
+            'out_dir',
+            'cap_size',
+            'click_points'}
+        try:
+            params = load_config(folder_path, required_keys)
+        except Exception:
+            self.logger.info(f'Failed to read config file')
+            self.confirm_txt.setText('ファイルが読み込めませんでした')
+            return
+
+        out_dir = Path(params['out_dir']).parent / get_now_str()
+        params['out_dir'] = str(out_dir)
+
+        if len(params['click_points']) == 4:
+            self.screen_manager.get_screen(
+                'live_exe').trigger('startup', params)
+        else:
+            self.screen_manager.get_screen(
+                'live_feed').trigger('startup', params)
+
+    def next(self) -> None:
         if self.out_dir.text() == '':
             self.confirm_txt.setText('保存場所を選択してください')
             return
@@ -131,8 +171,8 @@ class LiveSettingWindow(CustomQWidget):
             'total_sampling_sec': self.total_sampling_min.value() * 60,
             'format': self.format.currentText(),
             'save_frame': self.save_frame.isChecked(),
-            'out_dir': os.path.join(self.out_dir.text(), get_now_str())
+            'out_dir': str(Path(self.out_dir.text()) / get_now_str())
         }
 
         self.logger.debug("Starting live feed with params: %s", params)
-        self.screen_manager.get_screen('live_feed').trigger('startup', params) 
+        self.screen_manager.get_screen('live_feed').trigger('startup', params)

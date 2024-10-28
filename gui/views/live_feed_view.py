@@ -28,7 +28,7 @@ class LiveFeedWindow(CustomQWidget):
         super().__init__()
         screen_manager.add_screen('live_feed', self)
 
-    def initUI(self) -> None:
+    def initUI(self):
         main_layout = QVBoxLayout()
         header_layout = QVBoxLayout()
         feed_layout = QVBoxLayout()
@@ -126,7 +126,8 @@ class LiveFeedWindow(CustomQWidget):
         self.params['first_frame'] = first_frame
         params = self.params
         self.clear_env()
-        QTimer.singleShot(10, lambda: self.screen_manager.get_screen('region_select').trigger('startup', params, 'live_feed'))
+        QTimer.singleShot(10, lambda: self.screen_manager.get_screen(
+            'region_select').trigger('startup', params, 'live_feed'))
 
     def feed_cancelled(self) -> None:
         self.clear_env()

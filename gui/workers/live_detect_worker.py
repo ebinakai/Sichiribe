@@ -15,6 +15,7 @@
 
 from PySide6.QtCore import Signal, QThread
 from cores.capture import FrameCapture
+from cores.cnn import cnn_init
 from cores.frame_editor import FrameEditor
 import logging
 from typing import Optional
@@ -23,9 +24,6 @@ from datetime import timedelta
 import os
 import cv2
 import numpy as np
-
-from cores.cnn import select_cnn_model
-Detector = select_cnn_model()
 
 
 class DetectWorker(QThread):
@@ -59,10 +57,11 @@ class DetectWorker(QThread):
             self.params['cap_size'][0],
             self.params['cap_size'][1])
         self.fe = FrameEditor(num_digits=self.params['num_digits'])
-        self.dt = Detector(self.params['num_digits'])
 
-        if not self.dt.load():
-            self.logger.error("Failed to load the model.")
+        try:
+            self.dt = cnn_init(num_digits=self.params['num_digits'])
+        except Exception as e:
+            self.logger.error(f"Failed to load the model: {e}")
             self.model_not_found.emit()
             return None
 

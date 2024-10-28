@@ -1,7 +1,7 @@
 from cores.detector import Detector
 import os
 import logging
-from typing import Optional, Union, List, Type, Tuple, Any
+from typing import Optional, Union, List, Tuple, Any
 import cv2
 import numpy as np
 
@@ -28,11 +28,7 @@ class CNNCore(Detector):
         self.cv2_color_setting = 0    # 同上。cv2.imreadではモノクロ・グレースケールの場合は「0」。カラーの場合は「1」
         self.crop_size = 100          # 画像をトリミングするサイズ
 
-    def inference_7seg_classifier(self, image_bin):
-        raise NotImplementedError(
-            "This method must be implemented in the subclass")
-
-    def load(self):
+    def inference_7seg_classifier(self, image_bin: np.ndarray) -> List[int]:
         raise NotImplementedError(
             "This method must be implemented in the subclass")
 
@@ -108,30 +104,35 @@ class CNNCore(Detector):
         return np.array(result), np.array(errors_per_digit)
 
 
-def select_cnn_model() -> Type[CNNCore]:
+def cnn_init(num_digits: int, model_filename: Optional[str] = None) -> CNNCore:
     logger = logging.getLogger("__main__").getChild(__name__)
+
     try:
-        # tflite-runtime のインポートを試みる
-        from tflite_runtime.interpreter import Interpreter  # type: ignore
-
         from cores.cnn_tflite import CNNLite
-        logger.info("TFLite model selected.")
-        return CNNLite
+        logger.info("TensorFlow Lite Runtime detected. Using TFLite model.")
+
+        model_filename = "model_100x100.tflite" if model_filename is None else model_filename
+        return CNNLite(num_digits=num_digits, model_filename=model_filename)
     except ImportError:
-        logger.warning("TFLite runtime not found.")
+        logger.debug(
+            "TensorFlow Lite runtime not found. Attempting to import TensorFlow.")
 
-        try:
-            # TensorFlowのインポートを試みる
-            import tensorflow as tf  # type: ignore
+    try:
+        from cores.cnn_tf import CNNTf
+        logger.info("TensorFlow detected. Using Keras model.")
+        model_filename = "model_100x100.keras" if model_filename is None else model_filename
+        return CNNTf(num_digits=num_digits, model_filename=model_filename)
+    except ImportError:
+        logger.debug(
+            "TensorFlow not found. Attempting to import ONNX Runtime.")
 
-            from cores.cnn_tf import CNN
-            logger.info("Keras model selected.")
-            return CNN
-        except ImportError:
-            logger.warning(
-                "TensorFlow not found. Attempting to use ONNX model.")
-
-            # ONNXモデルを使用する
-            from cores.cnn_onnx import CNNOnnx
-            logger.info("ONNX model selected.")
-            return CNNOnnx
+    try:
+        from cores.cnn_onnx import CNNOnnx
+        logger.info("ONNX Runtime detected. Using ONNX model.")
+        model_filename = "model_100x100.onnx" if model_filename is None else model_filename
+        return CNNOnnx(num_digits=num_digits, model_filename=model_filename)
+    except ImportError:
+        logger.error(
+            "No compatible machine learning library found. Cannot select a model.")
+        raise ImportError(
+            "No compatible model library found. Please install TensorFlow Lite, TensorFlow, or ONNX Runtime.")
