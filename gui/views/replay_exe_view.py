@@ -105,9 +105,11 @@ class ReplayExeWindow(CustomQWidget):
         self.params['first_frame'] = first_frame
 
         if 'click_points' in self.params and len(self.params['click_points']):
-            self.screen_manager.get_screen('replay_threshold').trigger('startup', self.params)
-        else: 
-            self.screen_manager.get_screen('region_select').trigger('startup', self.params, 'replay_exe')
+            self.screen_manager.get_screen(
+                'replay_threshold').trigger('startup', self.params)
+        else:
+            self.screen_manager.get_screen('region_select').trigger(
+                'startup', self.params, 'replay_exe')
 
     def frame_devide_process(self, params: Dict) -> None:
         self.params = params

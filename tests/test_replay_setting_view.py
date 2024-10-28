@@ -37,10 +37,11 @@ class TestReplaySettingWindow:
         next_screen = Mock()
         window.screen_manager.get_screen.return_value = next_screen
 
-        with patch('gui.views.replay_setting_view.load_config', return_value={}):
+        with patch('gui.views.replay_setting_view.load_config', return_value={'out_dir': '/dummy/path'}):
             qtbot.mouseClick(window.load_button, Qt.LeftButton)
 
-        next_screen.trigger.assert_called_once_with('startup', {})
+        next_screen.trigger.assert_called_once_with(
+            'startup', {'out_dir': '/dummy/now'})
 
     def test_startup_with_empty_video_path(self, window):
         window.startup()
