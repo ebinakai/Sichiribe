@@ -34,7 +34,7 @@ class RegionSelectWindow(CustomQWidget):
         self.image_size: QSize
 
         super().__init__()
-        screen_manager.add_screen("region_select", self)
+        screen_manager.add_screen("region_select", self, "7セグメント領域選択")
 
         screen = QApplication.primaryScreen()
         screen_rect = screen.availableGeometry()

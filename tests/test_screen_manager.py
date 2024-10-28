@@ -20,10 +20,11 @@ class TestScreenManager:
         screen_manager = ScreenManager(stacked_widget, window)
 
         screen1 = QLabel("Screen 1")
-        screen_manager.add_screen("screen1", screen1)
+        screen_manager.add_screen("screen1", screen1, "title")
 
         screen_manager.show_screen("screen1")
         assert stacked_widget.currentWidget() == screen1
+        assert window.windowTitle() == "Sichiribe title"
 
     def test_screen_not_found(self, main_window):
         window, stacked_widget = main_window

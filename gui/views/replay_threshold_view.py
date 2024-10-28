@@ -35,7 +35,7 @@ class ReplayThresholdWindow(CustomQWidget):
         self.dt = Detector(4)
 
         super().__init__()
-        screen_manager.add_screen("replay_threshold", self)
+        screen_manager.add_screen("replay_threshold", self, "二値化しきい値設定")
 
     def initUI(self):
         main_layout = QVBoxLayout()

@@ -39,7 +39,7 @@ class ReplayExeWindow(CustomQWidget):
         self.graph_timestamps: List[str]
 
         super().__init__()
-        screen_manager.add_screen("replay_exe", self)
+        screen_manager.add_screen("replay_exe", self, "動画解析中")
 
     def initUI(self):
         main_layout = QVBoxLayout()

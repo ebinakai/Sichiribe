@@ -56,7 +56,7 @@ class ReplaySettingWindow(CustomQWidget):
         }
 
         super().__init__()
-        screen_manager.add_screen("replay_setting", self)
+        screen_manager.add_screen("replay_setting", self, "動画解析設定")
 
     def initUI(self):
         main_layout = QVBoxLayout()

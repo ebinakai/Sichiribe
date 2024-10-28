@@ -26,7 +26,7 @@ class LiveFeedWindow(CustomQWidget):
         self.failed_rates: List[float]
 
         super().__init__()
-        screen_manager.add_screen("live_feed", self)
+        screen_manager.add_screen("live_feed", self, "カメラフィード")
 
     def initUI(self):
         main_layout = QVBoxLayout()

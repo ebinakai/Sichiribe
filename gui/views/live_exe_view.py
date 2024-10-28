@@ -45,7 +45,7 @@ class LiveExeWindow(CustomQWidget):
         self.worker: Optional[DetectWorker] = None
 
         super().__init__()
-        screen_manager.add_screen("live_exe", self)
+        screen_manager.add_screen("live_exe", self, "ライブ解析中")
 
     def initUI(self):
         main_layout = QVBoxLayout()

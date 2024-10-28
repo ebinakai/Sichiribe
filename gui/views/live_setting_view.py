@@ -56,7 +56,7 @@ class LiveSettingWindow(CustomQWidget):
         }
 
         super().__init__()
-        screen_manager.add_screen("live_setting", self)
+        screen_manager.add_screen("live_setting", self, "ライブ解析設定")
 
     def initUI(self):
         main_layout = QVBoxLayout()

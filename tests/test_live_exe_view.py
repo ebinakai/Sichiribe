@@ -147,7 +147,7 @@ class TestWorkerCallbacks:
     def test_remaining_time(self, window):
         window.update_remaining_time(10.2)
         assert window.remaining_time_label.text() == str(timedelta(seconds=int(10.4)))
-        
+
         window.update_remaining_time(14.5)
         assert window.remaining_time_label.text() != str(timedelta(seconds=int(10.4)))
 

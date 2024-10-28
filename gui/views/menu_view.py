@@ -18,7 +18,7 @@ class MenuWindow(CustomQWidget):
         self.screen_manager = screen_manager
 
         super().__init__()
-        screen_manager.add_screen("menu", self)
+        screen_manager.add_screen("menu", self, "")
 
     def initUI(self):
         main_layout = QVBoxLayout()
