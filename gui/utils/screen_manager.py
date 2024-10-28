@@ -12,7 +12,14 @@ from PySide6.QtGui import QPalette
 from PySide6.QtCore import QEventLoop, QTimer, QPoint, QSize
 from gui.widgets.custom_qwidget import CustomQWidget
 import logging
-from typing import Tuple, Dict, Optional, Any
+from dataclasses import dataclass
+from typing import Tuple, Dict, Optional
+
+
+@dataclass
+class ScreenInfo:
+    widget: CustomQWidget
+    title: str
 
 
 class ScreenManager:
@@ -20,28 +27,27 @@ class ScreenManager:
         self.stacked_widget = stacked_widget
         self.main_window = main_window
         self.logger = logging.getLogger("__main__").getChild(__name__)
-        self.screens: Dict[str, Dict[str, Any]] = {}
+        self.screens: Dict[str, ScreenInfo] = {}
         self.window_pos: Optional[QPoint] = None
         self.window_size: Optional[QSize] = None
 
     def add_screen(self, name: str, widget: CustomQWidget, title: str) -> None:
-        self.screens[name] = {
-            "widget": widget,
-            "title": title,
-        }
+        self.screens[name] = ScreenInfo(widget=widget, title=title)
         self.stacked_widget.addWidget(widget)
 
     def show_screen(self, name: str) -> None:
         if name in self.screens:
-            self.main_window.setWindowTitle(f"Sichiribe {self.screens[name]['title']}")
-            self.stacked_widget.setCurrentWidget(self.screens[name]["widget"])
+            widget = self.screens[name].widget
+            widget.display()
+            self.main_window.setWindowTitle(f"Sichiribe {self.screens[name].title}")
+            self.stacked_widget.setCurrentWidget(widget)
             self.main_window.setFocus()
         else:
             raise ValueError(f"Screen '{name}' not found")
 
     def get_screen(self, name: str) -> CustomQWidget:
         if name in self.screens:
-            return self.screens[name]["widget"]
+            return self.screens[name].widget
         else:
             raise ValueError(f"Screen '{name}' not found")
 

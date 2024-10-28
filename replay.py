@@ -4,7 +4,7 @@
 """
 
 from cores.cnn import cnn_init
-from cores.common import load_config
+from cores.common import load_setting
 from cores.exporter import Exporter, get_supported_formats
 from cores.frame_editor import FrameEditor
 import argparse
@@ -29,7 +29,7 @@ def get_args() -> argparse.Namespace:
     parser.add_argument(
         "--video_path", help="解析する動画のパス", type=str, default=None
     )
-    parser.add_argument("--config", help="設定ファイルのパス", type=str, default=None)
+    parser.add_argument("--setting", help="設定ファイルのパス", type=str, default=None)
     parser.add_argument(
         "--num-digits", help="7セグメント表示器の桁数", type=int, default=4
     )
@@ -70,10 +70,10 @@ def main(params) -> None:
 
     if "click_points" in params and len(params["click_points"]) == 4:
         click_points = params["click_points"]
-        params["is_save_config"] = False
+        params["is_save_setting"] = False
     else:
         click_points = []
-        params["is_save_config"] = True
+        params["is_save_setting"] = True
 
     sampled_frames = fe.frame_devide(
         video_path=params["video_path"],
@@ -94,9 +94,9 @@ def main(params) -> None:
         logger.info(f"Failed Rate: {failed_rate}")
 
     data = ep.format(results, failed_rates, timestamps)
-    ep.export(data, method=params["format"])
-    if params["is_save_config"]:
-        ep.export(params, method="json", base_filename="params")
+    ep.export(data, method=params["format"], prefix="result")
+    if params["is_save_setting"]:
+        ep.export(params, method="json", prefix="params")
 
 
 if __name__ == "__main__":
@@ -109,13 +109,13 @@ if __name__ == "__main__":
         logger.setLevel(logging.INFO)
     logger.debug("args: %s", args)
 
-    config_path = params.pop("config")
-    if config_path is not None:
+    setting_path = params.pop("setting")
+    if setting_path is not None:
         required_keys = set(params.keys())
         required_keys.add("click_points")
-        params = load_config(config_path, required_keys)
+        params = load_setting(setting_path, required_keys)
     elif params["video_path"] is None:
-        raise ValueError("video_path or config is required.")
+        raise ValueError("video_path or setting is required.")
 
     logger.debug("params: %s", params)
     main(params)

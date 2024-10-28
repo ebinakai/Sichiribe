@@ -30,21 +30,24 @@ def window(qtbot):
 @pytest.mark.usefixtures("prevent_window_show")
 class TestLiveSettingWindow:
     @classmethod
-    def setup_class(cls):
-        cls.get_now_str_patcher = patch(
+    def setup_class(self):
+        self.get_now_str_patcher = patch(
             "gui.views.live_setting_view.get_now_str", return_value="now"
         )
-        cls.validate_patcher = patch(
+        self.validate_patcher = patch(
             "gui.views.live_setting_view.validate_output_directory", return_value=True
         )
+        exporter_patcher = patch("gui.views.live_setting_view.Exporter")
 
-        cls.mock_get_now_str = cls.get_now_str_patcher.start()
-        cls.mock_validate = cls.validate_patcher.start()
+        self.mock_get_now_str = self.get_now_str_patcher.start()
+        self.mock_validate = self.validate_patcher.start()
+        self.mock_expoter = exporter_patcher.start()
 
     @classmethod
-    def teardown_class(cls):
-        cls.mock_get_now_str.stop()
-        cls.mock_validate.stop()
+    def teardown_class(self):
+        self.mock_get_now_str.stop()
+        self.mock_validate.stop()
+        self.mock_expoter.stop()
 
     def test_initial_ui_state(self, window):
         assert window.device_num.value() == 0
@@ -79,13 +82,13 @@ class TestLiveSettingWindow:
         "gui.views.live_setting_view.QFileDialog.getOpenFileName",
         return_value=["/dummy/path.json", ""],
     )
-    def test_load_config(self, mock_dialog, test_data, window, expected_params, qtbot):
+    def test_load_setting(self, mock_dialog, test_data, window, expected_params, qtbot):
         next_screen = Mock()
         window.screen_manager.get_screen.return_value = next_screen
         expected_params["click_points"] = test_data["click_points"]
 
         with patch(
-            "gui.views.live_setting_view.load_config",
+            "gui.views.live_setting_view.load_setting",
             return_value=expected_params.copy(),
         ):
             qtbot.mouseClick(window.load_button, Qt.LeftButton)

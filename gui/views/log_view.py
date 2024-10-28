@@ -53,14 +53,8 @@ class LogWindow(CustomQWidget):
         # シグナルとスロットの接続
         self.emitter.new_log.connect(self.append_log)
 
-    def trigger(self, action, *args):
-        if action == "clear":
-            self.clear_log()
-        else:
-            raise ValueError(f"Invalid action: {action}")
+    def display(self):
+        self.log_display.clear()
 
     def append_log(self, message: str) -> None:
         self.log_display.append(message)
-
-    def clear_log(self) -> None:
-        self.log_display.clear()

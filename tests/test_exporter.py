@@ -31,25 +31,27 @@ class TestExporter:
     @patch("cores.exporter.get_now_str")
     def test_generate_filepath(self, mock_get_now_str):
         mock_get_now_str.return_value = "20240535000000"
-        base_filename = "test"
+        prefix = "test"
         extension = "csv"
         expected_output = "dummy_dir/test_20240535000000.csv"
 
-        actual_output = self.exporter.generate_filepath(base_filename, extension)
+        actual_output = self.exporter.generate_filepath(
+            prefix, extension, with_timestamp=True
+        )
         assert actual_output == expected_output
 
     def test_export_csv(self):
         data = {"a": 1, "b": 2}
-        base_filename = "test"
+        prefix = "test"
         self.exporter.to_csv = Mock()
-        self.exporter.export(data, "csv", base_filename)
+        self.exporter.export(data, "csv", prefix)
 
-        self.exporter.to_csv.assert_called_once_with(data, base_filename)
+        self.exporter.to_csv.assert_called_once_with([data], prefix, True)
 
     def test_export_json(self):
         data = {"a": 1, "b": 2}
-        base_filename = "test"
+        prefix = "test"
         self.exporter.to_json = Mock()
-        self.exporter.export(data, "json", base_filename)
+        self.exporter.export(data, "json", prefix)
 
-        self.exporter.to_json.assert_called_once_with(data, base_filename)
+        self.exporter.to_json.assert_called_once_with(data, prefix, True)

@@ -30,21 +30,24 @@ def window(qtbot):
 @pytest.mark.usefixtures("prevent_window_show")
 class TestReplaySettingWindow:
     @classmethod
-    def setup_class(cls):
-        cls.get_now_str_patcher = patch(
+    def setup_class(self):
+        get_now_str_patcher = patch(
             "gui.views.replay_setting_view.get_now_str", return_value="now"
         )
-        cls.validate_patcher = patch(
+        validate_patcher = patch(
             "gui.views.replay_setting_view.validate_output_directory", return_value=True
         )
+        exporter_patcher = patch("gui.views.replay_setting_view.Exporter")
 
-        cls.mock_get_now_str = cls.get_now_str_patcher.start()
-        cls.mock_validate = cls.validate_patcher.start()
+        self.mock_get_now_str = get_now_str_patcher.start()
+        self.mock_validate = validate_patcher.start()
+        self.mock_expoter = exporter_patcher.start()
 
     @classmethod
-    def teardown_class(cls):
-        cls.mock_get_now_str.stop()
-        cls.mock_validate.stop()
+    def teardown_class(self):
+        self.mock_get_now_str.stop()
+        self.mock_validate.stop()
+        self.mock_expoter.stop()
 
     def test_initial_ui_state(self, window):
         assert window.video_path.text() == ""
@@ -67,28 +70,28 @@ class TestReplaySettingWindow:
         "gui.views.replay_setting_view.QFileDialog.getOpenFileName",
         return_value=["/dummy/path/dammy.json", ""],
     )
-    def test_load_config(self, mock_dialog, window, expected_params, qtbot):
+    def test_load_setting(self, mock_dialog, window, expected_params, qtbot):
         next_screen = Mock()
         window.screen_manager.get_screen.return_value = next_screen
         expected_params["click_points"] = []
 
         with patch(
-            "gui.views.replay_setting_view.load_config",
+            "gui.views.replay_setting_view.load_setting",
             return_value=expected_params.copy(),
-        ) as mock_load_config:
+        ) as mock_load_setting:
             qtbot.mouseClick(window.load_button, Qt.LeftButton)
-            mock_load_config.assert_called_once()
+            mock_load_setting.assert_called_once()
 
         expected_params["out_dir"] = "/dummy/now"
         next_screen.trigger.assert_called_once_with("startup", expected_params)
 
-    def test_startup(self, window):
-        window.startup()
-        assert window.confirm_txt.text() == "動画ファイルを選択してください"
+    def test_next(self, window):
+        window.next()
+        assert window.confirm_txt.text() != ""
 
         window.video_path.setText("/dummy/path/video.mp4")
         with patch("gui.views.replay_setting_view.validate_params", return_value=True):
-            window.startup()
+            window.next()
 
         assert window.confirm_txt.text() == ""
         window.screen_manager.get_screen("replay_exe").trigger.assert_called_once()

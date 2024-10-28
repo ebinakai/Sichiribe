@@ -6,6 +6,7 @@ from PySide6.QtGui import QImage
 from PySide6.QtWidgets import QApplication, QWidget
 import numpy as np
 import cv2
+from platformdirs import user_data_dir
 
 
 def convert_cv_to_qimage(cv_img: np.ndarray) -> QImage:
@@ -66,3 +67,9 @@ def center_window(window: QWidget) -> None:
     y = (screen_rect.height() - window_rect.height()) // 2
 
     window.move(x, y)
+
+
+def get_user_data_dir() -> str:
+    appname = "Sichiribe"
+    appauthor = "EbinaKai"
+    return user_data_dir(appname, appauthor)

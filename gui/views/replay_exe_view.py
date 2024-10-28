@@ -129,7 +129,6 @@ class ReplayExeWindow(CustomQWidget):
 
     def frame_devide_process(self, params: Dict) -> None:
         self.params = params
-        self.screen_manager.get_screen("log").trigger("clear")
         self.screen_manager.show_screen("log")
 
         self.fd_worker = FrameDivideWorker(params)

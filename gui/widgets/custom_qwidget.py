@@ -17,3 +17,6 @@ class CustomQWidget(QWidget):
 
     def trigger(self, action: str, *args) -> None:
         raise NotImplementedError("trigger() must be implemented in subclass if used")
+
+    def display(self) -> None:
+        pass

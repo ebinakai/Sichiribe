@@ -113,7 +113,6 @@ class TestWorkerCallback:
         worker_instance.end.connect.assert_called_once_with(
             window.frame_devide_finished
         )
-        window.screen_manager.get_screen.assert_called_once_with("log")
 
     def test_frame_devide_finished(self, window):
         frames = ["frame1", "frame2"]

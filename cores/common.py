@@ -64,7 +64,7 @@ def filter_dict(
     return {k: v for k, v in data.items() if predicate(k, v)}
 
 
-def load_config(filepath: str, required_keys: Set[str]) -> Dict[str, Any]:
+def load_setting(filepath: str, required_keys: Set[str]) -> Dict[str, Any]:
 
     if not os.path.exists(filepath):
         raise FileNotFoundError(f"File not found: {filepath}")

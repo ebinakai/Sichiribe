@@ -2,7 +2,7 @@ import logging
 import json
 import csv
 import os
-from typing import Union, List, Dict, Any
+from typing import List, Dict
 from cores.common import get_now_str
 
 
@@ -22,28 +22,34 @@ class Exporter:
         self.logger.debug("Exporter loaded.")
 
     def export(
-        self, data: List[Any] | Dict, method: str, base_filename: str = "result"
+        self, data: List | Dict, method: str, prefix: str, with_timestamp: bool = True
     ) -> None:
         if method == "csv":
-            self.to_csv(data, base_filename)
+            if isinstance(data, dict):
+                data = [data]
+            self.to_csv(data, prefix, with_timestamp)
         elif method == "json":
-            self.to_json(data, base_filename)
+            self.to_json(data, prefix, with_timestamp)
         elif method == "dummy":
             pass
         else:
             self.logger.error("Invalid export method.")
 
-    # ファイル名を時刻を含めて生成
-    def generate_filepath(self, base_filename: str, extension: str) -> str:
-        now = get_now_str()
-        filename = f"{base_filename}_{now}.{extension}"
+    def generate_filepath(
+        self, prefix: str, extension: str, with_timestamp: bool
+    ) -> str:
+        if with_timestamp:
+            now = get_now_str()
+            filename = f"{prefix}_{now}.{extension}"
+        else:
+            filename = f"{prefix}.{extension}"
         return os.path.join(self.out_dir, filename)
 
-    def to_csv(self, data: List[Dict] | List | Dict, base_filename: str) -> None:
+    def to_csv(self, data: List[Dict], prefix: str, with_timestamp: bool) -> None:
         if not data:
             self.logger.debug("No data to export.")
             return
-        out_path = self.generate_filepath(base_filename, "csv")
+        out_path = self.generate_filepath(prefix, "csv", with_timestamp)
         keys = data[0].keys()
         with open(out_path, "w", newline="") as f:
             dict_writer = csv.DictWriter(f, fieldnames=keys)
@@ -51,11 +57,11 @@ class Exporter:
             dict_writer.writerows(data)
         self.logger.debug("Exported data to csv.")
 
-    def to_json(self, data: Union[Dict, List], base_filename: str) -> None:
+    def to_json(self, data: Dict | List, prefix: str, with_timestamp: bool) -> None:
         if not data:
             self.logger.debug("No data to export.")
             return
-        out_path = self.generate_filepath(base_filename, "json")
+        out_path = self.generate_filepath(prefix, "json", with_timestamp)
         with open(out_path, "w") as f:
             json.dump(data, f)
         self.logger.debug("Exported data to json.")

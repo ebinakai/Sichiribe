@@ -29,20 +29,23 @@ from PySide6.QtWidgets import (
 )
 from gui.widgets.custom_qwidget import CustomQWidget
 from gui.utils.screen_manager import ScreenManager
-from cores.exporter import get_supported_formats
+from gui.utils.common import get_user_data_dir
+from cores.exporter import get_supported_formats, Exporter
 from cores.common import (
     get_now_str,
-    load_config,
+    load_setting,
     validate_output_directory,
     validate_params,
 )
 import logging
+from typing import Dict, Any
 from pathlib import Path
 
 
 class LiveSettingWindow(CustomQWidget):
     def __init__(self, screen_manager: ScreenManager) -> None:
         self.logger = logging.getLogger("__main__").getChild(__name__)
+        self.ep = Exporter(get_user_data_dir())
         self.screen_manager = screen_manager
         self.required_keys = {
             "device_num": lambda x: isinstance(x, int) and x >= 0,
@@ -127,7 +130,7 @@ class LiveSettingWindow(CustomQWidget):
         footer_layout.addWidget(self.confirm_txt)
 
         self.load_button = QPushButton("構成ファイルから実行")
-        self.load_button.clicked.connect(self.load_config)
+        self.load_button.clicked.connect(self.load_setting)
         footer_layout.addWidget(self.load_button)
 
         self.next_button = QPushButton("実行")
@@ -140,6 +143,15 @@ class LiveSettingWindow(CustomQWidget):
         main_layout.addLayout(form_layout)
         main_layout.addLayout(footer_layout)
 
+    def display(self):
+        default_setting_path = Path(get_user_data_dir()) / "setting_live.json"
+        try:
+            params = load_setting(str(default_setting_path), self.required_keys.keys())
+            if validate_params(params, self.required_keys):
+                self.set_ui_from_params(params)
+        except Exception:
+            self.logger.info(f"Failed to load default setting file")
+
     def select_folder(self) -> None:
         folder_path = QFileDialog.getExistingDirectory(self, "フォルダを選択", "")
 
@@ -150,7 +162,7 @@ class LiveSettingWindow(CustomQWidget):
         sampling_sec = self.sampling_sec.value()
         self.num_frames.setMaximum(sampling_sec * 5)
 
-    def load_config(self) -> None:
+    def load_setting(self) -> None:
         self.confirm_txt.setText("")
         folder_path, _ = QFileDialog.getOpenFileName(
             self, "ファイルを選択", "", "設定ファイル(*.json)"
@@ -160,19 +172,21 @@ class LiveSettingWindow(CustomQWidget):
         required_keys.add("click_points")
         required_keys.add("cap_size")
         try:
-            params = load_config(folder_path, required_keys)
+            params = load_setting(folder_path, required_keys)
         except Exception:
-            self.logger.info(f"Failed to read config file")
+            self.logger.info(f"Failed to read setting file")
             self.confirm_txt.setText("ファイルが読み込めませんでした")
             return
 
-        out_dir_parent = Path(params["out_dir"]).parent
+        out_dir_parent = Path(params["out_dir"]).resolve().parent
         params["out_dir"] = str(out_dir_parent / get_now_str())
         if not validate_params(params, self.required_keys):
-            self.logger.info(f"Invalid config file")
+            self.logger.info(f"Invalid setting file")
             self.confirm_txt.setText("不正なファイルです")
             return
 
+        self.set_ui_from_params(params)
+        self.export_setting(params)
         if len(params["click_points"]) == 4:
             self.screen_manager.get_screen("live_exe").trigger("startup", params)
         else:
@@ -185,6 +199,33 @@ class LiveSettingWindow(CustomQWidget):
         else:
             self.confirm_txt.setText("")
 
+        params = self.get_params_from_ui()
+        params["out_dir"] = str(Path(params["out_dir"]).resolve() / get_now_str())
+        if not validate_params(params, self.required_keys):
+            self.confirm_txt.setText("不正な値が入力されています")
+            return
+
+        self.export_setting(params)
+        self.screen_manager.get_screen("live_feed").trigger("startup", params)
+
+    def export_setting(self, params: Dict[str, Any]) -> None:
+        export_params = params.copy()
+        export_params["out_dir"] = str(Path(params["out_dir"]).resolve().parent)
+        self.ep.export(
+            export_params, method="json", prefix="setting_live", with_timestamp=False
+        )
+
+    def set_ui_from_params(self, params) -> None:
+        self.device_num.setValue(params["device_num"])
+        self.num_digits.setValue(params["num_digits"])
+        self.sampling_sec.setValue(params["sampling_sec"])
+        self.num_frames.setValue(params["num_frames"])
+        self.total_sampling_min.setValue(max(params["total_sampling_sec"] // 60, 1))
+        self.format.setCurrentText(params["format"])
+        self.save_frame.setChecked(params["save_frame"])
+        self.out_dir.setText(params["out_dir"])
+
+    def get_params_from_ui(self) -> Dict[str, Any]:
         params = {
             "device_num": self.device_num.value(),
             "num_digits": self.num_digits.value(),
@@ -193,12 +234,6 @@ class LiveSettingWindow(CustomQWidget):
             "total_sampling_sec": self.total_sampling_min.value() * 60,
             "format": self.format.currentText(),
             "save_frame": self.save_frame.isChecked(),
-            "out_dir": str(Path(self.out_dir.text()) / get_now_str()),
+            "out_dir": self.out_dir.text(),
         }
-
-        if not validate_params(params, self.required_keys):
-            self.confirm_txt.setText("不正な値が入力されています")
-            return
-
-        self.logger.debug("Starting live feed with params: %s", params)
-        self.screen_manager.get_screen("live_feed").trigger("startup", params)
+        return params

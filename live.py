@@ -9,7 +9,7 @@ import os
 from datetime import timedelta
 import time
 from pathlib import Path
-from cores.common import get_now_str, load_config
+from cores.common import get_now_str, load_setting
 from cores.exporter import Exporter, get_supported_formats
 from cores.frame_editor import FrameEditor
 from cores.capture import FrameCapture
@@ -37,7 +37,7 @@ def get_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(
         description="7セグメントディスプレイの数字を読み取る"
     )
-    parser.add_argument("--config", help="設定ファイルのパス", type=str, default=None)
+    parser.add_argument("--setting", help="設定ファイルのパス", type=str, default=None)
     parser.add_argument(
         "--device_num", "--device", help="カメラデバイスの番号", type=int, default=0
     )
@@ -87,7 +87,7 @@ def main(params: Dict[str, Any]) -> None:
 
     if "click_points" in params and len(params["click_points"]) == 4:
         click_points = params["click_points"]
-        params["is_save_config"] = False
+        params["is_save_setting"] = False
 
     else:
         # 画角を調整するためにカメラフィードを表示
@@ -98,7 +98,7 @@ def main(params: Dict[str, Any]) -> None:
             logger.error("Failed to capture the frame.")
             return
         click_points = fe.region_select(frame)
-        params["is_save_config"] = True
+        params["is_save_setting"] = True
     params["click_points"] = click_points
 
     start_time = time.time()
@@ -149,9 +149,9 @@ def main(params: Dict[str, Any]) -> None:
     fc.release()
 
     data = ep.format(results, failed_rates, timestamps)
-    ep.export(data, method=params["format"])
-    if params["is_save_config"]:
-        ep.export(params, method="json", base_filename="params")
+    ep.export(data, method=params["format"], prefix="result")
+    if params["is_save_setting"]:
+        ep.export(params, method="json", prefix="params")
 
 
 if __name__ == "__main__":
@@ -167,11 +167,11 @@ if __name__ == "__main__":
 
     params["total_sampling_sec"] = params.pop("total_sampling_min") * 60
 
-    config_path = params.pop("config")
-    if config_path is not None:
+    setting_path = params.pop("setting")
+    if setting_path is not None:
         required_keys = set(params.keys())
         required_keys.add("click_points")
-        params = load_config(config_path, required_keys)
+        params = load_setting(setting_path, required_keys)
 
     logger.debug("params: %s", params)
     main(params)

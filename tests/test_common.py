@@ -1,42 +1,42 @@
 import pytest
-from cores.common import load_config, filter_dict
+from cores.common import load_setting, filter_dict
 import os
 import json
 
 
 class TestReadConfig:
     def setup_method(self):
-        expected_config = {
+        expected_setting = {
             "a": 42,
             "b": "test",
             "c": [1, 2, 3],
         }
 
-        config_path = "tests/config.json"
-        with open(config_path, "w") as f:
-            json.dump(expected_config, f)
+        setting_path = "tests/setting.json"
+        with open(setting_path, "w") as f:
+            json.dump(expected_setting, f)
 
-        self.config_path = config_path
-        self.expected_config = expected_config
+        self.setting_path = setting_path
+        self.expected_setting = expected_setting
 
     def teardown_method(self):
-        if os.path.exists(self.config_path):
-            os.remove(self.config_path)
+        if os.path.exists(self.setting_path):
+            os.remove(self.setting_path)
 
-    def test_load_config(self):
-        returned_config = load_config(
-            self.config_path, set(self.expected_config.keys())
+    def test_load_setting(self):
+        returned_setting = load_setting(
+            self.setting_path, set(self.expected_setting.keys())
         )
-        assert returned_config == self.expected_config
+        assert returned_setting == self.expected_setting
 
-    def test_load_config_missing_file(self):
+    def test_load_setting_missing_file(self):
         with pytest.raises(FileNotFoundError):
-            load_config("dummy/missing.json", [])
+            load_setting("dummy/missing.json", [])
 
-    def test_load_config_missing_key(self):
+    def test_load_setting_missing_key(self):
         required_keys = ["a", "b", "d"]
         with pytest.raises(KeyError):
-            load_config(self.config_path, required_keys)
+            load_setting(self.setting_path, required_keys)
 
 
 class TestExcludeFilterDict:
