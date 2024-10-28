@@ -28,6 +28,7 @@ from gui.workers.live_detect_worker import DetectWorker
 import logging
 from typing import List, Dict, Optional, Any
 import numpy as np
+from datetime import timedelta
 
 
 class LiveExeWindow(CustomQWidget):
@@ -41,6 +42,7 @@ class LiveExeWindow(CustomQWidget):
         self.graph_results: List[int]
         self.graph_failed_rates: List[float]
         self.graph_timestamps: List[str]
+        self.worker: Optional[DetectWorker] = None
 
         super().__init__()
         screen_manager.add_screen("live_exe", self)
@@ -81,6 +83,7 @@ class LiveExeWindow(CustomQWidget):
 
         self.term_label = QLabel()
         self.term_label.setStyleSheet("color: red")
+        self.remaining_time_label = QLabel("ここに残り時間を表示")
         self.term_button = QPushButton("途中終了")
         self.term_button.setFixedWidth(100)
         self.term_button.clicked.connect(self.cancel)
@@ -88,6 +91,7 @@ class LiveExeWindow(CustomQWidget):
         footer_layout.addWidget(self.graph_clear_button)
         footer_layout.addStretch()
         footer_layout.addWidget(self.term_label)
+        footer_layout.addWidget(self.remaining_time_label)
         footer_layout.addWidget(self.term_button)
 
         main_layout.addLayout(graph_layout)
@@ -149,6 +153,7 @@ class LiveExeWindow(CustomQWidget):
         self.worker = DetectWorker(self.params)
         self.worker.progress.connect(self.detect_progress)
         self.worker.send_image.connect(self.display_extract_image)
+        self.worker.remaining_time.connect(self.update_remaining_time)
         self.worker.finished.connect(self.detect_finished)
         self.worker.cancelled.connect(self.detect_cancelled)
         self.worker.model_not_found.connect(self.model_not_found)
@@ -184,6 +189,9 @@ class LiveExeWindow(CustomQWidget):
     def display_extract_image(self, image: np.ndarray) -> None:
         q_image = convert_cv_to_qimage(image)
         self.extracted_label.setPixmap(QPixmap.fromImage(q_image))
+
+    def update_remaining_time(self, remaining_time: float) -> None:
+        self.remaining_time_label.setText(str(timedelta(seconds=int(remaining_time))))
 
     def detect_finished(self) -> None:
         self.logger.info("Detect finished.")

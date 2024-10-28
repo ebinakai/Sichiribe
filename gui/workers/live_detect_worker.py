@@ -29,9 +29,11 @@ import numpy as np
 class DetectWorker(QThread):
     progress = Signal(int, float, str)
     send_image = Signal(np.ndarray)
+    remaining_time = Signal(float)
     cancelled = Signal()
     model_not_found = Signal()
     missed_frame = Signal()
+    SLEEP_INTERVAL = 0.1
 
     def __init__(self, params: dict) -> None:
         super().__init__()
@@ -64,13 +66,9 @@ class DetectWorker(QThread):
         frame_count = 0
         timestamps = []
 
-        while time.time() < end_time:
+        while time.time() < end_time and not self._is_cancelled:
             temp_time = time.time()
             frames = []
-
-            if self._is_cancelled:
-                self.cancelled.emit()
-                return None
 
             # タイムスタンプを "HH:MM:SS" 形式で生成
             elapsed_time = time.time() - start_time
@@ -84,7 +82,7 @@ class DetectWorker(QThread):
 
                 if frame is None:
                     self.missed_frame.emit()
-                    return None
+                    break
 
                 cropped_frame = self.fe.crop(frame, self.params["click_points"])
                 if cropped_frame is None:
@@ -112,12 +110,24 @@ class DetectWorker(QThread):
 
             self.progress.emit(value, failed_rate, timestamp_str)
 
+            remaining_time = end_time - time.time()
+            self.remaining_time.emit(max(remaining_time, 0))
+
             elapsed_time = time.time() - temp_time
             time_to_wait = max(0, self.params["sampling_sec"] - elapsed_time)
-
             if time_to_wait > 0:
                 self.logger.debug(f"Waiting for {time_to_wait:.2f}s")
-                time.sleep(time_to_wait)
+
+            time_end_wait = time.time() + time_to_wait
+            while time.time() < time_end_wait:
+                if self._is_cancelled:
+                    break
+                remaining_time = end_time - time.time()
+                self.remaining_time.emit(max(remaining_time, 0))
+                time.sleep(self.SLEEP_INTERVAL)
+
+        if self._is_cancelled:
+            self.cancelled.emit()
 
         self.fc.release()
 

@@ -2,6 +2,7 @@ import pytest
 from unittest.mock import Mock, patch
 from gui.views.live_exe_view import LiveExeWindow
 import numpy as np
+from datetime import timedelta
 
 
 @pytest.fixture
@@ -142,6 +143,13 @@ class TestWorkerCallbacks:
         window.detect_finished()
 
         window.export_process.assert_called_once_with(expected_params)
+
+    def test_remaining_time(self, window):
+        window.update_remaining_time(10.2)
+        assert window.remaining_time_label.text() == str(timedelta(seconds=int(10.4)))
+        
+        window.update_remaining_time(14.5)
+        assert window.remaining_time_label.text() != str(timedelta(seconds=int(10.4)))
 
     def test_detect_cancelled(self, window):
         window.detect_cancelled()
