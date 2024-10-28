@@ -1,12 +1,19 @@
-'''
+"""
 動画ファイル解析のための二値化しきい値を設定するViewクラス
 
 1. 初期値は大津の二値化を適用した画像を表示
 2. スライダーでしきい値を設定し、画像を更新する
 3. 次へボタンを押すと、しきい値をパラメータに保存し、次の画面に遷移する
-'''
+"""
 
-from PySide6.QtWidgets import QHBoxLayout, QVBoxLayout, QFormLayout, QPushButton, QLabel, QSlider
+from PySide6.QtWidgets import (
+    QHBoxLayout,
+    QVBoxLayout,
+    QFormLayout,
+    QPushButton,
+    QLabel,
+    QSlider,
+)
 from PySide6.QtCore import Qt
 from PySide6.QtGui import QPixmap
 from gui.widgets.custom_qwidget import CustomQWidget
@@ -21,14 +28,14 @@ import numpy as np
 
 class ReplayThresholdWindow(CustomQWidget):
     def __init__(self, screen_manager: ScreenManager) -> None:
-        self.logger = logging.getLogger('__main__').getChild(__name__)
+        self.logger = logging.getLogger("__main__").getChild(__name__)
         self.screen_manager = screen_manager
         self.threshold: Optional[int]
         self.fe = FrameEditor()
         self.dt = Detector(4)
 
         super().__init__()
-        screen_manager.add_screen('replay_threshold', self)
+        screen_manager.add_screen("replay_threshold", self, "二値化しきい値設定")
 
     def initUI(self):
         main_layout = QVBoxLayout()
@@ -55,7 +62,7 @@ class ReplayThresholdWindow(CustomQWidget):
         slider_layout.addWidget(self.binarize_th_label)
         form_layout.addRow("画像二値化しきい値：", slider_layout)
 
-        self.next_button = QPushButton('次へ')
+        self.next_button = QPushButton("次へ")
         self.next_button.setFixedWidth(100)
         self.next_button.setDefault(True)  # 強調表示されるデフォルトボタンに設定
         self.next_button.setAutoDefault(True)
@@ -71,40 +78,37 @@ class ReplayThresholdWindow(CustomQWidget):
         main_layout.addLayout(footer_layout)
 
     def trigger(self, action, *args):
-        if action == 'startup':
+        if action == "startup":
             self.startup(*args)
         else:
-            self.logger.error(f"Invalid action: {action}")
+            raise ValueError("Invalid action.")
 
     def startup(self, params: dict) -> None:
-        self.logger.info('Starting ReplayThresholdWindow.')
-        self.screen_manager.show_screen('replay_threshold')
+        self.logger.info("Starting ReplayThresholdWindow.")
+        self.screen_manager.show_screen("replay_threshold")
 
         _p, _s = self.screen_manager.save_screen_size()
 
         self.params = params
         self.threshold = None
-        self.first_frame = self.fe.crop(
-            params['first_frame'], params['click_points'])
+        self.first_frame = self.fe.crop(params["first_frame"], params["click_points"])
         self.binarize_th.setValue(0)
-        self.binarize_th_label.setText('自動設定')
+        self.binarize_th_label.setText("自動設定")
         self.update_binarize_th(0)
 
     def update_binarize_th(self, value: int) -> None:
         self.threshold = None if value == 0 else value
-        binarize_th_str = '自動設定' if self.threshold is None else str(
-            self.threshold)
+        binarize_th_str = "自動設定" if self.threshold is None else str(self.threshold)
         self.binarize_th_label.setText(binarize_th_str)
 
         if self.first_frame is None:
             self.logger.error("Frame lost.")
             self.clear_env()
             self.screen_manager.restore_screen_size()
-            self.screen_manager.show_screen('menu')
+            self.screen_manager.show_screen("menu")
             return
 
-        image_bin = self.dt.preprocess_binarization(
-            self.first_frame, self.threshold)
+        image_bin = self.dt.preprocess_binarization(self.first_frame, self.threshold)
         self.display_extract_image(image_bin)
 
     def display_extract_image(self, image: np.ndarray) -> None:
@@ -113,13 +117,12 @@ class ReplayThresholdWindow(CustomQWidget):
 
     def next(self) -> None:
         self.logger.info("Set threshold finished.")
-        self.params['threshold'] = self.threshold
+        self.params["threshold"] = self.threshold
         self.clear_env()
 
-        self.screen_manager.get_screen(
-            'replay_exe').trigger('continue', self.params)
+        self.screen_manager.get_screen("replay_exe").trigger("continue", self.params)
 
     def clear_env(self) -> None:
         self.extracted_label.clear()
-        self.logger.info('Environment cleared.')
+        self.logger.info("Environment cleared.")
         self.screen_manager.restore_screen_size()

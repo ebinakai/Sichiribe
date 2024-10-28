@@ -14,8 +14,9 @@ def window(qtbot):
 @pytest.mark.usefixtures("prevent_window_show")
 class TestMainWindow:
     def test_main_window_title(self, window):
-        assert window.windowTitle() != '', "Window title is Empty"
+        assert window.windowTitle() != "", "Window title is Empty"
 
     def test_stacked_widget_initialization(self, window):
-        assert isinstance(window.centralWidget(),
-                          QStackedWidget), "Central widget is not a QStackedWidget"
+        assert isinstance(
+            window.centralWidget(), QStackedWidget
+        ), "Central widget is not a QStackedWidget"

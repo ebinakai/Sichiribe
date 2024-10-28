@@ -1,6 +1,7 @@
 import pytest
 from unittest.mock import Mock, patch
 from gui.views.replay_exe_view import ReplayExeWindow
+import numpy as np
 
 
 @pytest.fixture
@@ -20,10 +21,28 @@ def window(qtbot):
 @pytest.mark.usefixtures("prevent_window_show")
 class TestMethods:
     def test_initial_ui_state(self, window):
+        assert (
+            window.extracted_label.pixmap() is None
+            or window.extracted_label.pixmap().isNull()
+        )
         assert window.term_label.text() == ""
         assert window.graph_label is not None
 
-    @patch('gui.views.replay_exe_view.FrameEditor')
+    def test_trigger(self, window):
+        window.startup = Mock()
+        expected_params = {"a": 1, "b": 2}
+        window.trigger("startup", expected_params.copy())
+
+        window.startup.assert_called_once_with(expected_params)
+
+        window.frame_devide_process = Mock()
+        window.trigger("continue", expected_params.copy())
+        window.frame_devide_process.assert_called_once_with(expected_params)
+
+        with pytest.raises(ValueError):
+            window.trigger("invalid", expected_params.copy())
+
+    @patch("gui.views.replay_exe_view.FrameEditor")
     def test_startup(self, mock_frame_editor, window):
         extracted_frame = Mock()
         window.graph_label = Mock()
@@ -35,7 +54,8 @@ class TestMethods:
             "num_frames": 1,
             "num_digits": 4,
             "video_path": "test.mp4",
-            "video_skip_sec": 5}
+            "video_skip_sec": 5,
+        }
 
         window.startup(test_params)
 
@@ -46,27 +66,26 @@ class TestMethods:
         assert window.graph_results == []
         assert window.graph_failed_rates == []
         assert window.graph_timestamps == []
-        assert window.params['first_frame'] == extracted_frame
+        assert window.params["first_frame"] == extracted_frame
         assert mock_frame_editor.called_once()
         assert mock_frame_editor_instance.frame_devide.called_once()
-        window.screen_manager.get_screen.assert_called_once_with(
-            'region_select')
+        window.screen_manager.get_screen.assert_called_once_with("region_select")
 
-    @patch('gui.views.replay_exe_view.export_result')
-    @patch('gui.views.replay_exe_view.export_params')
+    @patch("gui.views.replay_exe_view.export_result")
+    @patch("gui.views.replay_exe_view.export_params")
     def test_export_process(self, export_params, export_result, window):
         export_result = Mock()
         export_params = Mock()
         window.screen_manager.popup = Mock()
         window.screen_manager.show_screen = Mock()
-        window.params = {'out_dir': 'test'}
+        window.params = {"out_dir": "test"}
 
         window.export_process(window.params)
 
         assert export_result.called_once()
         assert export_params.called_once()
         assert window.screen_manager.popup.called_once()
-        window.screen_manager.show_screen.assert_called_once_with('menu')
+        window.screen_manager.show_screen.assert_called_once_with("menu")
 
 
 @pytest.mark.usefixtures("prevent_window_show")
@@ -82,7 +101,7 @@ class TestUserActions:
 
 @pytest.mark.usefixtures("prevent_window_show")
 class TestWorkerCallback:
-    @patch('gui.views.replay_exe_view.FrameDivideWorker')
+    @patch("gui.views.replay_exe_view.FrameDivideWorker")
     def test_frame_devide_process(self, worker_class, window):
         worker_instance = Mock()
         worker_class.return_value = worker_instance
@@ -92,21 +111,21 @@ class TestWorkerCallback:
         assert window.params == {"test": "test"}
         assert worker_instance.start.called_once()
         worker_instance.end.connect.assert_called_once_with(
-            window.frame_devide_finished)
-        window.screen_manager.get_screen.assert_called_once_with('log')
+            window.frame_devide_finished
+        )
 
     def test_frame_devide_finished(self, window):
-        frames = ['frame1', 'frame2']
-        timestamps = ['00:01', '00:02']
+        frames = ["frame1", "frame2"]
+        timestamps = ["00:01", "00:02"]
         window.detect_process = Mock()
 
         window.frame_devide_finished(frames, timestamps)
 
-        assert window.params['frames'] == frames
-        assert window.params['timestamps'] == timestamps
+        assert window.params["frames"] == frames
+        assert window.params["timestamps"] == timestamps
         window.detect_process.assert_called_once()
 
-    @patch('gui.views.replay_exe_view.DetectWorker')
+    @patch("gui.views.replay_exe_view.DetectWorker")
     def test_detect_process(self, worker_class, window):
         worker_instance = Mock()
         worker_class.return_value = worker_instance
@@ -114,14 +133,14 @@ class TestWorkerCallback:
         window.detect_process()
 
         assert worker_instance.start.called_once()
-        worker_instance.progress.connect.assert_called_once_with(
-            window.detect_progress)
-        worker_instance.finished.connect.assert_called_once_with(
-            window.detect_finished)
+        worker_instance.progress.connect.assert_called_once_with(window.detect_progress)
+        worker_instance.finished.connect.assert_called_once_with(window.detect_finished)
         worker_instance.cancelled.connect.assert_called_once_with(
-            window.detect_cancelled)
+            window.detect_cancelled
+        )
         worker_instance.model_not_found.connect.assert_called_once_with(
-            window.model_not_found)
+            window.model_not_found
+        )
 
     def test_model_not_found(self, window):
         window.clear_env = Mock()
@@ -129,7 +148,7 @@ class TestWorkerCallback:
         window.model_not_found()
 
         assert window.clear_env.called_once()
-        window.screen_manager.show_screen.assert_called_once_with('menu')
+        window.screen_manager.show_screen.assert_called_once_with("menu")
 
     def test_detect_progress(self, window):
         window.update_graph = Mock()
@@ -142,14 +161,18 @@ class TestWorkerCallback:
         assert window.failed_rates[-1] == 0.2
         window.update_graph.assert_called_once()
 
+    def test_display_extract_image(self, window):
+        window.display_extract_image(np.zeros((100, 100, 3), dtype=np.uint8))
+        assert not window.extracted_label.pixmap().isNull()
+
     def test_detect_finished(self, window):
         window.export_process = Mock()
         window.results = [1, 2, 3]
         window.failed_rates = [0.1, 0.2, 0.3]
         window.params = {
-            'results': window.results,
-            'failed_rates': window.failed_rates,
-            'timestamps': ["00:01", "00:02", "00:03"]
+            "results": window.results,
+            "failed_rates": window.failed_rates,
+            "timestamps": ["00:01", "00:02", "00:03"],
         }
 
         window.detect_finished()
@@ -158,13 +181,13 @@ class TestWorkerCallback:
 
     def test_detect_cancelled(self, window):
         window.term_label = Mock()
-        window.params = {'timestamps': ['00:01', '00:02', '00:03']}
+        window.params = {"timestamps": ["00:01", "00:02", "00:03"]}
         window.results = [1]
 
         window.detect_cancelled()
 
         assert window.term_label.setText.called_once()
-        assert len(window.params['timestamps']) == len(window.results)
+        assert len(window.params["timestamps"]) == len(window.results)
 
     def test_update_graph(self, window):
         window.graph_label = Mock()

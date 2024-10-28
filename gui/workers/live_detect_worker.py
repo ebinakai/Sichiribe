@@ -1,4 +1,4 @@
-'''
+"""
 リアルタイム解析を行うワーカークラス
 
 1. 以下の処理を行う
@@ -11,7 +11,7 @@
 2. キャプチャしたフレームを保存する場合は、フレーム保存用ディレクトリを作成する
 3. モデルのロードに失敗した場合、モデルが見つからないことを UI に通知
 4. フレームのキャプチャが失敗した場合、エラーを UI に通知
-'''
+"""
 
 from PySide6.QtCore import Signal, QThread
 from cores.capture import FrameCapture
@@ -29,14 +29,16 @@ import numpy as np
 class DetectWorker(QThread):
     progress = Signal(int, float, str)
     send_image = Signal(np.ndarray)
+    remaining_time = Signal(float)
     cancelled = Signal()
     model_not_found = Signal()
-    error = Signal()
+    missed_frame = Signal()
+    SLEEP_INTERVAL = 0.1
 
     def __init__(self, params: dict) -> None:
         super().__init__()
         self.params = params
-        self.logger = logging.getLogger('__main__').getChild(__name__)
+        self.logger = logging.getLogger("__main__").getChild(__name__)
         self._is_cancelled = False  # 停止フラグ
         self.binarize_th: Optional[int] = None
         self._is_capturing = True
@@ -45,38 +47,28 @@ class DetectWorker(QThread):
         self.logger.info("DetectWorker started.")
 
         # フレーム保存用ディレクトリの作成
-        if self.params['save_frame']:
-            os.makedirs(
-                os.path.join(
-                    self.params['out_dir'],
-                    'frames'),
-                exist_ok=True)
+        if self.params["save_frame"]:
+            os.makedirs(os.path.join(self.params["out_dir"], "frames"), exist_ok=True)
 
-        self.fc = FrameCapture(device_num=self.params['device_num'])
-        self.fc.set_cap_size(
-            self.params['cap_size'][0],
-            self.params['cap_size'][1])
-        self.fe = FrameEditor(num_digits=self.params['num_digits'])
+        self.fc = FrameCapture(device_num=self.params["device_num"])
+        self.fc.set_cap_size(self.params["cap_size"][0], self.params["cap_size"][1])
+        self.fe = FrameEditor(num_digits=self.params["num_digits"])
 
         try:
-            self.dt = cnn_init(num_digits=self.params['num_digits'])
+            self.dt = cnn_init(num_digits=self.params["num_digits"])
         except Exception as e:
             self.logger.error(f"Failed to load the model: {e}")
             self.model_not_found.emit()
             return None
 
         start_time = time.time()
-        end_time = time.time() + self.params['total_sampling_sec']
+        end_time = time.time() + self.params["total_sampling_sec"]
         frame_count = 0
         timestamps = []
 
-        while time.time() < end_time:
+        while time.time() < end_time and not self._is_cancelled:
             temp_time = time.time()
             frames = []
-
-            if self._is_cancelled:
-                self.cancelled.emit()
-                return None
 
             # タイムスタンプを "HH:MM:SS" 形式で生成
             elapsed_time = time.time() - start_time
@@ -85,45 +77,59 @@ class DetectWorker(QThread):
             timestamps.append(timestamp_str)
 
             self._is_capturing = True
-            for i in range(self.params['num_frames']):
+            for i in range(self.params["num_frames"]):
                 frame = self.fc.capture()
 
                 if frame is None:
-                    self.error.emit()
-                    return None
+                    self.missed_frame.emit()
+                    break
 
-                cropped_frame = self.fe.crop(
-                    frame, self.params['click_points'])
+                cropped_frame = self.fe.crop(frame, self.params["click_points"])
                 if cropped_frame is None:
                     self.logger.error("Failed to crop the frame.")
                     continue
                 frames.append(cropped_frame)
 
-                image_bin = self.dt.preprocess_binarization(
-                    cropped_frame, self.binarize_th)
-                self.send_image.emit(image_bin)
-
-                if self.params['save_frame']:
+                if self.params["save_frame"]:
                     frame_filename = os.path.join(
-                        self.params['out_dir'], 'frames', f"frame_{frame_count}.jpg")
+                        self.params["out_dir"], "frames", f"frame_{frame_count}.jpg"
+                    )
                     cv2.imwrite(frame_filename, cropped_frame)
                     self.logger.debug(
-                        f"Frame {frame_count} has been saved as: {frame_filename}")
+                        f"Frame {frame_count} has been saved as: {frame_filename}"
+                    )
                     frame_count += 1
             self._is_capturing = False
 
-            # 推論処理
+            # GUI への送信用の画像二値化であり、predict 内で再度処理する
+            image_bin = self.dt.preprocess_binarization(frames[0], self.binarize_th)
+            self.send_image.emit(image_bin)
+
             value, failed_rate = self.dt.predict(frames, self.binarize_th)
             self.logger.info(f"Detected: {value}, Failed rate: {failed_rate}")
 
             self.progress.emit(value, failed_rate, timestamp_str)
 
-            elapsed_time = time.time() - temp_time
-            time_to_wait = max(0, self.params['sampling_sec'] - elapsed_time)
+            remaining_time = end_time - time.time()
+            self.remaining_time.emit(max(remaining_time, 0))
 
+            elapsed_time = time.time() - temp_time
+            time_to_wait = max(0, self.params["sampling_sec"] - elapsed_time)
             if time_to_wait > 0:
                 self.logger.debug(f"Waiting for {time_to_wait:.2f}s")
-                time.sleep(time_to_wait)
+
+            time_end_wait = time.time() + time_to_wait
+            while time.time() < time_end_wait:
+                if self._is_cancelled:
+                    break
+                remaining_time = end_time - time.time()
+                self.remaining_time.emit(max(remaining_time, 0))
+                time.sleep(self.SLEEP_INTERVAL)
+
+        if self._is_cancelled:
+            self.cancelled.emit()
+
+        self.fc.release()
 
         return None
 
@@ -141,10 +147,9 @@ class DetectWorker(QThread):
                 self.logger.debug("Frame missing.")
                 return None
 
-            cropped_frame = self.fe.crop(frame, self.params['click_points'])
+            cropped_frame = self.fe.crop(frame, self.params["click_points"])
             if cropped_frame is None:
                 self.logger.debug("Failed to crop the frame.")
                 return None
-            image_bin = self.dt.preprocess_binarization(
-                cropped_frame, self.binarize_th)
+            image_bin = self.dt.preprocess_binarization(cropped_frame, self.binarize_th)
             self.send_image.emit(image_bin)

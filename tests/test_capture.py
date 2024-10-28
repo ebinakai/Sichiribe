@@ -11,8 +11,8 @@ def sample_frame():
 
 
 @pytest.fixture
-@patch('cv2.VideoCapture')
-@patch('time.sleep')
+@patch("cv2.VideoCapture")
+@patch("time.sleep")
 def frame_capture(mock_sleep, mock_video_capture, sample_frame):
     mock_cap_instance = Mock()
     mock_cap_instance.read.return_value = (True, sample_frame)
@@ -22,11 +22,11 @@ def frame_capture(mock_sleep, mock_video_capture, sample_frame):
 
 
 class TestFrameCapture:
-    @patch('cv2.VideoCapture')
+    @patch("cv2.VideoCapture")
     def test_init(self, mock_video_capture, frame_capture):
         assert mock_video_capture.called_once_with(1)
 
-    @patch('cv2.VideoCapture')
+    @patch("cv2.VideoCapture")
     def test_capture_success(self, mock_video_capture, frame_capture):
         result = frame_capture.capture()
 
@@ -41,8 +41,8 @@ class TestFrameCapture:
         assert result is None, "Output is not None"
         assert frame_capture.cap.read.called_once()
 
-    @patch('cv2.destroyAllWindows')
-    @patch('cv2.VideoCapture')
+    @patch("cv2.destroyAllWindows")
+    @patch("cv2.VideoCapture")
     def test_release(self, mock_video_capture, mock_destroy, frame_capture):
         frame_capture.release()
 
@@ -61,12 +61,13 @@ class TestFrameCapture:
         frame_capture.cap.set.assert_any_call(cv2.CAP_PROP_FRAME_HEIGHT, 720)
 
     @pytest.mark.timeout(0.5)
-    @patch('cv2.imshow')
-    @patch('cv2.waitKey')
-    @patch('cv2.destroyAllWindows')
+    @patch("cv2.imshow")
+    @patch("cv2.waitKey")
+    @patch("cv2.destroyAllWindows")
     def test_show_camera_feed_exit(
-            self, mock_destroy, mock_wait_key, mock_imshow, frame_capture):
-        mock_wait_key.return_value = ord('y')
+        self, mock_destroy, mock_wait_key, mock_imshow, frame_capture
+    ):
+        mock_wait_key.return_value = ord("y")
         frame_capture.show_camera_feed()
         _, expected_output = frame_capture.cap.read.return_value
 

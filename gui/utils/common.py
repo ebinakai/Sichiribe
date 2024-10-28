@@ -1,11 +1,12 @@
-'''
+"""
 雑多な関数をまとめたモジュール
-'''
+"""
 
 from PySide6.QtGui import QImage
 from PySide6.QtWidgets import QApplication, QWidget
 import numpy as np
 import cv2
+from platformdirs import user_data_dir
 
 
 def convert_cv_to_qimage(cv_img: np.ndarray) -> QImage:
@@ -15,30 +16,25 @@ def convert_cv_to_qimage(cv_img: np.ndarray) -> QImage:
     if channels == 3:
         bytes_per_line = 3 * width
         qimage = QImage(
-            cv_img.data,
-            width,
-            height,
-            bytes_per_line,
-            QImage.Format.Format_RGB888)
+            cv_img.data, width, height, bytes_per_line, QImage.Format.Format_RGB888
+        )
         return qimage.rgbSwapped()  # OpenCV uses BGR, QImage expects RGB
 
     # 画像が RGBA 形式の場合
     elif channels == 4:
         bytes_per_line = 4 * width
         qimage = QImage(
-            cv_img.data,
-            width,
-            height,
-            bytes_per_line,
-            QImage.Format.Format_RGBA8888)
+            cv_img.data, width, height, bytes_per_line, QImage.Format.Format_RGBA8888
+        )
         return qimage
 
     else:
         raise ValueError("Unsupported number of channels: {}".format(channels))
 
 
-def resize_image(image: np.ndarray, target_width: float,
-                 target_height: float) -> tuple[np.ndarray, float]:
+def resize_image(
+    image: np.ndarray, target_width: float, target_height: float
+) -> tuple[np.ndarray, float]:
 
     height, width = image.shape[:2]
     resize_scale_width = float(target_width / width)
@@ -56,7 +52,8 @@ def resize_image(image: np.ndarray, target_width: float,
         target_height = int(target_height)
 
     resized_image = cv2.resize(
-        image, (target_width, target_height), interpolation=cv2.INTER_AREA)
+        image, (target_width, target_height), interpolation=cv2.INTER_AREA
+    )
 
     return resized_image, resize_scale
 
@@ -70,3 +67,9 @@ def center_window(window: QWidget) -> None:
     y = (screen_rect.height() - window_rect.height()) // 2
 
     window.move(x, y)
+
+
+def get_user_data_dir() -> str:
+    appname = "Sichiribe"
+    appauthor = "EbinaKai"
+    return user_data_dir(appname, appauthor)

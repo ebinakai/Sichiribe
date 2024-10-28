@@ -1,4 +1,4 @@
-'''
+"""
 動画ファイル解析の設定を行うViewクラス
 
 1. 以下を設定する
@@ -13,24 +13,54 @@
 3. 構成ファイルから実行ボタンを押すと、設定ファイルからパラメータを読み込んで実行する
     - 構成ファイルとして、設定ファイル(*.json)を指定する
     - 構成ファイルの click_points に 4 つの座標が含まれている場合、カメラフィードと領域選択画面をスキップして実行する
-'''
+"""
 
-from PySide6.QtWidgets import QHBoxLayout, QVBoxLayout, QFormLayout, QPushButton, QComboBox, QSpinBox, QCheckBox, QLineEdit, QFileDialog, QLabel
+from PySide6.QtWidgets import (
+    QHBoxLayout,
+    QVBoxLayout,
+    QFormLayout,
+    QPushButton,
+    QComboBox,
+    QSpinBox,
+    QCheckBox,
+    QLineEdit,
+    QFileDialog,
+    QLabel,
+)
 from gui.widgets.custom_qwidget import CustomQWidget
 from gui.utils.screen_manager import ScreenManager
-from cores.common import get_now_str, load_config
+from gui.utils.common import get_user_data_dir
+from cores.exporter import Exporter
+from cores.common import (
+    get_now_str,
+    load_setting,
+    validate_output_directory,
+    validate_params,
+)
 from cores.exporter import get_supported_formats
 import logging
+from typing import Any, Dict
 from pathlib import Path
 
 
 class ReplaySettingWindow(CustomQWidget):
     def __init__(self, screen_manager: ScreenManager) -> None:
-        self.logger = logging.getLogger('__main__').getChild(__name__)
+        self.logger = logging.getLogger("__main__").getChild(__name__)
+        self.ep = Exporter(get_user_data_dir())
         self.screen_manager = screen_manager
+        self.required_keys = {
+            "video_path": lambda x: isinstance(x, str) and Path(x).exists(),
+            "num_digits": lambda x: isinstance(x, int) and x >= 1,
+            "sampling_sec": lambda x: isinstance(x, int) and x >= 1,
+            "num_frames": lambda x: isinstance(x, int) and x >= 1,
+            "video_skip_sec": lambda x: isinstance(x, int) and x >= 0,
+            "format": lambda x: x in get_supported_formats(),
+            "save_frame": lambda x: isinstance(x, bool),
+            "out_dir": lambda x: validate_output_directory(Path(x).parent),
+        }
 
         super().__init__()
-        screen_manager.add_screen('replay_setting', self)
+        screen_manager.add_screen("replay_setting", self, "動画解析設定")
 
     def initUI(self):
         main_layout = QVBoxLayout()
@@ -40,123 +70,160 @@ class ReplaySettingWindow(CustomQWidget):
 
         self.video_path = QLineEdit()
         self.video_path.setReadOnly(True)
-        self.video_path_button = QPushButton('ファイル選択')
+        self.video_path_button = QPushButton("ファイル選択")
         self.video_path_button.clicked.connect(self.select_file)
         file_layout = QVBoxLayout()
         file_layout.addWidget(self.video_path)
         file_layout.addWidget(self.video_path_button)
-        form_layout.addRow('解析する動画のパス：', file_layout)
+        form_layout.addRow("解析する動画のパス：", file_layout)
 
         self.num_digits = QSpinBox()
         self.num_digits.setValue(4)
         self.num_digits.setFixedWidth(50)
         self.num_digits.setMinimum(1)
-        form_layout.addRow('7セグメント表示器の桁数：', self.num_digits)
+        form_layout.addRow("7セグメント表示器の桁数：", self.num_digits)
 
         self.sampling_sec = QSpinBox()
         self.sampling_sec.setValue(5)
         self.sampling_sec.setFixedWidth(50)
         self.sampling_sec.setMinimum(1)
-        form_layout.addRow('動画をサンプリングする頻度 (秒)：', self.sampling_sec)
+        form_layout.addRow("動画をサンプリングする頻度 (秒)：", self.sampling_sec)
 
         self.num_frames = QSpinBox()
         self.num_frames.setValue(30)
         self.num_frames.setFixedWidth(50)
         self.num_frames.setMinimum(1)
-        form_layout.addRow('一回のサンプリングで何フレーム取得するか：', self.num_frames)
+        form_layout.addRow(
+            "一回のサンプリングで何フレーム取得するか：", self.num_frames
+        )
 
         self.video_skip_sec = QSpinBox()
         self.video_skip_sec.setValue(0)
         self.video_skip_sec.setFixedWidth(50)
-        form_layout.addRow('動画の解析を始めるタイミング (秒)：', self.video_skip_sec)
+        form_layout.addRow("動画の解析を始めるタイミング (秒)：", self.video_skip_sec)
 
         self.format = QComboBox()
         for fmt in get_supported_formats():
             self.format.addItem(fmt)
-        form_layout.addRow('出力フォーマット：', self.format)
+        form_layout.addRow("出力フォーマット：", self.format)
 
         self.save_frame = QCheckBox()
-        form_layout.addRow('キャプチャしたフレームを保存する：', self.save_frame)
+        form_layout.addRow("キャプチャしたフレームを保存する：", self.save_frame)
 
-        self.back_button = QPushButton('戻る')
+        self.back_button = QPushButton("戻る")
         self.back_button.setFixedWidth(100)
         self.back_button.clicked.connect(
-            lambda: self.screen_manager.show_screen('menu'))
+            lambda: self.screen_manager.show_screen("menu")
+        )
         footer_layout.addWidget(self.back_button)
 
         footer_layout.addStretch()
 
         self.confirm_txt = QLabel()
-        self.confirm_txt.setStyleSheet('color: red')
+        self.confirm_txt.setStyleSheet("color: red")
         footer_layout.addWidget(self.confirm_txt)
 
-        self.load_button = QPushButton('構成ファイルから実行')
-        self.load_button.clicked.connect(self.load_config)
+        self.load_button = QPushButton("構成ファイルから実行")
+        self.load_button.clicked.connect(self.load_setting)
         footer_layout.addWidget(self.load_button)
 
-        self.next_button = QPushButton('実行')
+        self.next_button = QPushButton("実行")
         self.next_button.setFixedWidth(100)
         self.next_button.setDefault(True)  # 強調表示されるデフォルトボタンに設定
         self.next_button.setAutoDefault(True)
-        self.next_button.clicked.connect(self.startup)
+        self.next_button.clicked.connect(self.next)
         footer_layout.addWidget(self.next_button)
 
         main_layout.addLayout(form_layout)
         main_layout.addLayout(footer_layout)
 
+    def display(self):
+        default_setting_path = Path(get_user_data_dir()) / "setting_replay.json"
+        try:
+            params = load_setting(str(default_setting_path), self.required_keys.keys())
+            if validate_params(params, self.required_keys):
+                self.set_ui_from_params(params)
+        except Exception:
+            self.logger.info(f"Failed to load default setting file")
+
     def select_file(self) -> None:
         video_path, _ = QFileDialog.getOpenFileName(
-            self, 'ファイルを選択', '', '動画ファイル (*.mp4 *.avi)')
+            self, "ファイルを選択", "", "動画ファイル (*.mp4 *.avi)"
+        )
         if video_path:
             self.video_path.setText(video_path)
 
     def back(self) -> None:
-        self.confirm_txt.setText('')
-        self.screen_manager.show_screen('menu')
+        self.confirm_txt.setText("")
+        self.screen_manager.show_screen("menu")
 
-    def load_config(self) -> None:
-        self.confirm_txt.setText('')
+    def load_setting(self) -> None:
+        self.confirm_txt.setText("")
         folder_path, _ = QFileDialog.getOpenFileName(
-            self, 'ファイルを選択', '', '設定ファイル(*.json)')
+            self, "ファイルを選択", "", "設定ファイル(*.json)"
+        )
 
-        required_keys = {
-            'video_path',
-            'num_digits',
-            'sampling_sec',
-            'num_frames',
-            'video_skip_sec',
-            'format',
-            'save_frame',
-            'out_dir',
-            'click_points'}
+        required_keys = set(self.required_keys.keys())
+        required_keys.add("click_points")
+
         try:
-            params = load_config(folder_path, required_keys)
+            params = load_setting(folder_path, required_keys)
         except Exception:
-            self.logger.info(f'Failed to read config file')
-            self.confirm_txt.setText('ファイルが読み込めませんでした')
+            self.logger.info(f"Failed to load setting file")
+            self.confirm_txt.setText("ファイルが読み込めませんでした")
             return
 
-        out_dir = Path(params['out_dir']).parent / get_now_str()
-        params['out_dir'] = str(out_dir)
+        out_dir_parent = Path(params["out_dir"]).resolve().parent
+        params["out_dir"] = str(out_dir_parent / get_now_str())
+        if not validate_params(params, self.required_keys):
+            self.logger.info(f"Invalid setting file")
+            self.confirm_txt.setText("不正なファイルです")
+            return
 
-        self.screen_manager.get_screen('replay_exe').trigger('startup', params)
+        self.set_ui_from_params(params)
+        self.ep.export(
+            params, method="json", prefix="setting_replay", with_timestamp=False
+        )
+        self.screen_manager.get_screen("replay_exe").trigger("startup", params)
 
-    def startup(self) -> None:
-        if self.video_path.text() == '':
-            self.confirm_txt.setText('動画ファイルを選択してください')
+    def next(self) -> None:
+        if self.video_path.text() == "":
+            self.confirm_txt.setText("動画ファイルを選択してください")
             return
         else:
-            self.confirm_txt.setText('')
+            self.confirm_txt.setText("")
 
-        out_dir = Path(self.video_path.text()).parent / get_now_str()
+        params = self.get_params_from_ui()
+        params["out_dir"] = str(
+            Path(params["video_path"]).resolve().parent / get_now_str()
+        )
+        if not validate_params(params, self.required_keys):
+            self.confirm_txt.setText("不正な値が入力されています")
+            return
+
+        self.ep.export(
+            params, method="json", prefix="setting_replay", with_timestamp=False
+        )
+        self.screen_manager.get_screen("replay_exe").trigger("startup", params)
+
+    def set_ui_from_params(self, params: Dict[str, Any]) -> None:
+        self.video_path.setText(params["video_path"])
+        self.num_digits.setValue(params["num_digits"])
+        self.sampling_sec.setValue(params["sampling_sec"])
+        self.num_frames.setValue(params["num_frames"])
+        self.video_skip_sec.setValue(params["video_skip_sec"])
+        self.format.setCurrentText(params["format"])
+        self.save_frame.setChecked(params["save_frame"])
+
+    def get_params_from_ui(self) -> Dict[str, Any]:
         params = {
-            'video_path': self.video_path.text(),
-            'num_digits': self.num_digits.value(),
-            'sampling_sec': self.sampling_sec.value(),
-            'num_frames': self.num_frames.value(),
-            'video_skip_sec': self.video_skip_sec.value(),
-            'format': self.format.currentText(),
-            'save_frame': self.save_frame.isChecked(),
-            'out_dir': str(out_dir)}
-
-        self.screen_manager.get_screen('replay_exe').trigger('startup', params)
+            "video_path": self.video_path.text(),
+            "num_digits": self.num_digits.value(),
+            "sampling_sec": self.sampling_sec.value(),
+            "num_frames": self.num_frames.value(),
+            "video_skip_sec": self.video_skip_sec.value(),
+            "format": self.format.currentText(),
+            "save_frame": self.save_frame.isChecked(),
+            "out_dir": self.video_path.text(),
+        }
+        return params

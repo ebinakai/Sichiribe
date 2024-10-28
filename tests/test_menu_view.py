@@ -27,11 +27,11 @@ class TestMenuWindow:
 
     def test_live_button_click(self, window, qtbot):
         qtbot.mouseClick(window.live_button, Qt.LeftButton)
-        window.screen_manager.show_screen.assert_called_with('live_setting')
+        window.screen_manager.show_screen.assert_called_with("live_setting")
 
     def test_replay_button_click(self, window, qtbot):
         qtbot.mouseClick(window.replay_button, Qt.LeftButton)
-        window.screen_manager.show_screen.assert_called_with('replay_setting')
+        window.screen_manager.show_screen.assert_called_with("replay_setting")
 
     def test_quit_button_click(self, window, qtbot):
         qtbot.mouseClick(window.quit_button, Qt.LeftButton)

@@ -21,24 +21,22 @@ class TestMplCanvas:
 
     def test_gen_graph(self, canvas):
         canvas.gen_graph(
-            "Test Title",
-            "X Label",
-            "Y1 Label",
-            "Y2 Label",
-            dark_theme=False)
+            "Test Title", "X Label", "Y1 Label", "Y2 Label", dark_theme=False
+        )
 
         assert canvas.axes1.get_title() == "Test Title"
-        assert canvas.axes1.xaxis.get_label_text() == "X Label", "X label is not correct"
-        assert canvas.axes1.yaxis.get_label_text() == "Y1 Label", "Y1 label is not correct"
-        assert canvas.axes2.yaxis.get_label_text() == "Y2 Label", "Y2 label is not correct"
+        assert (
+            canvas.axes1.xaxis.get_label_text() == "X Label"
+        ), "X label is not correct"
+        assert (
+            canvas.axes1.yaxis.get_label_text() == "Y1 Label"
+        ), "Y1 label is not correct"
+        assert (
+            canvas.axes2.yaxis.get_label_text() == "Y2 Label"
+        ), "Y2 label is not correct"
 
     def test_update_existing_plot(self, canvas):
-        canvas.gen_graph(
-            "Update Test",
-            "Time",
-            "Value 1",
-            "Value 2",
-            dark_theme=False)
+        canvas.gen_graph("Update Test", "Time", "Value 1", "Value 2", dark_theme=False)
 
         x_val = ["00:00:00", "00:00:01", "00:00:02"]
         y_val1 = [0.1, 0.5, 0.9]

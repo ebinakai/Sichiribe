@@ -22,14 +22,14 @@ class Detector(ABC):
 
     @abstractmethod
     def predict(self, *args, **kwargs) -> Any:
-        raise NotImplementedError(
-            "This method must be implemented in the subclass")
+        raise NotImplementedError("This method must be implemented in the subclass")
 
     def preprocess_binarization(
-            self,
-            image: np.ndarray,
-            binarize_th: Optional[int] = None,
-            output_grayscale: bool = False) -> np.ndarray:
+        self,
+        image: np.ndarray,
+        binarize_th: Optional[int] = None,
+        output_grayscale: bool = False,
+    ) -> np.ndarray:
 
         if len(image.shape) == 3 and image.shape[2] == 3:
             image = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
@@ -39,10 +39,10 @@ class Detector(ABC):
         if binarize_th is None:
             # 大津の2値化
             _, image_bin = cv2.threshold(
-                image, 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)
+                image, 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU
+            )
         else:
-            _, image_bin = cv2.threshold(
-                image, binarize_th, 255, cv2.THRESH_BINARY)
+            _, image_bin = cv2.threshold(image, binarize_th, 255, cv2.THRESH_BINARY)
 
         # 背景が黒（0）のピクセルが全体の50%未満の場合は反転（使用する学習モデルの特性上の理由）
         black_pixels = np.sum(image_bin == 0)

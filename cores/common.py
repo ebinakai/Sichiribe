@@ -4,8 +4,35 @@ import logging
 import datetime
 from typing import Dict, Set, Any, Callable
 import json
+from pathlib import Path
 
 logger = logging.getLogger("__main__").getChild(__name__)
+
+
+def validate_output_directory(directory_path: Path) -> bool:
+    if not directory_path.exists():
+        logger.error(f"Directory not found: {directory_path}")
+        return False
+
+    if not directory_path.is_dir() or not os.access(directory_path, os.W_OK):
+        logger.error(f"Directory '{directory_path}' is not writable.")
+        return False
+
+    return True
+
+
+def validate_params(
+    params: Dict[str, Any], required_keys: Dict[str, Callable[[Any], bool]]
+) -> bool:
+    for key, value in required_keys.items():
+        param_value = params.get(key)
+        if param_value is None:
+            logger.error(f"Missing key: {key}")
+            return False
+        if not value(param_value):
+            logger.error(f"Invalid value: {key}={param_value}")
+            return False
+    return True
 
 
 def clear_directory(directory: str) -> None:
@@ -24,25 +51,25 @@ def clear_directory(directory: str) -> None:
         except Exception as e:
             logger.error(f"Failed to delete {file_path}. Reason: {e}")
 
-    logger.debug(
-        f"All contents in the directory '{directory}' have been deleted.")
+    logger.debug(f"All contents in the directory '{directory}' have been deleted.")
 
 
 def get_now_str() -> str:
-    return datetime.datetime.now().strftime('%Y%m%d%H%M%S')
+    return datetime.datetime.now().strftime("%Y%m%d%H%M%S")
 
 
-def filter_dict(data: Dict[str, Any], predicate: Callable[[
-                str, Any], bool]) -> Dict[str, Any]:
+def filter_dict(
+    data: Dict[str, Any], predicate: Callable[[str, Any], bool]
+) -> Dict[str, Any]:
     return {k: v for k, v in data.items() if predicate(k, v)}
 
 
-def load_config(filepath: str, required_keys: Set[str]) -> Dict[str, Any]:
+def load_setting(filepath: str, required_keys: Set[str]) -> Dict[str, Any]:
 
     if not os.path.exists(filepath):
         raise FileNotFoundError(f"File not found: {filepath}")
 
-    with open(filepath, 'r') as file:
+    with open(filepath, "r") as file:
         data = json.load(file)
         if not isinstance(data, dict):
             raise TypeError(f"Data in {filepath} is not a dictionary")

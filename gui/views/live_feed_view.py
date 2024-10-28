@@ -1,10 +1,10 @@
-'''
+"""
 カメラの画角を確認するカメラフィード画面を表示するViewクラス
 
 1. カメラフィードを表示
 2. 戻るボタンを押すと、カメラフィードを停止し、前の画面に戻る
 3. 次へボタンを押すと、カメラフィードを停止し、7セグメント領域選択画面に遷移する
-'''
+"""
 
 from PySide6.QtWidgets import QHBoxLayout, QVBoxLayout, QPushButton, QLabel
 from PySide6.QtCore import QTimer, Qt
@@ -20,13 +20,13 @@ import numpy as np
 
 class LiveFeedWindow(CustomQWidget):
     def __init__(self, screen_manager: ScreenManager) -> None:
-        self.logger = logging.getLogger('__main__').getChild(__name__)
+        self.logger = logging.getLogger("__main__").getChild(__name__)
         self.screen_manager = screen_manager
         self.results: List[int]
         self.failed_rates: List[float]
 
         super().__init__()
-        screen_manager.add_screen('live_feed', self)
+        screen_manager.add_screen("live_feed", self, "カメラフィード")
 
     def initUI(self):
         main_layout = QVBoxLayout()
@@ -44,11 +44,11 @@ class LiveFeedWindow(CustomQWidget):
         self.feed_label = QLabel()
         feed_layout.addWidget(self.feed_label)
 
-        self.back_button = QPushButton('戻る')
+        self.back_button = QPushButton("戻る")
         self.back_button.setFixedWidth(100)
         self.back_button.clicked.connect(self.back)
 
-        self.next_button = QPushButton('次へ')
+        self.next_button = QPushButton("次へ")
         self.next_button.setFixedWidth(100)
         self.next_button.setDefault(True)  # 強調表示されるデフォルトボタンに設定
         self.next_button.setAutoDefault(True)
@@ -65,10 +65,10 @@ class LiveFeedWindow(CustomQWidget):
         main_layout.addLayout(footer_layout)
 
     def trigger(self, action, *args):
-        if action == 'startup':
+        if action == "startup":
             self.startup(*args)
         else:
-            self.logger.error(f"Invalid action: {action}")
+            raise ValueError(f"Invalid action: {action}")
 
     def back(self) -> None:
         self.logger.debug("Back button clicked.")
@@ -83,8 +83,8 @@ class LiveFeedWindow(CustomQWidget):
     def startup(self, params: dict) -> None:
         self.logger.info("Starting LiveFeedWindow.")
         self.feed_label.setText("読込中...")
-        self.screen_manager.show_screen('live_feed')
-        self.logger.info('Capture Feed starting...')
+        self.screen_manager.show_screen("live_feed")
+        self.logger.info("Capture Feed starting...")
 
         # 初期化
         self.results = []
@@ -96,25 +96,25 @@ class LiveFeedWindow(CustomQWidget):
         self.target_width = window_rect.width() * 0.8
         self.target_height = window_rect.height() * 0.8
         self.logger.debug(
-            'window width: %d window height: %d' %
-            (window_rect.width(), window_rect.height()))
+            "window width: %d window height: %d"
+            % (window_rect.width(), window_rect.height())
+        )
 
         self.params = params
         self.worker = LiveFeedWorker(
-            params,
-            self.target_width,
-            self.target_height)  # できるだけ小さな画像で処理
+            params, self.target_width, self.target_height
+        )  # できるだけ小さな画像で処理
         self.worker.cap_size.connect(self.recieve_cap_size)
         self.worker.progress.connect(self.show_feed)
         self.worker.end.connect(self.feed_finished)
         self.worker.cancelled.connect(self.feed_cancelled)
         self.worker.error.connect(self.feed_error)
         self.worker.start()
-        self.logger.info('Feed started.')
+        self.logger.info("Feed started.")
 
     def recieve_cap_size(self, cap_size: List[int]) -> None:
-        self.params['cap_size'] = cap_size
-        self.logger.debug('Capture size: %d x %d' % (cap_size[0], cap_size[1]))
+        self.params["cap_size"] = cap_size
+        self.logger.debug("Capture size: %d x %d" % (cap_size[0], cap_size[1]))
 
     def show_feed(self, frame: np.ndarray) -> None:
         frame, _ = resize_image(frame, self.target_width, self.target_height)
@@ -122,27 +122,29 @@ class LiveFeedWindow(CustomQWidget):
         self.feed_label.setPixmap(QPixmap(qimage))
 
     def feed_finished(self, first_frame: np.ndarray) -> None:
-        self.logger.info('Feed finished.')
-        self.params['first_frame'] = first_frame
+        self.logger.info("Feed finished.")
+        self.params["first_frame"] = first_frame
         params = self.params
         self.clear_env()
-        QTimer.singleShot(10, lambda: self.screen_manager.get_screen(
-            'region_select').trigger('startup', params, 'live_feed'))
+        QTimer.singleShot(
+            10,
+            lambda: self.screen_manager.get_screen("region_select").trigger(
+                "startup", params, "live_feed"
+            ),
+        )
 
     def feed_cancelled(self) -> None:
         self.clear_env()
-        QTimer.singleShot(
-            1, lambda: self.screen_manager.show_screen('live_setting'))
-        self.logger.info('Feed cancelled.')
+        QTimer.singleShot(1, lambda: self.screen_manager.show_screen("live_setting"))
+        self.logger.info("Feed cancelled.")
 
     def feed_error(self) -> None:
         self.clear_env()
         self.screen_manager.popup("カメラにアクセスできませんでした")
-        QTimer.singleShot(
-            1, lambda: self.screen_manager.show_screen('live_setting'))
-        self.logger.error('Feed missing frame.')
+        QTimer.singleShot(1, lambda: self.screen_manager.show_screen("live_setting"))
+        self.logger.error("Feed missing frame.")
 
     def clear_env(self) -> None:
         self.feed_label.clear()
-        self.logger.info('Environment cleared.')
+        self.logger.info("Environment cleared.")
         self.screen_manager.restore_screen_size()
