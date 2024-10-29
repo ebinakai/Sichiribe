@@ -27,11 +27,10 @@ class CNNLite(CNNCore):
         # 学習済みモデルの絶対パスを取得
         current_dir = Path(__file__).resolve().parent
         model_path = current_dir / ".." / "model" / model_filename
-        model_path = model_path.resolve()
-        self.model_path = str(model_path)
+        self.model_path = model_path.resolve()
         self.logger.debug("Load model path: %s" % self.model_path)
 
-        if not os.path.exists(self.model_path):
+        if not self.model_path.exists():
             raise FileNotFoundError(f"Model file not found: {self.model_path}")
 
         # TensorFlow Lite モデルの読み込み

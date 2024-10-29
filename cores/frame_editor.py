@@ -5,6 +5,7 @@ import logging
 import numpy as np
 from datetime import timedelta
 from cores.common import clear_directory
+from pathlib import Path
 
 
 class FrameEditor:
@@ -89,10 +90,8 @@ class FrameEditor:
                     break
 
                 if save_frame:
-                    frame_filename = os.path.join(
-                        out_dir, f"frame_{frame_count:06d}.jpg"
-                    )
-                    cv2.imwrite(frame_filename, frame)
+                    frame_filename = Path(out_dir) / f"frame_{frame_count:06d}.jpg"
+                    cv2.imwrite(str(frame_filename), frame)
                     saved_frame_count += 1
                     self.logger.debug(f"Frame saved to '{frame_filename}'.")
                 frames.append(frame)

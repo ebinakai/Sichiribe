@@ -4,15 +4,16 @@ GUIアプリケーションにおいて、画面間で共有されるパラメ�
 
 from cores.exporter import Exporter
 from cores.common import filter_dict
+from typing import Dict
 
 
-def export_result(params: dict) -> None:
+def export_result(params: Dict) -> None:
     ep = Exporter(params["out_dir"])
     data = ep.format(params["results"], params["failed_rates"], params["timestamps"])
     ep.export(data, method=params["format"], prefix="result")
 
 
-def export_params(params: dict) -> None:
+def export_params(params: Dict) -> None:
     ep = Exporter(out_dir=params["out_dir"])
     excluded_keys = {"results", "failed_rates", "timestamps", "first_frame", "frames"}
     filtered_params = filter_dict(params, lambda k, _: k not in excluded_keys)

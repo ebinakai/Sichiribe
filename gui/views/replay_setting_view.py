@@ -140,7 +140,7 @@ class ReplaySettingWindow(CustomQWidget):
     def display(self):
         default_setting_path = Path(get_user_data_dir()) / "setting_replay.json"
         try:
-            params = load_setting(str(default_setting_path), self.required_keys.keys())
+            params = load_setting(default_setting_path, self.required_keys.keys())
             if validate_params(params, self.required_keys):
                 self.set_ui_from_params(params)
         except Exception:

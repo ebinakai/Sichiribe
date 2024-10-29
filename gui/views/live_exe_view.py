@@ -153,19 +153,19 @@ class LiveExeWindow(CustomQWidget):
         self.worker.progress.connect(self.detect_progress)
         self.worker.send_image.connect(self.display_extract_image)
         self.worker.remaining_time.connect(self.update_remaining_time)
-        self.worker.finished.connect(self.detect_finished)
-        self.worker.cancelled.connect(self.detect_cancelled)
+        self.worker.finished.connect(self.export_process)
         self.worker.model_not_found.connect(self.model_not_found)
-        self.worker.missed_frame.connect(self.missed_frame)
+        self.worker.missed_frame.connect(
+            lambda: self.screen_manager.popup("カメラにアクセスに失敗しました")
+        )
 
         self.worker.start()
         self.logger.info("Detect started.")
 
     def model_not_found(self) -> None:
-        self.term_label.setText("モデルが見つかりません")
         self.logger.error("Model not found.")
-        self.clear_env()
         self.screen_manager.show_screen("menu")
+        self.clear_env()
 
     def detect_progress(self, result: int, failed_rate: float, timestamp: str) -> None:
         self.screen_manager.show_screen("live_exe")
@@ -173,9 +173,6 @@ class LiveExeWindow(CustomQWidget):
         self.failed_rates.append(failed_rate)
         self.timestamps.append(timestamp)
         self.update_graph(result, failed_rate, timestamp)
-
-    def missed_frame(self) -> None:
-        self.screen_manager.popup("カメラにアクセスできませんでした")
 
     def update_graph(self, result: int, failed_rate: float, timestamp: str) -> None:
         self.graph_results.append(result)
@@ -192,27 +189,18 @@ class LiveExeWindow(CustomQWidget):
     def update_remaining_time(self, remaining_time: float) -> None:
         self.remaining_time_label.setText(str(timedelta(seconds=int(remaining_time))))
 
-    def detect_finished(self) -> None:
-        self.logger.info("Detect finished.")
+    def export_process(self) -> None:
+        self.logger.info("Data exporting...")
+
         self.params["results"] = self.results
         self.params["failed_rates"] = self.failed_rates
         self.params["timestamps"] = self.timestamps
-        params = self.params
-        self.clear_env()
-        self.export_process(params)
+        export_result(self.params)
+        export_params(self.params)
 
-    def detect_cancelled(self) -> None:
-        self.logger.info("Detect cancelled.")
-        self.term_label.setText("中止しました")
-
-    def export_process(self, params: dict) -> None:
-        self.logger.info("Data exporting...")
-
-        export_result(params)
-        export_params(params)
-
-        self.screen_manager.popup(f"保存場所：{params['out_dir']}")
+        self.screen_manager.popup(f"保存場所：{self.params['out_dir']}")
         self.screen_manager.show_screen("menu")
+        self.clear_env()
 
     def clear_env(self) -> None:
         self.graph_label.clear()

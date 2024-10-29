@@ -35,23 +35,23 @@ def validate_params(
     return True
 
 
-def clear_directory(directory: str) -> None:
-    if not os.path.exists(directory):
-        logger.debug(f"The specified directory does not exist: {directory}")
+def clear_directory(directory: str | Path) -> None:
+    dir_path = Path(directory)
+    if not dir_path.exists():
+        logging.debug(f"The specified directory does not exist: {dir_path}")
         return
 
     # ディレクトリ内の全ファイルとサブディレクトリを削除
-    for filename in os.listdir(directory):
-        file_path = os.path.join(directory, filename)
+    for path in dir_path.iterdir():
         try:
-            if os.path.isfile(file_path) or os.path.islink(file_path):
-                os.unlink(file_path)
-            elif os.path.isdir(file_path):
-                shutil.rmtree(file_path)
+            if path.is_file() or path.is_symlink():
+                path.unlink()
+            elif path.is_dir():
+                shutil.rmtree(path)
         except Exception as e:
-            logger.error(f"Failed to delete {file_path}. Reason: {e}")
+            logging.error(f"Failed to delete {path}. Reason: {e}")
 
-    logger.debug(f"All contents in the directory '{directory}' have been deleted.")
+    logging.debug(f"All contents in the directory '{dir_path}' have been deleted.")
 
 
 def get_now_str() -> str:
@@ -64,9 +64,9 @@ def filter_dict(
     return {k: v for k, v in data.items() if predicate(k, v)}
 
 
-def load_setting(filepath: str, required_keys: Set[str]) -> Dict[str, Any]:
+def load_setting(filepath: str | Path, required_keys: Set[str]) -> Dict[str, Any]:
 
-    if not os.path.exists(filepath):
+    if not Path(filepath).exists():
         raise FileNotFoundError(f"File not found: {filepath}")
 
     with open(filepath, "r") as file:

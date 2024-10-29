@@ -36,11 +36,11 @@ class TestMethods:
         window.startup.assert_called_once_with(expected_params)
 
         window.frame_devide_process = Mock()
-        window.trigger("continue", expected_params.copy())
-        window.frame_devide_process.assert_called_once_with(expected_params)
+        window.trigger("continue")
+        assert window.frame_devide_process.called_once()
 
         with pytest.raises(ValueError):
-            window.trigger("invalid", expected_params.copy())
+            window.trigger("invalid")
 
     @patch("gui.views.replay_exe_view.FrameEditor")
     def test_startup(self, mock_frame_editor, window):
@@ -70,17 +70,21 @@ class TestMethods:
         assert mock_frame_editor.called_once()
         assert mock_frame_editor_instance.frame_devide.called_once()
         window.screen_manager.get_screen.assert_called_once_with("region_select")
+        params = window.screen_manager.get_screen().trigger.call_args[0][1]
+
+        assert params == test_params
+
+        test_params["video_path"] = "updated.mp4"
+        assert window.params["video_path"] == "updated.mp4"
 
     @patch("gui.views.replay_exe_view.export_result")
     @patch("gui.views.replay_exe_view.export_params")
     def test_export_process(self, export_params, export_result, window):
         export_result = Mock()
         export_params = Mock()
-        window.screen_manager.popup = Mock()
-        window.screen_manager.show_screen = Mock()
         window.params = {"out_dir": "test"}
 
-        window.export_process(window.params)
+        window.export_process()
 
         assert export_result.called_once()
         assert export_params.called_once()
@@ -106,9 +110,8 @@ class TestWorkerCallback:
         worker_instance = Mock()
         worker_class.return_value = worker_instance
 
-        window.frame_devide_process({"test": "test"})
+        window.frame_devide_process()
 
-        assert window.params == {"test": "test"}
         assert worker_instance.start.called_once()
         worker_instance.end.connect.assert_called_once_with(
             window.frame_devide_finished

@@ -200,7 +200,7 @@ class RegionSelectWindow(CustomQWidget):
         QTimer.singleShot(1, lambda: self.switch_back())
 
     def switch_back(self) -> None:
-        self.logger.debug("Switching to back screen(%s).", self.prev_screen)
+        self.logger.debug(f"Switching to back screen({self.prev_screen}).")
         if self.prev_screen == "replay_exe":
             self.screen_manager.show_screen("replay_setting")
         elif self.prev_screen == "live_feed":
@@ -210,7 +210,7 @@ class RegionSelectWindow(CustomQWidget):
         self.prev_screen = ""
 
     def switch_next(self) -> None:
-        self.logger.debug("Switching to next screen(%s).", self.prev_screen)
+        self.logger.debug(f"Switching to next screen({self.prev_screen}).")
         if self.prev_screen == "replay_exe":
             self.screen_manager.get_screen("replay_threshold").trigger(
                 "startup", self.params
@@ -226,5 +226,5 @@ class RegionSelectWindow(CustomQWidget):
         self.extracted_label.clear()
         self.click_points = []
         self.confirm_txt.setText("")
-        self.logger.info("Environment cleared.")
         self.screen_manager.restore_screen_size()
+        self.logger.info("Environment cleared.")

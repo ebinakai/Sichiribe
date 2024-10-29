@@ -21,34 +21,29 @@ import logging
 from typing import Optional
 import time
 from datetime import timedelta
-import os
 import cv2
 import numpy as np
+from pathlib import Path
 
 
 class DetectWorker(QThread):
     progress = Signal(int, float, str)
     send_image = Signal(np.ndarray)
     remaining_time = Signal(float)
-    cancelled = Signal()
     model_not_found = Signal()
     missed_frame = Signal()
     SLEEP_INTERVAL = 0.1
 
     def __init__(self, params: dict) -> None:
         super().__init__()
-        self.params = params
         self.logger = logging.getLogger("__main__").getChild(__name__)
-        self._is_cancelled = False  # 停止フラグ
+        self.params = params
+        self.is_cancelled = False
         self.binarize_th: Optional[int] = None
         self._is_capturing = True
 
-    def run(self) -> None:
-        self.logger.info("DetectWorker started.")
-
-        # フレーム保存用ディレクトリの作成
         if self.params["save_frame"]:
-            os.makedirs(os.path.join(self.params["out_dir"], "frames"), exist_ok=True)
+            (Path(self.params["out_dir"]) / "frames").mkdir(parents=True, exist_ok=True)
 
         self.fc = FrameCapture(device_num=self.params["device_num"])
         self.fc.set_cap_size(self.params["cap_size"][0], self.params["cap_size"][1])
@@ -61,14 +56,16 @@ class DetectWorker(QThread):
             self.model_not_found.emit()
             return None
 
+    def run(self) -> None:
+        self.logger.info("DetectWorker started.")
+
         start_time = time.time()
         end_time = time.time() + self.params["total_sampling_sec"]
         frame_count = 0
         timestamps = []
 
-        while time.time() < end_time and not self._is_cancelled:
+        while time.time() < end_time and not self.is_cancelled:
             temp_time = time.time()
-            frames = []
 
             # タイムスタンプを "HH:MM:SS" 形式で生成
             elapsed_time = time.time() - start_time
@@ -76,12 +73,14 @@ class DetectWorker(QThread):
             timestamp_str = str(timestamp)
             timestamps.append(timestamp_str)
 
+            frames = []
             self._is_capturing = True
             for i in range(self.params["num_frames"]):
                 frame = self.fc.capture()
 
                 if frame is None:
                     self.missed_frame.emit()
+                    self.is_cancelled = True
                     break
 
                 cropped_frame = self.fe.crop(frame, self.params["click_points"])
@@ -91,10 +90,12 @@ class DetectWorker(QThread):
                 frames.append(cropped_frame)
 
                 if self.params["save_frame"]:
-                    frame_filename = os.path.join(
-                        self.params["out_dir"], "frames", f"frame_{frame_count}.jpg"
+                    frame_filename = (
+                        Path(self.params["out_dir"])
+                        / "frames"
+                        / f"frame_{frame_count:06d}.jpg"
                     )
-                    cv2.imwrite(frame_filename, cropped_frame)
+                    cv2.imwrite(str(frame_filename), cropped_frame)
                     self.logger.debug(
                         f"Frame {frame_count} has been saved as: {frame_filename}"
                     )
@@ -110,24 +111,16 @@ class DetectWorker(QThread):
 
             self.progress.emit(value, failed_rate, timestamp_str)
 
-            remaining_time = end_time - time.time()
-            self.remaining_time.emit(max(remaining_time, 0))
-
             elapsed_time = time.time() - temp_time
             time_to_wait = max(0, self.params["sampling_sec"] - elapsed_time)
+            time_end_wait = time.time() + time_to_wait
             if time_to_wait > 0:
                 self.logger.debug(f"Waiting for {time_to_wait:.2f}s")
 
-            time_end_wait = time.time() + time_to_wait
-            while time.time() < time_end_wait:
-                if self._is_cancelled:
-                    break
-                remaining_time = end_time - time.time()
-                self.remaining_time.emit(max(remaining_time, 0))
-                time.sleep(self.SLEEP_INTERVAL)
-
-        if self._is_cancelled:
-            self.cancelled.emit()
+                while time.time() < time_end_wait and not self.is_cancelled:
+                    remaining_time = end_time - time.time()
+                    self.remaining_time.emit(max(remaining_time, 0))
+                    time.sleep(self.SLEEP_INTERVAL)
 
         self.fc.release()
 
@@ -135,7 +128,7 @@ class DetectWorker(QThread):
 
     def cancel(self) -> None:
         self.logger.info("DetectWorker terminating...")
-        self._is_cancelled = True
+        self.is_cancelled = True
 
     def update_binarize_th(self, value: Optional[int]) -> None:
         self.binarize_th = value
@@ -151,5 +144,6 @@ class DetectWorker(QThread):
             if cropped_frame is None:
                 self.logger.debug("Failed to crop the frame.")
                 return None
+
             image_bin = self.dt.preprocess_binarization(cropped_frame, self.binarize_th)
             self.send_image.emit(image_bin)

@@ -38,7 +38,7 @@ class TestExporter:
         actual_output = self.exporter.generate_filepath(
             prefix, extension, with_timestamp=True
         )
-        assert actual_output == expected_output
+        assert str(actual_output) == expected_output
 
     def test_export_csv(self):
         data = {"a": 1, "b": 2}

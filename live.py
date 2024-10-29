@@ -102,7 +102,7 @@ def main(params: Dict[str, Any]) -> None:
     params["click_points"] = click_points
 
     start_time = time.time()
-    end_time = time.time() + params["total_sampling_sec"]
+    end_time = start_time + params["total_sampling_sec"]
     frame_count = 0
     timestamps = []
     results = []
@@ -123,8 +123,8 @@ def main(params: Dict[str, Any]) -> None:
             frames.append(cropped_frame)
 
             if params["save_frame"]:
-                frame_filename = os.path.join(out_dir, f"frame_{frame_count}.jpg")
-                cv2.imwrite(frame_filename, cropped_frame)
+                frame_filename = out_dir / f"frame_{frame_count}.jpg"
+                cv2.imwrite(str(frame_filename), cropped_frame)
                 logger.debug(f"Frame {frame_count} has been saved as: {frame_filename}")
                 frame_count += 1
 

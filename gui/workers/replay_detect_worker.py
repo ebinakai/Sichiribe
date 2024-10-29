@@ -25,8 +25,8 @@ class DetectWorker(QThread):
 
     def __init__(self, params: Dict[str, Any]) -> None:
         super().__init__()
-        self.params = params
         self.logger = logging.getLogger("__main__").getChild(__name__)
+        self.params = params
         self._is_cancelled = False
 
     def run(self) -> None:

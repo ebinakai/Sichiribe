@@ -11,6 +11,7 @@ from PySide6.QtCore import Signal, QThread
 from cores.capture import FrameCapture
 import logging
 import numpy as np
+import time
 
 
 class LiveFeedWorker(QThread):
@@ -19,13 +20,14 @@ class LiveFeedWorker(QThread):
     end = Signal(np.ndarray)
     cancelled = Signal()
     error = Signal()
+    SLEEP_TIME = 0.01
 
     def __init__(self, params: dict, width: float, height: float) -> None:
         super().__init__()
+        self.logger = logging.getLogger("__main__").getChild(__name__)
         self.params = params
         self.width = width
         self.height = height
-        self.logger = logging.getLogger("__main__").getChild(__name__)
         self._is_cancelled = False
         self._is_finished = False
 
@@ -51,6 +53,8 @@ class LiveFeedWorker(QThread):
                 break
 
             self.progress.emit(frame)
+            time.sleep(self.SLEEP_TIME)
+
         fc.release()
         return None
 

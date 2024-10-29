@@ -4,6 +4,7 @@ import csv
 import os
 from typing import List, Dict
 from cores.common import get_now_str
+from pathlib import Path
 
 
 def get_supported_formats() -> List[str]:
@@ -37,13 +38,13 @@ class Exporter:
 
     def generate_filepath(
         self, prefix: str, extension: str, with_timestamp: bool
-    ) -> str:
+    ) -> Path:
         if with_timestamp:
             now = get_now_str()
             filename = f"{prefix}_{now}.{extension}"
         else:
             filename = f"{prefix}.{extension}"
-        return os.path.join(self.out_dir, filename)
+        return Path(self.out_dir) / filename
 
     def to_csv(self, data: List[Dict], prefix: str, with_timestamp: bool) -> None:
         if not data:

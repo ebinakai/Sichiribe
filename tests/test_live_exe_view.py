@@ -1,5 +1,5 @@
 import pytest
-from unittest.mock import Mock, patch
+from unittest.mock import Mock
 from gui.views.live_exe_view import LiveExeWindow
 import numpy as np
 from datetime import timedelta
@@ -129,21 +129,6 @@ class TestWorkerCallbacks:
         window.display_extract_image(np.zeros((100, 100, 3), dtype=np.uint8))
         assert not window.extracted_label.pixmap().isNull()
 
-    def test_detect_finished(self, window):
-        expected_params = {
-            "results": [1, 2, 3],
-            "failed_rates": [0.1, 0.2, 0.3],
-            "timestamps": ["00:01", "00:02", "00:03"],
-        }
-        window.results = expected_params["results"]
-        window.failed_rates = expected_params["failed_rates"]
-        window.timestamps = expected_params["timestamps"]
-        window.export_process = Mock()
-        window.graph_label = Mock()
-        window.detect_finished()
-
-        window.export_process.assert_called_once_with(expected_params)
-
     def test_remaining_time(self, window):
         window.update_remaining_time(10.2)
         assert window.remaining_time_label.text() == str(timedelta(seconds=int(10.4)))
@@ -151,12 +136,8 @@ class TestWorkerCallbacks:
         window.update_remaining_time(14.5)
         assert window.remaining_time_label.text() != str(timedelta(seconds=int(10.4)))
 
-    def test_detect_cancelled(self, window):
-        window.detect_cancelled()
-        assert window.term_label.text() != ""
-
     def test_model_not_found(self, window):
-        with patch.object(window, "clear_env"):
-            window.model_not_found()
-            assert window.term_label.text() != ""
-            window.screen_manager.show_screen.assert_called_with("menu")
+        window.clear_env = Mock()
+        window.model_not_found()
+        window.screen_manager.show_screen.assert_called_with("menu")
+        window.clear_env.assert_called_once()

@@ -22,7 +22,7 @@ from gui.utils.common import convert_cv_to_qimage
 from cores.frame_editor import FrameEditor
 from cores.cnn import CNNCore as Detector
 import logging
-from typing import Optional
+from typing import Optional, Dict
 import numpy as np
 
 
@@ -83,7 +83,7 @@ class ReplayThresholdWindow(CustomQWidget):
         else:
             raise ValueError("Invalid action.")
 
-    def startup(self, params: dict) -> None:
+    def startup(self, params: Dict) -> None:
         self.logger.info("Starting ReplayThresholdWindow.")
         self.screen_manager.show_screen("replay_threshold")
 
@@ -120,7 +120,7 @@ class ReplayThresholdWindow(CustomQWidget):
         self.params["threshold"] = self.threshold
         self.clear_env()
 
-        self.screen_manager.get_screen("replay_exe").trigger("continue", self.params)
+        self.screen_manager.get_screen("replay_exe").trigger("continue")
 
     def clear_env(self) -> None:
         self.extracted_label.clear()

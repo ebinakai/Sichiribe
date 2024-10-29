@@ -2,6 +2,7 @@ import pytest
 from cores.common import load_setting, filter_dict
 import os
 import json
+from pathlib import Path
 
 
 class TestReadConfig:
@@ -20,7 +21,7 @@ class TestReadConfig:
         self.expected_setting = expected_setting
 
     def teardown_method(self):
-        if os.path.exists(self.setting_path):
+        if Path(self.setting_path).exists():
             os.remove(self.setting_path)
 
     def test_load_setting(self):
