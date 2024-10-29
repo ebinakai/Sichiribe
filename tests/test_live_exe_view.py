@@ -120,9 +120,3 @@ class TestWorkerCallbacks:
 
         window.update_remaining_time(14.5)
         assert window.remaining_time_label.text() != str(timedelta(seconds=int(10.4)))
-
-    def test_model_not_found(self, window):
-        window.clear_env = Mock()
-        window.model_not_found()
-        window.screen_manager.show_screen.assert_called_with("menu")
-        window.clear_env.assert_called_once()

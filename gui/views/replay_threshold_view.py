@@ -90,6 +90,7 @@ class ReplayThresholdWindow(CustomQWidget):
 
     def startup(self) -> None:
         self.screen_manager.show_screen("replay_threshold")
+        self.data_store.get_all()
 
         _p, _s = self.screen_manager.save_screen_size()
 
@@ -122,10 +123,10 @@ class ReplayThresholdWindow(CustomQWidget):
         self.logger.info("Set threshold finished.")
         self.data_store.set("threshold", self.threshold)
         self.clear_env()
-
         self.screen_manager.get_screen("replay_exe").trigger("continue")
 
     def clear_env(self) -> None:
         self.extracted_label.clear()
+        self.binarize_th.setValue(0)
         self.logger.info("Environment cleared.")
         self.screen_manager.restore_screen_size()

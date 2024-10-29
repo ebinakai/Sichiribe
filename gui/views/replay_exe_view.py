@@ -130,7 +130,6 @@ class ReplayExeWindow(CustomQWidget):
 
     def frame_devide_process(self) -> None:
         self.screen_manager.show_screen("log")
-
         self.fd_worker = FrameDivideWorker()
         self.fd_worker.end.connect(self.frame_devide_finished)
         self.fd_worker.start()
@@ -178,14 +177,6 @@ class ReplayExeWindow(CustomQWidget):
         q_image = convert_cv_to_qimage(image)
         self.extracted_label.setPixmap(QPixmap.fromImage(q_image))
 
-    def detect_finished(self) -> None:
-        self.graph_label.clear()
-        self.logger.info("Detect finished.")
-        self.logger.info(f"Results: {self.results}")
-        self.data_store.set("results", self.results)
-        self.data_store.set("failed_rates", self.failed_rates)
-        self.export_process()
-
     def detect_cancelled(self) -> None:
         self.term_label.setText("中止しました")
         self.logger.info("Detect cancelled.")
@@ -193,15 +184,21 @@ class ReplayExeWindow(CustomQWidget):
             "timestamps", self.data_store.get("timestamps")[: len(self.results)]
         )
 
-    def export_process(self) -> None:
-        self.logger.info("Data exporting...")
-
-        export_result(self.data_store.get_all())
-        export_params(self.data_store.get_all())
-
-        self.screen_manager.popup(f"保存場所：{self.data_store.get('out_dir')}")
+    def detect_finished(self) -> None:
+        self.graph_label.clear()
+        self.logger.info("Detect finished.")
+        self.logger.info(f"Results: {self.results}")
+        self.data_store.set("results", self.results)
+        self.data_store.set("failed_rates", self.failed_rates)
+        self.export_process()
         self.screen_manager.show_screen("menu")
         self.clear_env()
+
+    def export_process(self) -> None:
+        self.logger.info("Data exporting...")
+        export_result(self.data_store.get_all())
+        export_params(self.data_store.get_all())
+        self.screen_manager.popup(f"保存場所：{self.data_store.get('out_dir')}")
 
     def clear_env(self) -> None:
         self.graph_label.clear()

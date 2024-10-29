@@ -37,6 +37,7 @@ from cores.common import (
     load_setting,
     validate_output_directory,
     validate_params,
+    filter_dict,
 )
 import logging
 from pathlib import Path
@@ -148,12 +149,11 @@ class LiveSettingWindow(CustomQWidget):
         default_setting_path = Path(get_user_data_dir()) / "setting_live.json"
         try:
             params = load_setting(str(default_setting_path), self.required_keys.keys())
+            if validate_params(params, self.required_keys):
+                self.data_store.set_all(params)
+                self.set_ui_from_params()
         except Exception:
             self.logger.info(f"Failed to load default setting file")
-
-        if validate_params(params, self.required_keys):
-            self.data_store.set_all(params)
-            self.set_ui_from_params()
 
     def select_folder(self) -> None:
         folder_path = QFileDialog.getExistingDirectory(self, "フォルダを選択", "")
@@ -218,8 +218,10 @@ class LiveSettingWindow(CustomQWidget):
         self.screen_manager.get_screen("live_feed").trigger("startup")
 
     def export_setting(self) -> None:
+        setting = self.data_store.get_all()
+        setting = filter_dict(setting, lambda k, v: k in self.required_keys.keys())
         self.ep.export(
-            self.data_store.get_all(),
+            setting,
             method="json",
             prefix="setting_live",
             with_timestamp=False,

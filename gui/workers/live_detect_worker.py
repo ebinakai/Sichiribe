@@ -28,11 +28,11 @@ from pathlib import Path
 
 
 class DetectWorker(QThread):
+    ready = Signal()
+    error = Signal(str)
     progress = Signal(int, float, str)
     send_image = Signal(np.ndarray)
     remaining_time = Signal(float)
-    model_not_found = Signal()
-    missed_frame = Signal()
     SLEEP_INTERVAL = 0.1
 
     def __init__(self) -> None:
@@ -53,26 +53,27 @@ class DetectWorker(QThread):
         self.logger.info("DetectWorker started.")
 
         try:
+            self.dt = cnn_init(num_digits=self.data_store.get("num_digits"))
+        except Exception as e:
+            self.logger.error(f"Failed to load the model: {e}")
+            self.error.emit("CNNモデルの読み込みに失敗しました")
+            return None
+
+        try:
             self.fc = FrameCapture(device_num=self.data_store.get("device_num"))
         except Exception as e:
             self.logger.error(f"Failed to open camera: {e}")
-            self.missed_frame.emit()
+            self.error.emit("カメラへのアクセスに失敗しました")
             return None
 
         self.fc.set_cap_size(*self.data_store.get("cap_size"))
         self.fe = FrameEditor(num_digits=self.data_store.get("num_digits"))
 
-        try:
-            self.dt = cnn_init(num_digits=self.data_store.get("num_digits"))
-        except Exception as e:
-            self.logger.error(f"Failed to load the model: {e}")
-            self.model_not_found.emit()
-            return None
-
         start_time = time.time()
         end_time = time.time() + self.data_store.get("total_sampling_sec")
         frame_count = 0
         timestamps = []
+        first_loop = True
 
         while time.time() < end_time and not self.is_cancelled:
             temp_time = time.time()
@@ -89,7 +90,7 @@ class DetectWorker(QThread):
                 frame = self.fc.capture()
 
                 if frame is None:
-                    self.missed_frame.emit()
+                    self.error.emit("フレームの取得に失敗しました")
                     self.is_cancelled = True
                     break
 
@@ -118,6 +119,10 @@ class DetectWorker(QThread):
 
             value, failed_rate = self.dt.predict(frames, self.binarize_th)
             self.logger.info(f"Detected: {value}, Failed rate: {failed_rate}")
+
+            if first_loop:
+                self.ready.emit()
+                first_loop = False
 
             self.progress.emit(value, failed_rate, timestamp_str)
 

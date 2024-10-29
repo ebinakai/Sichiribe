@@ -37,6 +37,7 @@ from cores.common import (
     load_setting,
     validate_output_directory,
     validate_params,
+    filter_dict,
 )
 from cores.exporter import get_supported_formats
 import logging
@@ -142,12 +143,11 @@ class ReplaySettingWindow(CustomQWidget):
         default_setting_path = Path(get_user_data_dir()) / "setting_replay.json"
         try:
             params = load_setting(default_setting_path, self.required_keys.keys())
+            if validate_params(params, self.required_keys):
+                self.data_store.set_all(params)
+                self.set_ui_from_params()
         except Exception:
             self.logger.info(f"Failed to load default setting file")
-
-        if validate_params(params, self.required_keys):
-            self.data_store.set_all(params)
-            self.set_ui_from_params()
 
     def select_file(self) -> None:
         video_path, _ = QFileDialog.getOpenFileName(
@@ -208,8 +208,10 @@ class ReplaySettingWindow(CustomQWidget):
         self.screen_manager.get_screen("replay_exe").trigger("startup")
 
     def export_setting(self) -> None:
+        setting = self.data_store.get_all()
+        setting = filter_dict(setting, lambda k, v: k in self.required_keys.keys())
         self.ep.export(
-            self.data_store.get_all(),
+            setting,
             method="json",
             prefix="setting_replay",
             with_timestamp=False,

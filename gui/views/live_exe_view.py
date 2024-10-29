@@ -150,23 +150,15 @@ class LiveExeWindow(CustomQWidget):
         )
 
         self.worker = DetectWorker()
+        self.worker.ready.connect(lambda: self.screen_manager.show_screen("live_exe"))
         self.worker.progress.connect(self.detect_progress)
         self.worker.send_image.connect(self.display_extract_image)
         self.worker.remaining_time.connect(self.update_remaining_time)
-        self.worker.finished.connect(self.export_process)
-        self.worker.model_not_found.connect(self.model_not_found)
-        self.worker.missed_frame.connect(
-            lambda: self.screen_manager.popup("カメラにアクセスに失敗しました")
-        )
+        self.worker.finished.connect(self.detect_finished)
+        self.worker.error.connect(lambda msg: self.screen_manager.popup(msg))
 
         self.worker.start()
-        self.screen_manager.show_screen("live_exe")
         self.logger.info("Detect started.")
-
-    def model_not_found(self) -> None:
-        self.logger.error("Model not found.")
-        self.screen_manager.show_screen("menu")
-        self.clear_env()
 
     def detect_progress(self, result: int, failed_rate: float, timestamp: str) -> None:
         self.results.append(result)
@@ -189,18 +181,20 @@ class LiveExeWindow(CustomQWidget):
     def update_remaining_time(self, remaining_time: float) -> None:
         self.remaining_time_label.setText(str(timedelta(seconds=int(remaining_time))))
 
-    def export_process(self) -> None:
-        self.logger.info("Data exporting...")
-
+    def detect_finished(self) -> None:
+        self.logger.info("Detect finished.")
         self.data_store.set("results", self.results)
         self.data_store.set("failed_rates", self.failed_rates)
         self.data_store.set("timestamps", self.timestamps)
-        export_result(self.data_store.get_all())
-        export_params(self.data_store.get_all())
-
-        self.screen_manager.popup(f"保存場所：{self.data_store.get('out_dir')}")
+        self.export_process()
         self.screen_manager.show_screen("menu")
         self.clear_env()
+
+    def export_process(self) -> None:
+        self.logger.info("Data exporting...")
+        export_result(self.data_store.get_all())
+        export_params(self.data_store.get_all())
+        self.screen_manager.popup(f"保存場所：{self.data_store.get('out_dir')}")
 
     def clear_env(self) -> None:
         self.graph_label.clear()

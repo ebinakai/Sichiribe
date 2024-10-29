@@ -1,6 +1,7 @@
 import pytest
 from unittest.mock import Mock
 from gui.views.replay_threshold_view import ReplayThresholdWindow
+from gui.utils.data_store import DataStore
 import numpy as np
 
 
@@ -17,6 +18,10 @@ def window(qtbot):
 
 @pytest.mark.usefixtures("prevent_window_show")
 class TestReplayThresholdWindow:
+    def setup_method(self):
+        self.data_store = DataStore.get_instance()
+        self.data_store.clear()
+
     def test_initial_ui_state(self, window):
         assert window.binarize_th.value() == 0
         assert window.binarize_th_label.text() == "自動設定"
@@ -43,4 +48,5 @@ class TestReplayThresholdWindow:
         window.binarize_th.setValue(150)
         window.next_button.click()
 
+        assert self.data_store.get("threshold") == 150
         window.screen_manager.get_screen.assert_called_with("replay_exe")

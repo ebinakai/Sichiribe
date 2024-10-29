@@ -84,7 +84,6 @@ class TestMethods:
         assert export_result.called_once()
         assert export_params.called_once()
         assert window.screen_manager.popup.called_once()
-        window.screen_manager.show_screen.assert_called_once_with("menu")
 
 
 @pytest.mark.usefixtures("prevent_window_show")

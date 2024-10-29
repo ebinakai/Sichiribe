@@ -25,7 +25,7 @@ class DataStore:
     def set(self, key: str, value: Any) -> None:
         with self._data_lock:
             self.shared_data[key] = value
-            self.logger.debug(f"{key} is set to {value}")
+            self.logger.debug(f"{key} is set.")
 
     def set_all(self, data: Dict) -> None:
         with self._data_lock:
@@ -34,21 +34,21 @@ class DataStore:
 
     def get(self, key: str) -> Any:
         with self._data_lock:
-            value = self.shared_data.get(key)
-            if value is None:
+            if key not in self.shared_data.keys():
                 raise ValueError(f"{key} is not found.")
-            self.logger.debug(f"{key} is {value}.")
+            value = self.shared_data.get(key)
+            self.logger.debug(f"{key} is returned.")
             return value
 
     def get_all(self) -> Dict:
         with self._data_lock:
-            self.logger.debug(f"{self.shared_data} is returned.")
+            self.logger.debug(f"{self.shared_data.keys()} is returned.")
             return self.shared_data
 
     def has(self, key: str) -> bool:
         with self._data_lock:
             self.logger.debug(f"{key} is checked.")
-            return key in self.shared_data
+            return key in self.shared_data.keys()
 
     def clear(self) -> None:
         with self._data_lock:
