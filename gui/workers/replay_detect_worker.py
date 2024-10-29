@@ -11,9 +11,9 @@
 """
 
 from PySide6.QtCore import Signal, QThread
+from gui.utils.data_store import DataStore
 from cores.cnn import cnn_init
 import logging
-from typing import Dict, Any
 import numpy as np
 
 
@@ -23,35 +23,37 @@ class DetectWorker(QThread):
     cancelled = Signal()
     model_not_found = Signal()
 
-    def __init__(self, params: Dict[str, Any]) -> None:
+    def __init__(self) -> None:
         super().__init__()
         self.logger = logging.getLogger("__main__").getChild(__name__)
-        self.params = params
+        self.data_store = DataStore.get_instance()
         self._is_cancelled = False
 
     def run(self) -> None:
         self.logger.info("DetectWorker started.")
 
         try:
-            self.dt = cnn_init(num_digits=self.params["num_digits"])
+            self.dt = cnn_init(num_digits=self.data_store.get("num_digits"))
         except Exception as e:
             self.logger.error(f"Failed to load the model: {e}")
             self.model_not_found.emit()
             return None
 
-        for frames, timestamp in zip(self.params["frames"], self.params["timestamps"]):
+        for frames, timestamp in zip(
+            self.data_store.get("frames"), self.data_store.get("timestamps")
+        ):
             if self._is_cancelled:
                 self.cancelled.emit()
                 return None
 
             # GUI への送信用の画像二値化であり、predict 内で再度処理する
             image_bin = self.dt.preprocess_binarization(
-                frames[0], self.params["threshold"]
+                frames[0], binarize_th=self.data_store.get("threshold")
             )
             self.send_image.emit(image_bin)
 
             result, failed_rate = self.dt.predict(
-                frames, binarize_th=self.params["threshold"]
+                frames, binarize_th=self.data_store.get("threshold")
             )
             self.logger.info(f"Detected Result: {result}")
             self.logger.info(f"Failed Rate: {failed_rate}")

@@ -9,6 +9,7 @@ from PySide6.QtWidgets import QHBoxLayout, QVBoxLayout, QPushButton
 from PySide6.QtCore import Qt
 from gui.widgets.custom_qwidget import CustomQWidget
 from gui.utils.screen_manager import ScreenManager
+from gui.utils.data_store import DataStore
 import logging
 
 
@@ -16,6 +17,7 @@ class MenuWindow(CustomQWidget):
     def __init__(self, screen_manager: ScreenManager) -> None:
         self.logger = logging.getLogger("__main__").getChild(__name__)
         self.screen_manager = screen_manager
+        self.data_store = DataStore.get_instance()
 
         super().__init__()
         screen_manager.add_screen("menu", self, "")
@@ -54,3 +56,6 @@ class MenuWindow(CustomQWidget):
         main_layout.addLayout(button_layout)
         main_layout.addStretch()
         main_layout.addLayout(footer_layout)
+
+    def display(self):
+        self.data_store.clear()

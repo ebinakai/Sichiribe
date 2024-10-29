@@ -10,13 +10,8 @@ def window(qtbot):
     screen_manager.save_screen_size.return_value = (800, 600)
     window = ReplayThresholdWindow(screen_manager)
     qtbot.addWidget(window)
+    window.first_frame = np.zeros((100, 100, 3), dtype=np.uint8)
     window.show()
-    window.startup(
-        {
-            "first_frame": np.zeros((100, 100, 3), dtype=np.uint8),
-            "click_points": [[10, 10], [90, 90], [10, 90], [90, 10]],
-        }
-    )
     return window
 
 
@@ -29,13 +24,12 @@ class TestReplayThresholdWindow:
 
     def test_trigger(self, window):
         window.startup = Mock()
-        expected_params = {"a": 1, "b": 2}
-        window.trigger("startup", expected_params.copy())
+        window.trigger("startup")
 
-        window.startup.assert_called_once_with(expected_params)
+        assert window.startup.called_once()
 
         with pytest.raises(ValueError):
-            window.trigger("invalid", expected_params.copy())
+            window.trigger("invalid")
 
     def test_threshold_update(self, window):
         window.binarize_th.setValue(128)

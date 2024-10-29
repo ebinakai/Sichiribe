@@ -17,13 +17,14 @@ from PySide6.QtGui import QPixmap
 from gui.widgets.custom_qwidget import CustomQWidget
 from gui.utils.screen_manager import ScreenManager
 from gui.utils.common import convert_cv_to_qimage
+from gui.utils.data_store import DataStore
 from gui.utils.exporter import export_result, export_params
 from gui.widgets.mpl_canvas_widget import MplCanvas
 from gui.workers.frame_devide_worker import FrameDivideWorker
 from gui.workers.replay_detect_worker import DetectWorker
 from cores.frame_editor import FrameEditor
 import logging
-from typing import List, Dict, Union, Any
+from typing import List, Union
 import numpy as np
 
 
@@ -31,7 +32,7 @@ class ReplayExeWindow(CustomQWidget):
     def __init__(self, screen_manager: ScreenManager) -> None:
         self.logger = logging.getLogger("__main__").getChild(__name__)
         self.screen_manager = screen_manager
-        self.params: Dict[str, Any]
+        self.data_store = DataStore.get_instance()
         self.results: List[int]
         self.failed_rates: List[float]
         self.graph_results: List[int]
@@ -87,7 +88,7 @@ class ReplayExeWindow(CustomQWidget):
         else:
             raise ValueError(f"Invalid action: {action}")
 
-    def startup(self, params: Dict) -> None:
+    def startup(self) -> None:
         self.graph_label.gen_graph(
             title="Results",
             xlabel="Timestamp",
@@ -96,7 +97,6 @@ class ReplayExeWindow(CustomQWidget):
             dark_theme=self.screen_manager.check_if_dark_mode(),
         )
         self.term_label.setText("")
-        self.params = params
         self.results = []
         self.failed_rates = []
         self.graph_results = []
@@ -105,32 +105,33 @@ class ReplayExeWindow(CustomQWidget):
 
         # 最初のフレームを取得
         self.fe = FrameEditor(
-            self.params["sampling_sec"],
-            self.params["num_frames"],
-            self.params["num_digits"],
+            self.data_store.get("sampling_sec"),
+            self.data_store.get("num_frames"),
+            self.data_store.get("num_digits"),
         )
         first_frame = self.fe.frame_devide(
-            self.params["video_path"],
-            self.params["video_skip_sec"],
+            self.data_store.get("video_path"),
+            self.data_store.get("video_skip_sec"),
             save_frame=False,
             is_crop=False,
             extract_single_frame=True,
         )
-        self.params["first_frame"] = first_frame
+        self.data_store.set("first_frame", first_frame)
 
-        if "click_points" in self.params and len(self.params["click_points"]):
-            self.screen_manager.get_screen("replay_threshold").trigger(
-                "startup", self.params
-            )
+        if (
+            self.data_store.has("click_points")
+            and len(self.data_store.get("click_points")) == 4
+        ):
+            self.screen_manager.get_screen("replay_threshold").trigger("startup")
         else:
             self.screen_manager.get_screen("region_select").trigger(
-                "startup", self.params, "replay_exe"
+                "startup", "replay_exe"
             )
 
     def frame_devide_process(self) -> None:
         self.screen_manager.show_screen("log")
 
-        self.fd_worker = FrameDivideWorker(self.params)
+        self.fd_worker = FrameDivideWorker()
         self.fd_worker.end.connect(self.frame_devide_finished)
         self.fd_worker.start()
         self.logger.info("Frame Devide started.")
@@ -140,12 +141,12 @@ class ReplayExeWindow(CustomQWidget):
     ) -> None:
         self.logger.debug("timestamps: %s" % timestamps)
         self.logger.info("Frame Devide finished.")
-        self.params["frames"] = frames
-        self.params["timestamps"] = timestamps
+        self.data_store.set("frames", frames)
+        self.data_store.set("timestamps", timestamps)
         self.detect_process()
 
     def detect_process(self) -> None:
-        self.dt_worker = DetectWorker(self.params)
+        self.dt_worker = DetectWorker()
         self.dt_worker.progress.connect(self.detect_progress)
         self.dt_worker.send_image.connect(self.display_extract_image)
         self.dt_worker.finished.connect(self.detect_finished)
@@ -181,22 +182,24 @@ class ReplayExeWindow(CustomQWidget):
         self.graph_label.clear()
         self.logger.info("Detect finished.")
         self.logger.info(f"Results: {self.results}")
-        self.params["results"] = self.results
-        self.params["failed_rates"] = self.failed_rates
+        self.data_store.set("results", self.results)
+        self.data_store.set("failed_rates", self.failed_rates)
         self.export_process()
 
     def detect_cancelled(self) -> None:
         self.term_label.setText("中止しました")
         self.logger.info("Detect cancelled.")
-        self.params["timestamps"] = self.params["timestamps"][: len(self.results)]
+        self.data_store.set(
+            "timestamps", self.data_store.get("timestamps")[: len(self.results)]
+        )
 
     def export_process(self) -> None:
         self.logger.info("Data exporting...")
 
-        export_result(self.params)
-        export_params(self.params)
+        export_result(self.data_store.get_all())
+        export_params(self.data_store.get_all())
 
-        self.screen_manager.popup(f"保存場所：{self.params['out_dir']}")
+        self.screen_manager.popup(f"保存場所：{self.data_store.get('out_dir')}")
         self.screen_manager.show_screen("menu")
         self.clear_env()
 

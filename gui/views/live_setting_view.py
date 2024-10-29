@@ -29,6 +29,7 @@ from PySide6.QtWidgets import (
 )
 from gui.widgets.custom_qwidget import CustomQWidget
 from gui.utils.screen_manager import ScreenManager
+from gui.utils.data_store import DataStore
 from gui.utils.common import get_user_data_dir
 from cores.exporter import get_supported_formats, Exporter
 from cores.common import (
@@ -38,7 +39,6 @@ from cores.common import (
     validate_params,
 )
 import logging
-from typing import Dict, Any
 from pathlib import Path
 
 
@@ -47,6 +47,7 @@ class LiveSettingWindow(CustomQWidget):
         self.logger = logging.getLogger("__main__").getChild(__name__)
         self.ep = Exporter(get_user_data_dir())
         self.screen_manager = screen_manager
+        self.data_store = DataStore.get_instance()
         self.required_keys = {
             "device_num": lambda x: isinstance(x, int) and x >= 0,
             "num_digits": lambda x: isinstance(x, int) and x >= 1,
@@ -147,10 +148,12 @@ class LiveSettingWindow(CustomQWidget):
         default_setting_path = Path(get_user_data_dir()) / "setting_live.json"
         try:
             params = load_setting(str(default_setting_path), self.required_keys.keys())
-            if validate_params(params, self.required_keys):
-                self.set_ui_from_params(params)
         except Exception:
             self.logger.info(f"Failed to load default setting file")
+
+        if validate_params(params, self.required_keys):
+            self.data_store.set_all(params)
+            self.set_ui_from_params()
 
     def select_folder(self) -> None:
         folder_path = QFileDialog.getExistingDirectory(self, "フォルダを選択", "")
@@ -178,6 +181,8 @@ class LiveSettingWindow(CustomQWidget):
             self.confirm_txt.setText("ファイルが読み込めませんでした")
             return
 
+        self.export_setting()
+
         out_dir_parent = Path(params["out_dir"]).resolve().parent
         params["out_dir"] = str(out_dir_parent / get_now_str())
         if not validate_params(params, self.required_keys):
@@ -185,12 +190,12 @@ class LiveSettingWindow(CustomQWidget):
             self.confirm_txt.setText("不正なファイルです")
             return
 
-        self.set_ui_from_params(params)
-        self.export_setting(params)
+        self.data_store.set_all(params)
+        self.set_ui_from_params()
         if len(params["click_points"]) == 4:
-            self.screen_manager.get_screen("live_exe").trigger("startup", params)
+            self.screen_manager.get_screen("live_exe").trigger("startup")
         else:
-            self.screen_manager.get_screen("live_feed").trigger("startup", params)
+            self.screen_manager.get_screen("live_feed").trigger("startup")
 
     def next(self) -> None:
         if self.out_dir.text() == "":
@@ -199,41 +204,45 @@ class LiveSettingWindow(CustomQWidget):
         else:
             self.confirm_txt.setText("")
 
-        params = self.get_params_from_ui()
-        params["out_dir"] = str(Path(params["out_dir"]).resolve() / get_now_str())
-        if not validate_params(params, self.required_keys):
+        self.get_params_from_ui()
+        self.export_setting()
+
+        self.data_store.set(
+            "out_dir",
+            str(Path(self.data_store.get("out_dir")).resolve() / get_now_str()),
+        )
+        if not validate_params(self.data_store.get_all(), self.required_keys):
             self.confirm_txt.setText("不正な値が入力されています")
             return
 
-        self.export_setting(params)
-        self.screen_manager.get_screen("live_feed").trigger("startup", params)
+        self.screen_manager.get_screen("live_feed").trigger("startup")
 
-    def export_setting(self, params: Dict[str, Any]) -> None:
-        export_params = params.copy()
-        export_params["out_dir"] = str(Path(params["out_dir"]).resolve().parent)
+    def export_setting(self) -> None:
         self.ep.export(
-            export_params, method="json", prefix="setting_live", with_timestamp=False
+            self.data_store.get_all(),
+            method="json",
+            prefix="setting_live",
+            with_timestamp=False,
         )
 
-    def set_ui_from_params(self, params) -> None:
-        self.device_num.setValue(params["device_num"])
-        self.num_digits.setValue(params["num_digits"])
-        self.sampling_sec.setValue(params["sampling_sec"])
-        self.num_frames.setValue(params["num_frames"])
-        self.total_sampling_min.setValue(max(params["total_sampling_sec"] // 60, 1))
-        self.format.setCurrentText(params["format"])
-        self.save_frame.setChecked(params["save_frame"])
-        self.out_dir.setText(params["out_dir"])
+    def set_ui_from_params(self) -> None:
+        self.device_num.setValue(self.data_store.get("device_num"))
+        self.num_digits.setValue(self.data_store.get("num_digits"))
+        self.sampling_sec.setValue(self.data_store.get("sampling_sec"))
+        self.num_frames.setValue(self.data_store.get("num_frames"))
+        self.total_sampling_min.setValue(
+            self.data_store.get("total_sampling_sec") // 60
+        )
+        self.format.setCurrentText(self.data_store.get("format"))
+        self.save_frame.setChecked(self.data_store.get("save_frame"))
+        self.out_dir.setText(self.data_store.get("out_dir"))
 
-    def get_params_from_ui(self) -> Dict[str, Any]:
-        params = {
-            "device_num": self.device_num.value(),
-            "num_digits": self.num_digits.value(),
-            "sampling_sec": self.sampling_sec.value(),
-            "num_frames": self.num_frames.value(),
-            "total_sampling_sec": self.total_sampling_min.value() * 60,
-            "format": self.format.currentText(),
-            "save_frame": self.save_frame.isChecked(),
-            "out_dir": self.out_dir.text(),
-        }
-        return params
+    def get_params_from_ui(self):
+        self.data_store.set("device_num", self.device_num.value())
+        self.data_store.set("num_digits", self.num_digits.value())
+        self.data_store.set("sampling_sec", self.sampling_sec.value())
+        self.data_store.set("num_frames", self.num_frames.value())
+        self.data_store.set("total_sampling_sec", self.total_sampling_min.value() * 60)
+        self.data_store.set("format", self.format.currentText())
+        self.data_store.set("save_frame", self.save_frame.isChecked())
+        self.data_store.set("out_dir", self.out_dir.text())

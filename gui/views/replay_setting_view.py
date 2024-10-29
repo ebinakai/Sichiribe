@@ -29,6 +29,7 @@ from PySide6.QtWidgets import (
 )
 from gui.widgets.custom_qwidget import CustomQWidget
 from gui.utils.screen_manager import ScreenManager
+from gui.utils.data_store import DataStore
 from gui.utils.common import get_user_data_dir
 from cores.exporter import Exporter
 from cores.common import (
@@ -39,7 +40,6 @@ from cores.common import (
 )
 from cores.exporter import get_supported_formats
 import logging
-from typing import Any, Dict
 from pathlib import Path
 
 
@@ -48,6 +48,7 @@ class ReplaySettingWindow(CustomQWidget):
         self.logger = logging.getLogger("__main__").getChild(__name__)
         self.ep = Exporter(get_user_data_dir())
         self.screen_manager = screen_manager
+        self.data_store = DataStore.get_instance()
         self.required_keys = {
             "video_path": lambda x: isinstance(x, str) and Path(x).exists(),
             "num_digits": lambda x: isinstance(x, int) and x >= 1,
@@ -141,10 +142,12 @@ class ReplaySettingWindow(CustomQWidget):
         default_setting_path = Path(get_user_data_dir()) / "setting_replay.json"
         try:
             params = load_setting(default_setting_path, self.required_keys.keys())
-            if validate_params(params, self.required_keys):
-                self.set_ui_from_params(params)
         except Exception:
             self.logger.info(f"Failed to load default setting file")
+
+        if validate_params(params, self.required_keys):
+            self.data_store.set_all(params)
+            self.set_ui_from_params()
 
     def select_file(self) -> None:
         video_path, _ = QFileDialog.getOpenFileName(
@@ -180,11 +183,10 @@ class ReplaySettingWindow(CustomQWidget):
             self.confirm_txt.setText("不正なファイルです")
             return
 
-        self.set_ui_from_params(params)
-        self.ep.export(
-            params, method="json", prefix="setting_replay", with_timestamp=False
-        )
-        self.screen_manager.get_screen("replay_exe").trigger("startup", params)
+        self.data_store.set_all(params)
+        self.set_ui_from_params()
+        self.export_setting()
+        self.screen_manager.get_screen("replay_exe").trigger("startup")
 
     def next(self) -> None:
         if self.video_path.text() == "":
@@ -193,37 +195,41 @@ class ReplaySettingWindow(CustomQWidget):
         else:
             self.confirm_txt.setText("")
 
-        params = self.get_params_from_ui()
-        params["out_dir"] = str(
-            Path(params["video_path"]).resolve().parent / get_now_str()
+        self.get_params_from_ui()
+        self.data_store.set(
+            "out_dir",
+            str(Path(self.data_store.get("video_path")).parent / get_now_str()),
         )
-        if not validate_params(params, self.required_keys):
+        if not validate_params(self.data_store.get_all(), self.required_keys):
             self.confirm_txt.setText("不正な値が入力されています")
             return
 
+        self.export_setting()
+        self.screen_manager.get_screen("replay_exe").trigger("startup")
+
+    def export_setting(self) -> None:
         self.ep.export(
-            params, method="json", prefix="setting_replay", with_timestamp=False
+            self.data_store.get_all(),
+            method="json",
+            prefix="setting_replay",
+            with_timestamp=False,
         )
-        self.screen_manager.get_screen("replay_exe").trigger("startup", params)
 
-    def set_ui_from_params(self, params: Dict[str, Any]) -> None:
-        self.video_path.setText(params["video_path"])
-        self.num_digits.setValue(params["num_digits"])
-        self.sampling_sec.setValue(params["sampling_sec"])
-        self.num_frames.setValue(params["num_frames"])
-        self.video_skip_sec.setValue(params["video_skip_sec"])
-        self.format.setCurrentText(params["format"])
-        self.save_frame.setChecked(params["save_frame"])
+    def set_ui_from_params(self) -> None:
+        self.video_path.setText(self.data_store.get("video_path"))
+        self.num_digits.setValue(self.data_store.get("num_digits"))
+        self.sampling_sec.setValue(self.data_store.get("sampling_sec"))
+        self.num_frames.setValue(self.data_store.get("num_frames"))
+        self.video_skip_sec.setValue(self.data_store.get("video_skip_sec"))
+        self.format.setCurrentText(self.data_store.get("format"))
+        self.save_frame.setChecked(self.data_store.get("save_frame"))
 
-    def get_params_from_ui(self) -> Dict[str, Any]:
-        params = {
-            "video_path": self.video_path.text(),
-            "num_digits": self.num_digits.value(),
-            "sampling_sec": self.sampling_sec.value(),
-            "num_frames": self.num_frames.value(),
-            "video_skip_sec": self.video_skip_sec.value(),
-            "format": self.format.currentText(),
-            "save_frame": self.save_frame.isChecked(),
-            "out_dir": self.video_path.text(),
-        }
-        return params
+    def get_params_from_ui(self) -> None:
+        self.data_store.set("video_path", self.video_path.text())
+        self.data_store.set("num_digits", self.num_digits.value())
+        self.data_store.set("sampling_sec", self.sampling_sec.value())
+        self.data_store.set("num_frames", self.num_frames.value())
+        self.data_store.set("video_skip_sec", self.video_skip_sec.value())
+        self.data_store.set("format", self.format.currentText())
+        self.data_store.set("save_frame", self.save_frame.isChecked())
+        self.data_store.set("out_dir", self.video_path.text())

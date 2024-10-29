@@ -2,6 +2,7 @@ import pytest
 from unittest.mock import Mock, patch
 from PySide6.QtCore import Qt
 from gui.views.replay_setting_view import ReplaySettingWindow
+from gui.utils.data_store import DataStore
 
 
 @pytest.fixture
@@ -15,6 +16,7 @@ def expected_params():
         "format": "csv",
         "save_frame": False,
         "out_dir": "/dummy/path",
+        "click_points": [],
     }
 
 
@@ -29,7 +31,6 @@ def window(qtbot):
 
 @pytest.mark.usefixtures("prevent_window_show")
 class TestReplaySettingWindow:
-    @classmethod
     def setup_class(self):
         get_now_str_patcher = patch(
             "gui.views.replay_setting_view.get_now_str", return_value="now"
@@ -43,11 +44,14 @@ class TestReplaySettingWindow:
         self.mock_validate = validate_patcher.start()
         self.mock_expoter = exporter_patcher.start()
 
-    @classmethod
     def teardown_class(self):
         self.mock_get_now_str.stop()
         self.mock_validate.stop()
         self.mock_expoter.stop()
+
+    def setup_method(self):
+        self.data_store = DataStore.get_instance()
+        self.data_store.clear()
 
     def test_initial_ui_state(self, window):
         assert window.video_path.text() == ""
@@ -73,7 +77,6 @@ class TestReplaySettingWindow:
     def test_load_setting(self, mock_dialog, window, expected_params, qtbot):
         next_screen = Mock()
         window.screen_manager.get_screen.return_value = next_screen
-        expected_params["click_points"] = []
 
         with patch(
             "gui.views.replay_setting_view.load_setting",
@@ -82,8 +85,8 @@ class TestReplaySettingWindow:
             qtbot.mouseClick(window.load_button, Qt.LeftButton)
             mock_load_setting.assert_called_once()
 
-        expected_params["out_dir"] = "/dummy/now"
-        next_screen.trigger.assert_called_once_with("startup", expected_params)
+        assert self.data_store.get("out_dir") == "/dummy/now"
+        next_screen.trigger.assert_called_once_with("startup")
 
     def test_next(self, window):
         window.next()
@@ -95,12 +98,11 @@ class TestReplaySettingWindow:
 
         assert window.confirm_txt.text() == ""
         window.screen_manager.get_screen("replay_exe").trigger.assert_called_once()
-        params = window.screen_manager.get_screen("replay_exe").trigger.call_args[0][1]
 
-        assert params["video_path"] == "/dummy/path/video.mp4"
-        assert params["num_digits"] == 4
-        assert params["sampling_sec"] == 5
-        assert params["num_frames"] == 30
-        assert params["video_skip_sec"] == 0
-        assert params["format"] == window.format.currentText()
-        assert params["save_frame"] == window.save_frame.isChecked()
+        assert self.data_store.get("video_path") == window.video_path.text()
+        assert self.data_store.get("num_digits") == window.num_digits.value()
+        assert self.data_store.get("sampling_sec") == window.sampling_sec.value()
+        assert self.data_store.get("num_frames") == window.num_frames.value()
+        assert self.data_store.get("video_skip_sec") == window.video_skip_sec.value()
+        assert self.data_store.get("format") == window.format.currentText()
+        assert self.data_store.get("save_frame") == window.save_frame.isChecked()

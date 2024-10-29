@@ -1,13 +1,11 @@
 import pytest
 from PySide6.QtCore import Qt
-from unittest.mock import MagicMock
 from gui.views.menu_view import MenuWindow
 
 
 @pytest.fixture
-def window(qtbot):
-    screen_manager = MagicMock()
-    window = MenuWindow(screen_manager)
+def window(qtbot, mock_screen_manager):
+    window = MenuWindow(mock_screen_manager)
     qtbot.addWidget(window)
     window.show()
     return window

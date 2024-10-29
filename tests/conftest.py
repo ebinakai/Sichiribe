@@ -1,4 +1,5 @@
 import pytest
+from unittest.mock import MagicMock, Mock
 from unittest.mock import patch
 import numpy as np
 
@@ -17,3 +18,10 @@ def sample_frame():
 @pytest.fixture
 def sample_frame_gs():
     return np.zeros((480, 640, 1), dtype=np.uint8)
+
+
+@pytest.fixture
+def mock_screen_manager():
+    manager = Mock()
+    manager.save_screen_size.return_value = (MagicMock(), None)
+    return manager

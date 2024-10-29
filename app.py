@@ -1,5 +1,6 @@
 """
-GUIアプリケーションを起動するためのメインプログラムこのスクリプトを実行することで、GUIアプリケーションが起動する
+GUIアプリケーションを起動するためのメインプログラム
+このスクリプトを実行することで、GUIアプリケーションが起動する
 詳細については、https://github.com/EbinaKai/Sichiribe/wiki/How-to-use-GUI-App を参照
 """
 
@@ -9,12 +10,27 @@ from PySide6.QtCore import QTimer
 from PySide6.QtWidgets import QApplication
 import sys
 import logging
+import argparse
 
-formatter = "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
-logging.basicConfig(level=logging.INFO, format=formatter)
+
+def setup_logging(debug_mode: bool) -> None:
+    formatter = "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+    level = logging.DEBUG if debug_mode else logging.INFO
+    logging.basicConfig(level=level, format=formatter)
+
+
+def get_args() -> argparse.Namespace:
+    parser = argparse.ArgumentParser(description="GUI Application")
+    parser.add_argument(
+        "--debug", action="store_true", help="デバッグモードを有効にする"
+    )
+    return parser.parse_args()
 
 
 def main() -> None:
+    args = get_args()
+    setup_logging(args.debug)
+
     show_splash_ms = 2000
 
     app = QApplication([])

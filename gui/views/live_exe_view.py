@@ -23,10 +23,11 @@ from gui.widgets.custom_qwidget import CustomQWidget
 from gui.widgets.mpl_canvas_widget import MplCanvas
 from gui.utils.screen_manager import ScreenManager
 from gui.utils.common import convert_cv_to_qimage
+from gui.utils.data_store import DataStore
 from gui.utils.exporter import export_result, export_params
 from gui.workers.live_detect_worker import DetectWorker
 import logging
-from typing import List, Dict, Optional, Any
+from typing import List, Optional
 import numpy as np
 from datetime import timedelta
 
@@ -35,7 +36,6 @@ class LiveExeWindow(CustomQWidget):
     def __init__(self, screen_manager: ScreenManager) -> None:
         self.logger = logging.getLogger("__main__").getChild(__name__)
         self.screen_manager = screen_manager
-        self.params: Dict[str, Any]
         self.results: List[int]
         self.failed_rates: List[float]
         self.timestamps: List[str]
@@ -43,6 +43,7 @@ class LiveExeWindow(CustomQWidget):
         self.graph_failed_rates: List[float]
         self.graph_timestamps: List[str]
         self.worker: Optional[DetectWorker] = None
+        self.data_store = DataStore.get_instance()
 
         super().__init__()
         screen_manager.add_screen("live_exe", self, "ライブ解析中")
@@ -124,7 +125,7 @@ class LiveExeWindow(CustomQWidget):
         self.graph_timestamps = []
         self.update_graph(self.results[-1], self.failed_rates[-1], self.timestamps[-1])
 
-    def startup(self, params: dict) -> None:
+    def startup(self) -> None:
         self.logger.info("Starting LiveExeWindow.")
         self.screen_manager.show_screen("log")
 
@@ -133,7 +134,6 @@ class LiveExeWindow(CustomQWidget):
         self.binarize_th.setValue(0)
         self.binarize_th_label.setText("自動設定")
         self.term_label.setText("")
-        self.params = params
         self.results = []
         self.failed_rates = []
         self.timestamps = []
@@ -149,7 +149,7 @@ class LiveExeWindow(CustomQWidget):
             dark_theme=self.screen_manager.check_if_dark_mode(),
         )
 
-        self.worker = DetectWorker(self.params)
+        self.worker = DetectWorker()
         self.worker.progress.connect(self.detect_progress)
         self.worker.send_image.connect(self.display_extract_image)
         self.worker.remaining_time.connect(self.update_remaining_time)
@@ -160,6 +160,7 @@ class LiveExeWindow(CustomQWidget):
         )
 
         self.worker.start()
+        self.screen_manager.show_screen("live_exe")
         self.logger.info("Detect started.")
 
     def model_not_found(self) -> None:
@@ -168,7 +169,6 @@ class LiveExeWindow(CustomQWidget):
         self.clear_env()
 
     def detect_progress(self, result: int, failed_rate: float, timestamp: str) -> None:
-        self.screen_manager.show_screen("live_exe")
         self.results.append(result)
         self.failed_rates.append(failed_rate)
         self.timestamps.append(timestamp)
@@ -192,13 +192,13 @@ class LiveExeWindow(CustomQWidget):
     def export_process(self) -> None:
         self.logger.info("Data exporting...")
 
-        self.params["results"] = self.results
-        self.params["failed_rates"] = self.failed_rates
-        self.params["timestamps"] = self.timestamps
-        export_result(self.params)
-        export_params(self.params)
+        self.data_store.set("results", self.results)
+        self.data_store.set("failed_rates", self.failed_rates)
+        self.data_store.set("timestamps", self.timestamps)
+        export_result(self.data_store.get_all())
+        export_params(self.data_store.get_all())
 
-        self.screen_manager.popup(f"保存場所：{self.params['out_dir']}")
+        self.screen_manager.popup(f"保存場所：{self.data_store.get('out_dir')}")
         self.screen_manager.show_screen("menu")
         self.clear_env()
 

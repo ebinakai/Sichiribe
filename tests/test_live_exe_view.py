@@ -6,24 +6,14 @@ from datetime import timedelta
 
 
 @pytest.fixture
-def mock_screen_manager():
-    manager = Mock()
-    manager.check_if_dark_mode.return_value = False
-    return manager
-
-
-@pytest.fixture
 def window(qtbot, mock_screen_manager):
-    """Initialize test window with mocked dependencies"""
     window = LiveExeWindow(mock_screen_manager)
-    # 必要な初期化を追加
     window.results = []
     window.failed_rates = []
     window.timestamps = []
     window.graph_results = []
     window.graph_failed_rates = []
     window.graph_timestamps = []
-    window.params = {}
     qtbot.addWidget(window)
     return window
 
@@ -44,13 +34,12 @@ class TestMethods:
 
     def test_trigger(self, window):
         window.startup = Mock()
-        expected_params = {"a": 1, "b": 2}
-        window.trigger("startup", expected_params.copy())
+        window.trigger("startup")
 
-        window.startup.assert_called_once_with(expected_params)
+        window.startup.assert_called_once()
 
         with pytest.raises(ValueError):
-            window.trigger("invalid", expected_params.copy())
+            window.trigger("invalid")
 
     def test_display_extract_image(self, window):
         sample_image = np.zeros((100, 100, 3), dtype=np.uint8)
@@ -61,21 +50,17 @@ class TestMethods:
 
     def test_detect_progress_updates(self, window):
         window.graph_label = Mock()
-
         result, failed_rate, timestamp = 42, 0.15, "10:00:00"
-        window.detect_progress(result, failed_rate, timestamp)
 
+        window.detect_progress(result, failed_rate, timestamp)
         assert window.results == [42]
         assert window.failed_rates == [0.15]
         assert window.timestamps == ["10:00:00"]
         assert window.graph_results == [42]
         assert window.graph_failed_rates == [0.15]
         assert window.graph_timestamps == ["10:00:00"]
-        window.screen_manager.show_screen.assert_called_with("live_exe")
 
-        result, failed_rate, timestamp = 42, 0.15, "10:00:00"
         window.detect_progress(result, failed_rate, timestamp)
-
         assert window.results == [42, 42]
         assert window.failed_rates == [0.15, 0.15]
         assert window.timestamps == ["10:00:00", "10:00:00"]

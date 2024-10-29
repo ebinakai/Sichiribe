@@ -6,7 +6,7 @@ from pathlib import Path
 
 
 class TestReadConfig:
-    def setup_method(self):
+    def setup_class(self):
         expected_setting = {
             "a": 42,
             "b": "test",
@@ -20,7 +20,7 @@ class TestReadConfig:
         self.setting_path = setting_path
         self.expected_setting = expected_setting
 
-    def teardown_method(self):
+    def teardown_class(self):
         if Path(self.setting_path).exists():
             os.remove(self.setting_path)
 

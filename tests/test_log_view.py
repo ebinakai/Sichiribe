@@ -1,12 +1,10 @@
 import pytest
-from unittest.mock import Mock
 from gui.views.log_view import LogWindow
 
 
 @pytest.fixture
-def window(qtbot):
-    screen_manager = Mock()
-    window = LogWindow(screen_manager)
+def window(qtbot, mock_screen_manager):
+    window = LogWindow(mock_screen_manager)
     qtbot.addWidget(window)
     window.show()
     return window

@@ -14,6 +14,7 @@
 """
 
 from PySide6.QtCore import Signal, QThread
+from gui.utils.data_store import DataStore
 from cores.capture import FrameCapture
 from cores.cnn import cnn_init
 from cores.frame_editor import FrameEditor
@@ -34,33 +35,42 @@ class DetectWorker(QThread):
     missed_frame = Signal()
     SLEEP_INTERVAL = 0.1
 
-    def __init__(self, params: dict) -> None:
+    def __init__(self) -> None:
         super().__init__()
         self.logger = logging.getLogger("__main__").getChild(__name__)
-        self.params = params
+        self.data_store = DataStore.get_instance()
         self.is_cancelled = False
         self.binarize_th: Optional[int] = None
         self._is_capturing = True
 
-        if self.params["save_frame"]:
-            (Path(self.params["out_dir"]) / "frames").mkdir(parents=True, exist_ok=True)
+        if self.data_store.get("save_frame"):
+            (Path(self.data_store.get("out_dir")) / "frames").mkdir(
+                parents=True, exist_ok=True
+            )
 
-        self.fc = FrameCapture(device_num=self.params["device_num"])
-        self.fc.set_cap_size(self.params["cap_size"][0], self.params["cap_size"][1])
-        self.fe = FrameEditor(num_digits=self.params["num_digits"])
+    def run(self) -> None:
+
+        self.logger.info("DetectWorker started.")
 
         try:
-            self.dt = cnn_init(num_digits=self.params["num_digits"])
+            self.fc = FrameCapture(device_num=self.data_store.get("device_num"))
+        except Exception as e:
+            self.logger.error(f"Failed to open camera: {e}")
+            self.missed_frame.emit()
+            return None
+
+        self.fc.set_cap_size(*self.data_store.get("cap_size"))
+        self.fe = FrameEditor(num_digits=self.data_store.get("num_digits"))
+
+        try:
+            self.dt = cnn_init(num_digits=self.data_store.get("num_digits"))
         except Exception as e:
             self.logger.error(f"Failed to load the model: {e}")
             self.model_not_found.emit()
             return None
 
-    def run(self) -> None:
-        self.logger.info("DetectWorker started.")
-
         start_time = time.time()
-        end_time = time.time() + self.params["total_sampling_sec"]
+        end_time = time.time() + self.data_store.get("total_sampling_sec")
         frame_count = 0
         timestamps = []
 
@@ -75,7 +85,7 @@ class DetectWorker(QThread):
 
             frames = []
             self._is_capturing = True
-            for i in range(self.params["num_frames"]):
+            for i in range(self.data_store.get("num_digits")):
                 frame = self.fc.capture()
 
                 if frame is None:
@@ -83,15 +93,15 @@ class DetectWorker(QThread):
                     self.is_cancelled = True
                     break
 
-                cropped_frame = self.fe.crop(frame, self.params["click_points"])
+                cropped_frame = self.fe.crop(frame, self.data_store.get("click_points"))
                 if cropped_frame is None:
                     self.logger.error("Failed to crop the frame.")
                     continue
                 frames.append(cropped_frame)
 
-                if self.params["save_frame"]:
+                if self.data_store.get("save_frame"):
                     frame_filename = (
-                        Path(self.params["out_dir"])
+                        Path(self.data_store.get("out_dir"))
                         / "frames"
                         / f"frame_{frame_count:06d}.jpg"
                     )
@@ -112,7 +122,7 @@ class DetectWorker(QThread):
             self.progress.emit(value, failed_rate, timestamp_str)
 
             elapsed_time = time.time() - temp_time
-            time_to_wait = max(0, self.params["sampling_sec"] - elapsed_time)
+            time_to_wait = max(0, self.data_store.get("sampling_sec") - elapsed_time)
             time_end_wait = time.time() + time_to_wait
             if time_to_wait > 0:
                 self.logger.debug(f"Waiting for {time_to_wait:.2f}s")
@@ -140,7 +150,7 @@ class DetectWorker(QThread):
                 self.logger.debug("Frame missing.")
                 return None
 
-            cropped_frame = self.fe.crop(frame, self.params["click_points"])
+            cropped_frame = self.fe.crop(frame, self.data_store.get("click_points"))
             if cropped_frame is None:
                 self.logger.debug("Failed to crop the frame.")
                 return None

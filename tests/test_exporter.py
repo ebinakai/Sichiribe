@@ -4,10 +4,10 @@ import os
 
 
 class TestExporter:
-    def setup_method(self):
+    def setup_class(self):
         self.exporter = Exporter("dummy_dir")
 
-    def teardown_method(self):
+    def teardown_class(self):
         os.rmdir("dummy_dir")
 
     def test_format(self):

@@ -8,6 +8,7 @@
 """
 
 from PySide6.QtCore import Signal, QThread
+from gui.utils.data_store import DataStore
 from cores.capture import FrameCapture
 import logging
 import numpy as np
@@ -22,18 +23,26 @@ class LiveFeedWorker(QThread):
     error = Signal()
     SLEEP_TIME = 0.01
 
-    def __init__(self, params: dict, width: float, height: float) -> None:
+    def __init__(self, width: float, height: float) -> None:
         super().__init__()
         self.logger = logging.getLogger("__main__").getChild(__name__)
-        self.params = params
+        self.data_store = DataStore.get_instance()
         self.width = width
         self.height = height
         self._is_cancelled = False
         self._is_finished = False
 
     def run(self) -> None:
-        fc = FrameCapture(self.params["device_num"])
-        self.logger.info("Capture device(%s) loaded." % self.params["device_num"])
+        try:
+            fc = FrameCapture(self.data_store.get("device_num"))
+        except Exception as e:
+            self.logger.error(f"Failed to open camera: {e}")
+            self.error.emit()
+            return None
+
+        self.logger.info(
+            "Capture device(%s) loaded." % self.data_store.get("device_num")
+        )
         cap_width, cap_height = fc.set_cap_size(self.width, self.height)
         self.logger.debug("Capture size set to %d x %d" % (cap_width, cap_height))
         self.cap_size.emit((cap_width, cap_height))
