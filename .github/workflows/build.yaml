@@ -4,17 +4,25 @@ on:
   pull_request:
     branches:
       - main
-    paths:
-      - gui/**
-      - cores/**
-      - app.py
-    paths-ignore:
-      - '**/*.md'
-      - '.gitignore'
-      - 'sample/**'
 
 jobs:
+  check_changes:
+    runs-on: ubuntu-latest
+    outputs:
+      run_build: ${{ steps.filter.outputs.src }}
+    steps:
+      - uses: dorny/paths-filter@v2
+        id: filter
+        with:
+          filters: |
+            src:
+              - 'gui/**'
+              - 'cores/**'
+              - 'app.py'
+
   build:
+    needs: check_changes
+    if: needs.check_changes.outputs.run_build == 'true'
     strategy:
       matrix:
         os: [macos-latest, ubuntu-latest, windows-latest]
