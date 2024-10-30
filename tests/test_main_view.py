@@ -11,7 +11,7 @@ def window(qtbot):
     return window
 
 
-@pytest.mark.usefixtures("prevent_window_show")
+@pytest.mark.usefixtures("prevent_window_show", "qt_test_environment")
 class TestMainWindow:
     def test_main_window_title(self, window):
         assert window.windowTitle() != "", "Window title is Empty"

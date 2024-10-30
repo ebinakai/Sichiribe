@@ -153,7 +153,7 @@ class RegionSelectWindow(CustomQWidget):
     def update_image(self, image: np.ndarray) -> None:
         click_points = np.array(self.click_points) / self.resize_scale
         extract_image = self.fe.crop(self.image_original, click_points.tolist())
-        image, extract_image = self.fe.draw_debug_info(
+        image, extract_image = self.fe.draw_region_outline(
             image, extract_image, self.click_points
         )
         height, width, channel = self.image.shape
@@ -163,20 +163,19 @@ class RegionSelectWindow(CustomQWidget):
         if extract_image is not None:
             self.display_extract_image(extract_image)
 
-    def startup(self, params: dict, prev_screen: str) -> None:
+    def startup(self, prev_screen: str) -> None:
         self.logger.info("Starting RegionSelectWindow.")
-        self.params = params
         self.prev_screen = prev_screen
-        self.fe = FrameEditor(num_digits=params["num_digits"])
+        self.fe = FrameEditor(num_digits=self.data_store.get("num_digits"))
 
-        window_pos, _s = self.screen_manager.save_screen_size()
+        window_pos, _ = self.screen_manager.save_screen_size()
 
         screen = QApplication.primaryScreen()
         screen_rect = screen.availableGeometry()
         self.target_width = int(screen_rect.width() * 0.8)
         self.target_height = int((screen_rect.height() - 100) * 0.8)
 
-        self.set_image(params["first_frame"])
+        self.set_image(self.data_store.get("first_frame"))
         self.screen_manager.show_screen("region_select")
         QTimer.singleShot(1, lambda: self.window().move(window_pos.x(), 1))
 
@@ -187,7 +186,7 @@ class RegionSelectWindow(CustomQWidget):
 
         self.logger.info("Region selection finished.")
         click_points = np.array(self.click_points) / self.resize_scale
-        self.params["click_points"] = click_points.tolist()
+        self.data_store.set("click_points", click_points.tolist())
 
         self.clear_env()
 
@@ -200,23 +199,21 @@ class RegionSelectWindow(CustomQWidget):
         QTimer.singleShot(1, lambda: self.switch_back())
 
     def switch_back(self) -> None:
-        self.logger.debug("Switching to back screen(%s).", self.prev_screen)
+        self.logger.debug(f"Switching to back screen({self.prev_screen}).")
         if self.prev_screen == "replay_exe":
             self.screen_manager.show_screen("replay_setting")
         elif self.prev_screen == "live_feed":
-            self.screen_manager.get_screen("live_feed").trigger("startup", self.params)
+            self.screen_manager.get_screen("live_feed").trigger("startup")
         else:
             raise ValueError("Invalid previous screen.")
         self.prev_screen = ""
 
     def switch_next(self) -> None:
-        self.logger.debug("Switching to next screen(%s).", self.prev_screen)
+        self.logger.debug(f"Switching to next screen({self.prev_screen}).")
         if self.prev_screen == "replay_exe":
-            self.screen_manager.get_screen("replay_threshold").trigger(
-                "startup", self.params
-            )
+            self.screen_manager.get_screen("replay_threshold").trigger("startup")
         elif self.prev_screen == "live_feed":
-            self.screen_manager.get_screen("live_exe").trigger("startup", self.params)
+            self.screen_manager.get_screen("live_exe").trigger("startup")
         else:
             raise ValueError("Invalid previous screen.")
         self.prev_screen = ""
@@ -226,5 +223,5 @@ class RegionSelectWindow(CustomQWidget):
         self.extracted_label.clear()
         self.click_points = []
         self.confirm_txt.setText("")
-        self.logger.info("Environment cleared.")
         self.screen_manager.restore_screen_size()
+        self.logger.info("Environment cleared.")

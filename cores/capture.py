@@ -14,14 +14,15 @@ class FrameCapture:
         self.logger = logging.getLogger("__main__").getChild(__name__)
 
         self.cap = cv2.VideoCapture(device_num)
-        self.frame_count = 0
+        if not self.cap.isOpened():
+            raise Exception("Failed to open camera.")
 
         # カメラに接続するまで待機
         time.sleep(0.1)
 
     def show_camera_feed(self) -> None:
 
-        while cv2.waitKey(1) & 0xFF != ord("y"):
+        while cv2.waitKey(10) & 0xFF != ord("y"):
             frame = self.capture()
             if frame is None:
                 break

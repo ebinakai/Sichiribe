@@ -1,10 +1,10 @@
-import os
 from typing import Union, List, Optional, Tuple
 import cv2
 import logging
 import numpy as np
 from datetime import timedelta
 from cores.common import clear_directory
+from pathlib import Path
 
 
 class FrameEditor:
@@ -45,7 +45,7 @@ class FrameEditor:
         self.click_points = click_points
 
         if save_frame:
-            os.makedirs(out_dir, exist_ok=True)
+            Path(out_dir).mkdir(parents=True, exist_ok=True)
             clear_directory(out_dir)
 
         cap = cv2.VideoCapture(video_path)
@@ -89,10 +89,8 @@ class FrameEditor:
                     break
 
                 if save_frame:
-                    frame_filename = os.path.join(
-                        out_dir, f"frame_{frame_count:06d}.jpg"
-                    )
-                    cv2.imwrite(frame_filename, frame)
+                    frame_filename = Path(out_dir) / f"frame_{frame_count:06d}.jpg"
+                    cv2.imwrite(str(frame_filename), frame)
                     saved_frame_count += 1
                     self.logger.debug(f"Frame saved to '{frame_filename}'.")
                 frames.append(frame)
@@ -174,7 +172,7 @@ class FrameEditor:
             extract_image = self.crop(img_clone, self.click_points)
 
             # デバッグ情報描画
-            img_clone, extract_image = self.draw_debug_info(
+            img_clone, extract_image = self.draw_region_outline(
                 img_clone,
                 extract_image,
                 self.click_points,
@@ -203,10 +201,10 @@ class FrameEditor:
                 self.click_points = self.order_points(self.click_points)
 
     def order_points(self, click_points: List) -> List:
-        _points = np.array(click_points)
+        points_ = np.array(click_points)
 
         # x座標で昇順にソート
-        sorted_by_x = _points[np.argsort(_points[:, 0])]
+        sorted_by_x = points_[np.argsort(points_[:, 0])]
 
         # 左側の2点と右側の2点に分ける
         left_points = sorted_by_x[:2]
@@ -228,23 +226,26 @@ class FrameEditor:
         ]
 
     # 選択領域の可視化
-    def draw_debug_info(
+    def draw_region_outline(
         self,
         image: np.ndarray,
         extract_image: Optional[np.ndarray],
-        click_points_: List[np.ndarray],
+        click_points: List,
     ) -> Tuple[np.ndarray, Optional[np.ndarray]]:
-        for click_point in click_points_:
+        for click_point in click_points:
             cv2.circle(image, (click_point[0], click_point[1]), 5, (0, 255, 0), -1)
-        if len(click_points_) >= 3:
-            cv2.drawContours(image, [np.array(click_points_)], -1, (0, 255, 0), 2)
-        if extract_image is not None:
-            for index in range(self.num_digits):
-                temp_x = int((extract_image.shape[1] / self.num_digits) * index)
-                temp_y = extract_image.shape[0]
+        if len(click_points) >= 3:
+            cv2.drawContours(image, [click_points], -1, (0, 255, 0), 2)  # type: ignore
 
-                if index > 0:
-                    cv2.line(
-                        extract_image, (temp_x, 0), (temp_x, temp_y), (0, 255, 0), 1
-                    )
+        if extract_image is not None:
+            extract_image = self.draw_separation_lines(extract_image)
         return image, extract_image
+
+    def draw_separation_lines(self, extract_image: np.ndarray) -> np.ndarray:
+        for index in range(self.num_digits):
+            temp_x = int((extract_image.shape[1] / self.num_digits) * index)
+            temp_y = extract_image.shape[0]
+
+            if index > 0:
+                cv2.line(extract_image, (temp_x, 0), (temp_x, temp_y), (0, 255, 0), 1)
+        return extract_image

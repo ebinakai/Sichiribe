@@ -6,33 +6,33 @@
 """
 
 from PySide6.QtCore import Signal, QThread
+from gui.utils.data_store import DataStore
 from cores.frame_editor import FrameEditor
-import os
+from pathlib import Path
 import logging
 
 
 class FrameDivideWorker(QThread):
     end = Signal(list, list)
 
-    def __init__(self, params: dict) -> None:
+    def __init__(self) -> None:
         super().__init__()
-        self.video_path = params["video_path"]
-        self.video_skip_sec = params["video_skip_sec"]
-        self.save_frame = params["save_frame"]
-        self.out_dir = os.path.join(params["out_dir"], "frames")
-        self.click_points = params["click_points"]
+        self.data_store = DataStore.get_instance()
+        self.out_dir = str(Path(self.data_store.get("out_dir")) / "frames")
         self.fe = FrameEditor(
-            params["sampling_sec"], params["num_frames"], params["num_digits"]
+            self.data_store.get("sampling_sec"),
+            self.data_store.get("num_frames"),
+            self.data_store.get("num_digits"),
         )
         self.logger = logging.getLogger("__main__").getChild(__name__)
 
     def run(self) -> None:
         frames = self.fe.frame_devide(
-            self.video_path,
-            self.video_skip_sec,
-            self.save_frame,
+            self.data_store.get("video_path"),
+            self.data_store.get("video_skip_sec"),
+            self.data_store.get("save_frame"),
             self.out_dir,
-            click_points=self.click_points,
+            click_points=self.data_store.get("click_points"),
         )
 
         timestamps = self.fe.generate_timestamp(len(frames))

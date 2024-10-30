@@ -90,7 +90,7 @@ curl -L -o model/model_100x100.tflite https://github.com/EbinaKai/Sichiribe/rele
 | `cores/cnn.py` | CNNモデルを用いて画像から数字を取得するプログラムのコア部分 |
 | `cores/cnn.py` | CNNモデルをTensorflowのフルバージョン(.kerasモデル)で動かす場合 |
 | `cores/cnn_lite.py` | CNNモデルをtflite-runtime(.tfliteモデル)で動かす場合 |
-| `cores/exporter.py` | 取得した結果を任意の形式で出力・保存する機能 |
+| `cores/export_utils.py` | 取得した結果を任意の形式で出力・保存する機能 |
 | `train/train.py` | CNNモデルを学習させるプログラム |
 | `train/conv_keras2tf.py` | Kerasモデルをtflite形式に変換するプログラム |
 | `gui/utils/common.py` | GUI用の汎用的な機能の関数詰め合わせ |
@@ -122,10 +122,10 @@ CNNモデルを学習させるためには以下のプログラムを実行す�
 
 ```bash
 # 学習(ファイル内のパラメーターを調整してから実行)
-python cnn/train.py
+python train/train.py
 
 # 軽量モデルに変換
-python cnn/conv_keras2tf.py
+python train/conv_keras2tf.py
 ```
 
 ## 参考資料

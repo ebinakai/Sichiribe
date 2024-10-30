@@ -5,12 +5,12 @@
 
 from cores.cnn import cnn_init
 import cv2
-import os
 from datetime import timedelta
 import time
 from pathlib import Path
-from cores.common import get_now_str, load_setting
-from cores.exporter import Exporter, get_supported_formats
+from cores.common import get_now_str
+from cores.settings_manager import SettingsManager
+from cores.export_utils import get_supported_formats, export, build_data_records
 from cores.frame_editor import FrameEditor
 from cores.capture import FrameCapture
 import argparse
@@ -27,7 +27,7 @@ logging.basicConfig(level=logging.DEBUG, format=formatter)
 logger = logging.getLogger("__main__").getChild(__name__)
 
 FILE = Path(__file__).resolve()
-ROOT = FILE.parents[0]
+ROOT = FILE.parent
 
 
 def get_args() -> argparse.Namespace:
@@ -73,36 +73,32 @@ def get_args() -> argparse.Namespace:
     return args
 
 
-def main(params: Dict[str, Any]) -> None:
+def main(settings: Dict[str, Any]) -> None:
 
-    if params["save_frame"]:
-        now = get_now_str()
-        out_dir = ROOT / f"frames_{now}"
-        os.makedirs(out_dir)
+    out_dir = ROOT / "results" / get_now_str()
+    if settings["save_frame"]:
+        (out_dir / "frames").mkdir(parents=True, exist_ok=True)
 
-    fc = FrameCapture(device_num=params["device_num"])
-    fe = FrameEditor(num_digits=params["num_digits"])
-    dt = cnn_init(num_digits=params["num_digits"])
-    ep = Exporter(out_dir="results")
+    frame_capture = FrameCapture(device_num=settings["device_num"])
+    frame_editor = FrameEditor(num_digits=settings["num_digits"])
+    detector = cnn_init(num_digits=settings["num_digits"])
 
-    if "click_points" in params and len(params["click_points"]) == 4:
-        click_points = params["click_points"]
-        params["is_save_setting"] = False
+    if "click_points" in settings and len(settings["click_points"]) == 4:
+        click_points = settings["click_points"]
 
     else:
         # 画角を調整するためにカメラフィードを表示
-        fc.show_camera_feed()
+        frame_capture.show_camera_feed()
 
-        frame = fc.capture()
+        frame = frame_capture.capture()
         if frame is None:
             logger.error("Failed to capture the frame.")
             return
-        click_points = fe.region_select(frame)
-        params["is_save_setting"] = True
-    params["click_points"] = click_points
+        click_points = frame_editor.region_select(frame)
+    settings["click_points"] = click_points
 
     start_time = time.time()
-    end_time = time.time() + params["total_sampling_sec"]
+    end_time = start_time + settings["total_sampling_sec"]
     frame_count = 0
     timestamps = []
     results = []
@@ -111,25 +107,25 @@ def main(params: Dict[str, Any]) -> None:
         temp_time = time.time()
         frames = []
 
-        for i in range(params["num_frames"]):
-            frame = fc.capture()
+        for i in range(settings["num_frames"]):
+            frame = frame_capture.capture()
 
             if frame is None:
                 continue
 
-            cropped_frame = fe.crop(frame, click_points)
+            cropped_frame = frame_editor.crop(frame, click_points)
             if cropped_frame is None:
                 continue
             frames.append(cropped_frame)
 
-            if params["save_frame"]:
-                frame_filename = os.path.join(out_dir, f"frame_{frame_count}.jpg")
-                cv2.imwrite(frame_filename, cropped_frame)
+            if settings["save_frame"]:
+                frame_filename = out_dir / f"frame_{frame_count}.jpg"
+                cv2.imwrite(str(frame_filename), cropped_frame)
                 logger.debug(f"Frame {frame_count} has been saved as: {frame_filename}")
                 frame_count += 1
 
         if len(frames) != 0:
-            value, failed_rate = dt.predict(frames)
+            value, failed_rate = detector.predict(frames)
             logger.info(f"Detected: {value}, Failed rate: {failed_rate}")
             results.append(value)
             failed_rates.append(failed_rate)
@@ -140,40 +136,49 @@ def main(params: Dict[str, Any]) -> None:
             timestamps.append(str(timestamp))
 
         elapsed_time = time.time() - temp_time
-        time_to_wait = max(0, params["sampling_sec"] - elapsed_time)
+        time_to_wait = max(0, settings["sampling_sec"] - elapsed_time)
 
         if time_to_wait > 0:
             logger.debug(f"Waiting for {time_to_wait:.2f}s")
             time.sleep(time_to_wait)
 
-    fc.release()
+    frame_capture.release()
 
-    data = ep.format(results, failed_rates, timestamps)
-    ep.export(data, method=params["format"], prefix="result")
-    if params["is_save_setting"]:
-        ep.export(params, method="json", prefix="params")
+    data = build_data_records(
+        {
+            "results": results,
+            "failed_rates": failed_rates,
+            "timestamps": timestamps,
+        }
+    )
+    settings = settings_manager.remove_non_require_keys(settings)
+    export(data, format=settings["format"], out_dir=out_dir, prefix="result")
+    export(settings, format="json", out_dir=out_dir, prefix="settings")
 
 
 if __name__ == "__main__":
 
     args = get_args()
-    params = vars(args)
+    settings = vars(args)
 
-    if params.pop("debug"):
+    if settings.pop("debug"):
         logger.setLevel(logging.DEBUG)
     else:
         logger.setLevel(logging.INFO)
     logger.debug("args: %s", args)
 
-    params["total_sampling_sec"] = params.pop("total_sampling_min") * 60
+    settings["total_sampling_sec"] = settings.pop("total_sampling_min") * 60
 
-    setting_path = params.pop("setting")
+    settings_manager = SettingsManager("live")
+
+    setting_path = settings.pop("setting")
     if setting_path is not None:
-        required_keys = set(params.keys())
-        required_keys.add("click_points")
-        params = load_setting(setting_path, required_keys)
+        settings = settings_manager.load(setting_path)
+    else:
+        settings["click_points"] = []
 
-    logger.debug("params: %s", params)
-    main(params)
+    settings_manager.validate(settings)
+    logger.debug("settings: %s", settings)
+    main(settings)
 
     logger.info("All Done!")

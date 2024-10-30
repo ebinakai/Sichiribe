@@ -54,3 +54,6 @@ class MenuWindow(CustomQWidget):
         main_layout.addLayout(button_layout)
         main_layout.addStretch()
         main_layout.addLayout(footer_layout)
+
+    def display(self):
+        self.data_store.clear()

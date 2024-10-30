@@ -48,7 +48,7 @@ class TestFrameEditor:
 
         assert isinstance(frames, list)
         assert isinstance(frames[0][0], np.ndarray)
-        assert mock_cap.release.called_once()
+        mock_cap.release.assert_called_once()
 
     @patch("cv2.VideoCapture")
     def test_frame_devide_single_frame(
@@ -65,7 +65,7 @@ class TestFrameEditor:
         )
 
         assert isinstance(frame, np.ndarray)
-        assert mock_cap.release.called_once()
+        mock_cap.release.assert_called_once()
 
     def test_generate_timestamp(self, frame_editor):
         n = 5
@@ -98,10 +98,10 @@ class TestFrameEditor:
         result = frame_editor.crop(sample_frame, invalid_points)
         assert result is None
 
-    def test_draw_debug_info(self, frame_editor, sample_frame, sample_click_points):
+    def test_draw_region_outline(self, frame_editor, sample_frame, sample_click_points):
         extract_frame = np.zeros((100, 400, 3), dtype=np.uint8)
 
-        frame_edited, extract_edited = frame_editor.draw_debug_info(
+        frame_edited, extract_edited = frame_editor.draw_region_outline(
             sample_frame, extract_frame, sample_click_points
         )
 
@@ -111,6 +111,7 @@ class TestFrameEditor:
         assert extract_edited.shape == extract_frame.shape
 
     @pytest.mark.timeout(0.5)
+    @patch("cv2.setMouseCallback")
     @patch("cv2.namedWindow")
     @patch("cv2.imshow")
     @patch("cv2.waitKey")
@@ -121,6 +122,7 @@ class TestFrameEditor:
         mock_wait_key,
         mock_imshow,
         mock_name_window,
+        mock_set_mouse_callback,
         frame_editor,
         sample_frame,
         sample_click_points,
@@ -131,7 +133,7 @@ class TestFrameEditor:
 
         assert isinstance(result, list)
         assert len(result) == 4
-        assert mock_destroy.called_once()
+        mock_destroy.assert_called_once()
 
     def test_mouse_callback(self, frame_editor):
         frame_editor.mouse_callback(cv2.EVENT_LBUTTONDOWN, 100, 100, None, None)

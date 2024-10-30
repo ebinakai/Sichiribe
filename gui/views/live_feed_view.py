@@ -66,7 +66,7 @@ class LiveFeedWindow(CustomQWidget):
 
     def trigger(self, action, *args):
         if action == "startup":
-            self.startup(*args)
+            self.startup()
         else:
             raise ValueError(f"Invalid action: {action}")
 
@@ -80,7 +80,7 @@ class LiveFeedWindow(CustomQWidget):
         if self.worker is not None:
             self.worker.stop()  # ワーカーに停止を指示
 
-    def startup(self, params: dict) -> None:
+    def startup(self) -> None:
         self.logger.info("Starting LiveFeedWindow.")
         self.feed_label.setText("読込中...")
         self.screen_manager.show_screen("live_feed")
@@ -89,9 +89,9 @@ class LiveFeedWindow(CustomQWidget):
         # 初期化
         self.results = []
         self.failed_rates = []
-        _p, _s = self.screen_manager.save_screen_size()
+        p_, s_ = self.screen_manager.save_screen_size()
 
-        # 表示画像サイズを計算
+        # 表示画像サイズを計算 (できるだけ小さな画像で処理)
         window_rect = self.geometry()
         self.target_width = window_rect.width() * 0.8
         self.target_height = window_rect.height() * 0.8
@@ -100,10 +100,7 @@ class LiveFeedWindow(CustomQWidget):
             % (window_rect.width(), window_rect.height())
         )
 
-        self.params = params
-        self.worker = LiveFeedWorker(
-            params, self.target_width, self.target_height
-        )  # できるだけ小さな画像で処理
+        self.worker = LiveFeedWorker(self.target_width, self.target_height)
         self.worker.cap_size.connect(self.recieve_cap_size)
         self.worker.progress.connect(self.show_feed)
         self.worker.end.connect(self.feed_finished)
@@ -113,7 +110,7 @@ class LiveFeedWindow(CustomQWidget):
         self.logger.info("Feed started.")
 
     def recieve_cap_size(self, cap_size: List[int]) -> None:
-        self.params["cap_size"] = cap_size
+        self.data_store.set("cap_size", cap_size)
         self.logger.debug("Capture size: %d x %d" % (cap_size[0], cap_size[1]))
 
     def show_feed(self, frame: np.ndarray) -> None:
@@ -123,13 +120,12 @@ class LiveFeedWindow(CustomQWidget):
 
     def feed_finished(self, first_frame: np.ndarray) -> None:
         self.logger.info("Feed finished.")
-        self.params["first_frame"] = first_frame
-        params = self.params
+        self.data_store.set("first_frame", first_frame)
         self.clear_env()
         QTimer.singleShot(
             10,
             lambda: self.screen_manager.get_screen("region_select").trigger(
-                "startup", params, "live_feed"
+                "startup", "live_feed"
             ),
         )
 

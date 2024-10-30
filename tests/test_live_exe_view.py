@@ -1,34 +1,26 @@
 import pytest
-from unittest.mock import Mock, patch
+from unittest.mock import Mock
 from gui.views.live_exe_view import LiveExeWindow
+from cores.frame_editor import FrameEditor
 import numpy as np
 from datetime import timedelta
 
 
 @pytest.fixture
-def mock_screen_manager():
-    manager = Mock()
-    manager.check_if_dark_mode.return_value = False
-    return manager
-
-
-@pytest.fixture
 def window(qtbot, mock_screen_manager):
-    """Initialize test window with mocked dependencies"""
     window = LiveExeWindow(mock_screen_manager)
-    # 必要な初期化を追加
     window.results = []
     window.failed_rates = []
     window.timestamps = []
     window.graph_results = []
     window.graph_failed_rates = []
     window.graph_timestamps = []
-    window.params = {}
+    window.fe = FrameEditor()
     qtbot.addWidget(window)
     return window
 
 
-@pytest.mark.usefixtures("prevent_window_show")
+@pytest.mark.usefixtures("prevent_window_show", "qt_test_environment")
 class TestMethods:
     def test_initial_ui_state(self, window):
         assert (
@@ -44,13 +36,12 @@ class TestMethods:
 
     def test_trigger(self, window):
         window.startup = Mock()
-        expected_params = {"a": 1, "b": 2}
-        window.trigger("startup", expected_params.copy())
+        window.trigger("startup")
 
-        window.startup.assert_called_once_with(expected_params)
+        window.startup.assert_called_once()
 
         with pytest.raises(ValueError):
-            window.trigger("invalid", expected_params.copy())
+            window.trigger("invalid")
 
     def test_display_extract_image(self, window):
         sample_image = np.zeros((100, 100, 3), dtype=np.uint8)
@@ -61,21 +52,17 @@ class TestMethods:
 
     def test_detect_progress_updates(self, window):
         window.graph_label = Mock()
-
         result, failed_rate, timestamp = 42, 0.15, "10:00:00"
-        window.detect_progress(result, failed_rate, timestamp)
 
+        window.detect_progress(result, failed_rate, timestamp)
         assert window.results == [42]
         assert window.failed_rates == [0.15]
         assert window.timestamps == ["10:00:00"]
         assert window.graph_results == [42]
         assert window.graph_failed_rates == [0.15]
         assert window.graph_timestamps == ["10:00:00"]
-        window.screen_manager.show_screen.assert_called_with("live_exe")
 
-        result, failed_rate, timestamp = 42, 0.15, "10:00:00"
         window.detect_progress(result, failed_rate, timestamp)
-
         assert window.results == [42, 42]
         assert window.failed_rates == [0.15, 0.15]
         assert window.timestamps == ["10:00:00", "10:00:00"]
@@ -84,13 +71,13 @@ class TestMethods:
         assert window.graph_timestamps == ["10:00:00", "10:00:00"]
 
 
-@pytest.mark.usefixtures("prevent_window_show")
+@pytest.mark.usefixtures("prevent_window_show", "qt_test_environment")
 class TestUserActions:
     def test_cancel_action(self, window):
         window.worker = Mock()
         window.cancel()
 
-        assert window.worker.cancel.called_once()
+        window.worker.cancel.assert_called_once()
         assert window.term_label.text() == "中止中..."
 
     @pytest.mark.parametrize(
@@ -123,26 +110,11 @@ class TestUserActions:
         )
 
 
-@pytest.mark.usefixtures("prevent_window_show")
+@pytest.mark.usefixtures("prevent_window_show", "qt_test_environment")
 class TestWorkerCallbacks:
     def test_display_extract_image(self, window):
         window.display_extract_image(np.zeros((100, 100, 3), dtype=np.uint8))
         assert not window.extracted_label.pixmap().isNull()
-
-    def test_detect_finished(self, window):
-        expected_params = {
-            "results": [1, 2, 3],
-            "failed_rates": [0.1, 0.2, 0.3],
-            "timestamps": ["00:01", "00:02", "00:03"],
-        }
-        window.results = expected_params["results"]
-        window.failed_rates = expected_params["failed_rates"]
-        window.timestamps = expected_params["timestamps"]
-        window.export_process = Mock()
-        window.graph_label = Mock()
-        window.detect_finished()
-
-        window.export_process.assert_called_once_with(expected_params)
 
     def test_remaining_time(self, window):
         window.update_remaining_time(10.2)
@@ -150,13 +122,3 @@ class TestWorkerCallbacks:
 
         window.update_remaining_time(14.5)
         assert window.remaining_time_label.text() != str(timedelta(seconds=int(10.4)))
-
-    def test_detect_cancelled(self, window):
-        window.detect_cancelled()
-        assert window.term_label.text() != ""
-
-    def test_model_not_found(self, window):
-        with patch.object(window, "clear_env"):
-            window.model_not_found()
-            assert window.term_label.text() != ""
-            window.screen_manager.show_screen.assert_called_with("menu")

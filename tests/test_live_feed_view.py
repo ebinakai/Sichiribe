@@ -1,5 +1,5 @@
 import pytest
-from unittest.mock import Mock, patch, ANY
+from unittest.mock import Mock, patch
 from gui.views.live_feed_view import LiveFeedWindow
 from PySide6.QtCore import Qt
 from PySide6.QtGui import QPixmap
@@ -7,46 +7,41 @@ import numpy as np
 
 
 @pytest.fixture
-def window(qtbot):
-    screen_manager = Mock()
-    window = LiveFeedWindow(screen_manager)
-    window.params = {}
+def window(qtbot, mock_screen_manager):
+    window = LiveFeedWindow(mock_screen_manager)
     qtbot.addWidget(window)
     window.show()
     return window
 
 
-@pytest.mark.usefixtures("prevent_window_show")
+@pytest.mark.usefixtures("prevent_window_show", "qt_test_environment")
 class TestLiveFeedWindow:
     def test_initial_ui_state(self, window):
         assert window.feed_label.text() == ""
 
     def test_trigger(self, window):
         window.startup = Mock()
-        expected_params = {"a": 1, "b": 2}
-        window.trigger("startup", expected_params.copy())
+        window.trigger("startup")
 
-        window.startup.assert_called_once_with(expected_params)
+        window.startup.assert_called_once_with()
 
         with pytest.raises(ValueError):
-            window.trigger("invalid", expected_params.copy())
+            window.trigger("invalid")
 
     @patch("gui.views.live_feed_view.LiveFeedWorker")
     def test_startup(self, mock_worker_class, window):
         mock_worker_instance = Mock()
         mock_worker_class.return_value = mock_worker_instance
         window.screen_manager.save_screen_size.return_value = (1920, 1080)
-        test_params = {"a": 0, "b": 2}
 
-        window.startup(test_params)
+        window.startup()
 
-        assert window.params == test_params
         assert window.results == []
         assert window.failed_rates == []
         assert window.feed_label.text() != ""
-        assert window.screen_manager.save_screen_size.called_once()
+        window.screen_manager.save_screen_size.assert_called_once()
         window.screen_manager.show_screen.assert_called_once_with("live_feed")
-        mock_worker_class.assert_called_once_with(test_params, ANY, ANY)
+        mock_worker_class.assert_called_once()
         mock_worker_instance.cap_size.connect.assert_called_once_with(
             window.recieve_cap_size
         )
@@ -56,7 +51,7 @@ class TestLiveFeedWindow:
             window.feed_cancelled
         )
         mock_worker_instance.error.connect.assert_called_once_with(window.feed_error)
-        assert mock_worker_instance.start.called_once()
+        mock_worker_instance.start.assert_called_once()
 
     def test_back_button(self, window, qtbot):
         window.worker = Mock()

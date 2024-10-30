@@ -31,8 +31,8 @@ class ReplayThresholdWindow(CustomQWidget):
         self.logger = logging.getLogger("__main__").getChild(__name__)
         self.screen_manager = screen_manager
         self.threshold: Optional[int]
-        self.fe = FrameEditor()
         self.dt = Detector(4)
+        self.first_frame: Optional[np.ndarray] = None
 
         super().__init__()
         screen_manager.add_screen("replay_threshold", self, "二値化しきい値設定")
@@ -53,11 +53,13 @@ class ReplayThresholdWindow(CustomQWidget):
 
         slider_layout = QHBoxLayout()
         self.binarize_th = QSlider()
+        self.binarize_th.setValue(0)
         self.binarize_th.setFixedWidth(200)
         self.binarize_th.setRange(0, 255)
         self.binarize_th.setOrientation(Qt.Orientation.Horizontal)
         self.binarize_th.valueChanged.connect(self.update_binarize_th)
         self.binarize_th_label = QLabel()
+        self.binarize_th_label.setText("自動設定")
         slider_layout.addWidget(self.binarize_th)
         slider_layout.addWidget(self.binarize_th_label)
         form_layout.addRow("画像二値化しきい値：", slider_layout)
@@ -79,21 +81,20 @@ class ReplayThresholdWindow(CustomQWidget):
 
     def trigger(self, action, *args):
         if action == "startup":
-            self.startup(*args)
+            self.startup()
         else:
             raise ValueError("Invalid action.")
 
-    def startup(self, params: dict) -> None:
-        self.logger.info("Starting ReplayThresholdWindow.")
+    def startup(self) -> None:
         self.screen_manager.show_screen("replay_threshold")
+        self.fe = FrameEditor(self.data_store.get("num_digits"))
 
-        _p, _s = self.screen_manager.save_screen_size()
+        p_, s_ = self.screen_manager.save_screen_size()
 
-        self.params = params
         self.threshold = None
-        self.first_frame = self.fe.crop(params["first_frame"], params["click_points"])
-        self.binarize_th.setValue(0)
-        self.binarize_th_label.setText("自動設定")
+        self.first_frame = self.fe.crop(
+            self.data_store.get("first_frame"), self.data_store.get("click_points")
+        )
         self.update_binarize_th(0)
 
     def update_binarize_th(self, value: int) -> None:
@@ -112,17 +113,18 @@ class ReplayThresholdWindow(CustomQWidget):
         self.display_extract_image(image_bin)
 
     def display_extract_image(self, image: np.ndarray) -> None:
+        image = self.fe.draw_separation_lines(image)
         q_image = convert_cv_to_qimage(image)
         self.extracted_label.setPixmap(QPixmap.fromImage(q_image))
 
     def next(self) -> None:
         self.logger.info("Set threshold finished.")
-        self.params["threshold"] = self.threshold
+        self.data_store.set("threshold", self.threshold)
         self.clear_env()
-
-        self.screen_manager.get_screen("replay_exe").trigger("continue", self.params)
+        self.screen_manager.get_screen("replay_exe").trigger("continue")
 
     def clear_env(self) -> None:
         self.extracted_label.clear()
+        self.binarize_th.setValue(0)
         self.logger.info("Environment cleared.")
         self.screen_manager.restore_screen_size()

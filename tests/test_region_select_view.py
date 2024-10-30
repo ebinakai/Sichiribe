@@ -1,17 +1,11 @@
 import pytest
-from unittest.mock import Mock, MagicMock, patch
+from unittest.mock import Mock, patch
 import numpy as np
 from PySide6.QtCore import QPoint, QSize
 from PySide6.QtGui import QMouseEvent
 from gui.views.region_select_view import RegionSelectWindow
+from gui.utils.data_store import DataStore
 from tests.test_helper import create_mouse_event
-
-
-@pytest.fixture
-def mock_screen_manager():
-    manager = Mock()
-    manager.save_screen_size.return_value = (MagicMock(), None)
-    return manager
 
 
 @pytest.fixture
@@ -20,7 +14,7 @@ def mock_frame_editor():
         editor = mock.return_value
         editor.order_points.return_value = [[0, 0], [100, 0], [100, 100], [0, 100]]
         editor.crop.return_value = np.zeros((100, 100, 3), dtype=np.uint8)
-        editor.draw_debug_info.return_value = (
+        editor.draw_region_outline.return_value = (
             np.zeros((200, 200, 3), dtype=np.uint8),
             np.zeros((100, 100, 3), dtype=np.uint8),
         )
@@ -41,8 +35,12 @@ def window(qtbot, mock_screen_manager, mock_frame_editor):
         return window
 
 
-@pytest.mark.usefixtures("prevent_window_show")
+@pytest.mark.usefixtures("prevent_window_show", "qt_test_environment")
 class TestSelectRegionWindow:
+    def setup_method(self):
+        self.data_store = DataStore.get_instance()
+        self.data_store.clear()
+
     def test_initial_ui_state(self, window):
         assert len(window.click_points) == 0
         assert window.main_label is not None
@@ -54,25 +52,19 @@ class TestSelectRegionWindow:
 
     def test_trigger(self, window):
         window.startup = Mock()
-        expected_params = {"a": 1, "b": 2}
-        window.trigger("startup", expected_params.copy())
-
-        window.startup.assert_called_once_with(expected_params)
+        window.trigger("startup")
 
         with pytest.raises(ValueError):
-            window.trigger("invalid", expected_params.copy())
+            window.trigger("invalid")
 
     def test_startup(self, window):
-        params = {
-            "num_digits": 2,
-            "first_frame": np.zeros((480, 640, 3), dtype=np.uint8),
-        }
-        window.startup(params, "replay_exe")
+        self.data_store.set("num_digits", 2)
+        self.data_store.set("first_frame", np.zeros((480, 640, 3), dtype=np.uint8))
+        window.startup("replay_exe")
 
-        assert window.params == params
         assert window.prev_screen == "replay_exe"
         assert window.fe is not None
-        assert window.screen_manager.save_screen_size.called_once()
+        window.screen_manager.save_screen_size.assert_called_once()
         window.screen_manager.show_screen.assert_called_with("region_select")
 
     def test_label_clicked_add_points(self, window):
@@ -87,7 +79,7 @@ class TestSelectRegionWindow:
             window.label_clicked(event)
 
         assert len(window.click_points) == 4
-        assert window.fe.order_points.called_once()
+        window.fe.order_points.assert_called_once()
 
     def test_finish_select_with_incomplete_points(self, window):
         window.click_points = [(50, 50)]
@@ -96,25 +88,23 @@ class TestSelectRegionWindow:
         assert window.confirm_txt.text() != ""
 
     def test_finish_select_success(self, window):
-        window.params = {"num_digits": 4}
+        self.data_store.set("num_digits", 4)
         window.prev_screen = "replay_exe"
         window.resize_scale = 1.0
         window.click_points = [(0, 0), (100, 0), (100, 100), (0, 100)]
         window.finish_select()
 
-        assert "click_points" in window.params
-        assert len(window.params["click_points"]) == 4
+        assert self.data_store.get("click_points")
+        assert len(self.data_store.get("click_points")) == 4
 
     def test_cancel_select(self, window):
         window.prev_screen = "replay_exe"
-        window.params = {"some": "data"}
 
         window.cancel_select()
         assert window.click_points == []
         assert window.confirm_txt.text() == ""
 
     def test_switch_back(self, window):
-        window.params = {"some": "data"}
         window.prev_screen = "live_feed"
         window.switch_back()
         window.screen_manager.get_screen.assert_called_with("live_feed")
@@ -124,7 +114,6 @@ class TestSelectRegionWindow:
         window.screen_manager.show_screen.assert_called_with("replay_setting")
 
     def test_switch_next(self, window):
-        window.params = {"some": "data"}
         window.prev_screen = "live_feed"
         window.switch_next()
         window.screen_manager.get_screen.assert_called_with("live_exe")

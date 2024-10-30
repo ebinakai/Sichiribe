@@ -1,19 +1,17 @@
 import pytest
 from PySide6.QtCore import Qt
-from unittest.mock import MagicMock
 from gui.views.menu_view import MenuWindow
 
 
 @pytest.fixture
-def window(qtbot):
-    screen_manager = MagicMock()
-    window = MenuWindow(screen_manager)
+def window(qtbot, mock_screen_manager):
+    window = MenuWindow(mock_screen_manager)
     qtbot.addWidget(window)
     window.show()
     return window
 
 
-@pytest.mark.usefixtures("prevent_window_show")
+@pytest.mark.usefixtures("prevent_window_show", "qt_test_environment")
 class TestMenuWindow:
     def test_initial_ui_state(self, window):
         assert window.live_button.text() is not None

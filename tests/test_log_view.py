@@ -1,18 +1,16 @@
 import pytest
-from unittest.mock import Mock
 from gui.views.log_view import LogWindow
 
 
 @pytest.fixture
-def window(qtbot):
-    screen_manager = Mock()
-    window = LogWindow(screen_manager)
+def window(qtbot, mock_screen_manager):
+    window = LogWindow(mock_screen_manager)
     qtbot.addWidget(window)
     window.show()
     return window
 
 
-@pytest.mark.usefixtures("prevent_window_show")
+@pytest.mark.usefixtures("prevent_window_show", "qt_test_environment")
 class TestLogWindow:
     def test_initial_ui_state(self, window):
         assert window.log_display.toPlainText() == ""
