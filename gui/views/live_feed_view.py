@@ -12,7 +12,6 @@ from PySide6.QtGui import QPixmap
 from gui.widgets.custom_qwidget import CustomQWidget
 from gui.utils.screen_manager import ScreenManager
 from gui.utils.common import convert_cv_to_qimage, resize_image
-from gui.utils.data_store import DataStore
 from gui.workers.live_feed_worker import LiveFeedWorker
 import logging
 from typing import List
@@ -23,7 +22,6 @@ class LiveFeedWindow(CustomQWidget):
     def __init__(self, screen_manager: ScreenManager) -> None:
         self.logger = logging.getLogger("__main__").getChild(__name__)
         self.screen_manager = screen_manager
-        self.data_store = DataStore.get_instance()
         self.results: List[int]
         self.failed_rates: List[float]
 
@@ -91,7 +89,7 @@ class LiveFeedWindow(CustomQWidget):
         # 初期化
         self.results = []
         self.failed_rates = []
-        _p, _s = self.screen_manager.save_screen_size()
+        p_, s_ = self.screen_manager.save_screen_size()
 
         # 表示画像サイズを計算 (できるだけ小さな画像で処理)
         window_rect = self.geometry()

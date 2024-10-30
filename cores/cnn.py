@@ -55,11 +55,11 @@ class CNNCore(Detector):
         binarize_th: Optional[int] = None,
     ) -> tuple[int, float]:
 
-        _images = images if isinstance(images, list) else [images]
+        images_ = images if isinstance(images, list) else [images]
 
         results = np.zeros((0, self.num_digits))
 
-        for image in _images:
+        for image in images_:
 
             image_gs = self.load_image(image)
 

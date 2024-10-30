@@ -4,9 +4,11 @@
 """
 
 from cores.cnn import cnn_init
-from cores.common import load_setting
+from cores.common import get_now_str
+from cores.settings_manager import SettingsManager
 from cores.exporter import Exporter, get_supported_formats
 from cores.frame_editor import FrameEditor
+from pathlib import Path
 import argparse
 import logging
 import warnings
@@ -18,6 +20,9 @@ warnings.filterwarnings("ignore", category=UserWarning, module="cv2")
 formatter = "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
 logging.basicConfig(level=logging.DEBUG, format=formatter)
 logger = logging.getLogger("__main__").getChild(__name__)
+
+FILE = Path(__file__).resolve()
+ROOT = FILE.parent
 
 
 def get_args() -> argparse.Namespace:
@@ -63,61 +68,69 @@ def get_args() -> argparse.Namespace:
     return args
 
 
-def main(params) -> None:
-    fe = FrameEditor(params["sampling_sec"], params["num_frames"], params["num_digits"])
-    dt = cnn_init(num_digits=params["num_digits"])
-    ep = Exporter(out_dir="results")
+def main(settings) -> None:
+    frame_editor = FrameEditor(
+        settings["sampling_sec"], settings["num_frames"], settings["num_digits"]
+    )
+    detector = cnn_init(num_digits=settings["num_digits"])
 
-    if "click_points" in params and len(params["click_points"]) == 4:
-        click_points = params["click_points"]
-        params["is_save_setting"] = False
+    out_dir = ROOT / "results" / get_now_str() / f"frames"
+    exporter = Exporter(out_dir=str(out_dir))
+
+    if "click_points" in settings and len(settings["click_points"]) == 4:
+        click_points = settings["click_points"]
     else:
         click_points = []
-        params["is_save_setting"] = True
 
-    sampled_frames = fe.frame_devide(
-        video_path=params["video_path"],
-        video_skip_sec=params["video_skip_sec"],
-        save_frame=params["save_frame"],
+    sampled_frames = frame_editor.frame_devide(
+        video_path=settings["video_path"],
+        video_skip_sec=settings["video_skip_sec"],
+        save_frame=settings["save_frame"],
+        out_dir=str(out_dir / "frames"),
         click_points=click_points,
     )
-    params["click_points"] = fe.get_click_points()
-    timestamps = fe.generate_timestamp(len(sampled_frames))
+    settings["click_points"] = frame_editor.get_click_points()
+    timestamps = frame_editor.generate_timestamp(len(sampled_frames))
 
     results = []
     failed_rates = []
     for frames in sampled_frames:
-        result, failed_rate = dt.predict(frames)
+        result, failed_rate = detector.predict(frames)
         results.append(result)
         failed_rates.append(failed_rate)
         logger.info(f"Detected Result: {result}")
         logger.info(f"Failed Rate: {failed_rate}")
 
-    data = ep.format(results, failed_rates, timestamps)
-    ep.export(data, method=params["format"], prefix="result")
-    if params["is_save_setting"]:
-        ep.export(params, method="json", prefix="params")
+    data = exporter.format(results, failed_rates, timestamps)
+    exporter.export(
+        data, method=settings["format"], prefix="result", with_timestamp=False
+    )
+
+    settings = settings_manager.remove_non_require_keys(settings)
+    exporter.export(settings, method="json", prefix="settings", with_timestamp=False)
 
 
 if __name__ == "__main__":
     args = get_args()
-    params = vars(args)
+    settings = vars(args)
 
-    if params.pop("debug"):
+    if settings.pop("debug"):
         logger.setLevel(logging.DEBUG)
     else:
         logger.setLevel(logging.INFO)
     logger.debug("args: %s", args)
 
-    setting_path = params.pop("setting")
+    settings_manager = SettingsManager("replay")
+    setting_path = settings.pop("setting")
     if setting_path is not None:
-        required_keys = set(params.keys())
-        required_keys.add("click_points")
-        params = load_setting(setting_path, required_keys)
-    elif params["video_path"] is None:
+        settings = settings_manager.load(setting_path)
+    elif settings["video_path"] is None:
         raise ValueError("video_path or setting is required.")
+    else:
+        settings["click_points"] = []
 
-    logger.debug("params: %s", params)
-    main(params)
+    settings_manager.validate(settings)
+    logger.debug("settings: %s", settings)
+    main(settings)
 
     logger.info("All Done!")

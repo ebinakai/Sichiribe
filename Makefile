@@ -17,7 +17,7 @@ prune:
 	autoflake --recursive --in-place --remove-unused-variables --remove-all-unused-imports --exclude "env" -v -v ./
 
 test:
-	pytest tests/*py
+	pytest --log-level=DEBUG tests/*py
 
 check:
 	mypy --config-file mypy.ini .

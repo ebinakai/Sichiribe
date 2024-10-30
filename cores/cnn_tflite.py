@@ -58,8 +58,8 @@ class CNNLite(CNNCore):
             predictions.append(output_data)
 
         # (num_digits, num_classes) 形状に変換
-        _predictions = np.array(predictions).squeeze()
-        argmax_indices = _predictions.argmax(
+        predictions_ = np.array(predictions).squeeze()
+        argmax_indices = predictions_.argmax(
             axis=1
         )  # 各行に対して最大値のインデックスを取得
 

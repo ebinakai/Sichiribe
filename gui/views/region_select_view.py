@@ -23,7 +23,6 @@ from gui.widgets.custom_qwidget import CustomQWidget
 from gui.utils.screen_manager import ScreenManager
 from cores.frame_editor import FrameEditor
 from gui.utils.common import convert_cv_to_qimage, resize_image
-from gui.utils.data_store import DataStore
 from gui.widgets.clickable_label import ClickableLabel
 
 
@@ -31,7 +30,6 @@ class RegionSelectWindow(CustomQWidget):
     def __init__(self, screen_manager: ScreenManager) -> None:
         self.logger = logging.getLogger("__main__").getChild(__name__)
         self.screen_manager = screen_manager
-        self.data_store = DataStore.get_instance()
         self.click_points: List = []
         self.image_size: QSize
 
@@ -170,7 +168,7 @@ class RegionSelectWindow(CustomQWidget):
         self.prev_screen = prev_screen
         self.fe = FrameEditor(num_digits=self.data_store.get("num_digits"))
 
-        window_pos, _s = self.screen_manager.save_screen_size()
+        window_pos, _ = self.screen_manager.save_screen_size()
 
         screen = QApplication.primaryScreen()
         screen_rect = screen.availableGeometry()

@@ -17,12 +17,12 @@ from PySide6.QtGui import QPixmap
 from gui.widgets.custom_qwidget import CustomQWidget
 from gui.utils.screen_manager import ScreenManager
 from gui.utils.common import convert_cv_to_qimage
-from gui.utils.data_store import DataStore
 from gui.utils.exporter import export_result, export_params
 from gui.widgets.mpl_canvas_widget import MplCanvas
 from gui.workers.frame_devide_worker import FrameDivideWorker
 from gui.workers.replay_detect_worker import DetectWorker
 from cores.frame_editor import FrameEditor
+from cores.settings_manager import SettingsManager
 import logging
 from typing import List, Union
 import numpy as np
@@ -31,8 +31,8 @@ import numpy as np
 class ReplayExeWindow(CustomQWidget):
     def __init__(self, screen_manager: ScreenManager) -> None:
         self.logger = logging.getLogger("__main__").getChild(__name__)
+        self.settings_manager = SettingsManager("replay")
         self.screen_manager = screen_manager
-        self.data_store = DataStore.get_instance()
         self.results: List[int]
         self.failed_rates: List[float]
         self.graph_results: List[int]
@@ -130,6 +130,8 @@ class ReplayExeWindow(CustomQWidget):
 
     def frame_devide_process(self) -> None:
         self.screen_manager.show_screen("log")
+        settings = self.settings_manager.remove_non_require_keys(self.data_store.get_all())
+        self.settings_manager.save(settings)
         self.fd_worker = FrameDivideWorker()
         self.fd_worker.end.connect(self.frame_devide_finished)
         self.fd_worker.start()

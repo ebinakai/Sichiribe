@@ -18,7 +18,6 @@ from PySide6.QtCore import Qt
 from PySide6.QtGui import QPixmap
 from gui.widgets.custom_qwidget import CustomQWidget
 from gui.utils.screen_manager import ScreenManager
-from gui.utils.data_store import DataStore
 from gui.utils.common import convert_cv_to_qimage
 from cores.frame_editor import FrameEditor
 from cores.cnn import CNNCore as Detector
@@ -31,7 +30,6 @@ class ReplayThresholdWindow(CustomQWidget):
     def __init__(self, screen_manager: ScreenManager) -> None:
         self.logger = logging.getLogger("__main__").getChild(__name__)
         self.screen_manager = screen_manager
-        self.data_store = DataStore.get_instance()
         self.threshold: Optional[int]
         self.fe = FrameEditor()
         self.dt = Detector(4)
@@ -92,7 +90,7 @@ class ReplayThresholdWindow(CustomQWidget):
         self.screen_manager.show_screen("replay_threshold")
         self.data_store.get_all()
 
-        _p, _s = self.screen_manager.save_screen_size()
+        p_, s_ = self.screen_manager.save_screen_size()
 
         self.threshold = None
         self.first_frame = self.fe.crop(

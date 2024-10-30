@@ -1,4 +1,3 @@
-import os
 from typing import Union, List, Optional, Tuple
 import cv2
 import logging
@@ -46,7 +45,7 @@ class FrameEditor:
         self.click_points = click_points
 
         if save_frame:
-            os.makedirs(out_dir, exist_ok=True)
+            Path(out_dir).mkdir(parents=True, exist_ok=True)
             clear_directory(out_dir)
 
         cap = cv2.VideoCapture(video_path)
@@ -202,10 +201,10 @@ class FrameEditor:
                 self.click_points = self.order_points(self.click_points)
 
     def order_points(self, click_points: List) -> List:
-        _points = np.array(click_points)
+        points_ = np.array(click_points)
 
         # x座標で昇順にソート
-        sorted_by_x = _points[np.argsort(_points[:, 0])]
+        sorted_by_x = points_[np.argsort(points_[:, 0])]
 
         # 左側の2点と右側の2点に分ける
         left_points = sorted_by_x[:2]

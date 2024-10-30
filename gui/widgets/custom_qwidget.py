@@ -5,12 +5,14 @@
 """
 
 from PySide6.QtWidgets import QWidget
+from gui.utils.data_store import DataStore
 
 
 class CustomQWidget(QWidget):
     def __init__(self) -> None:
         super().__init__()
         self.initUI()
+        self.data_store = DataStore.get_instance()
 
     def initUI(self) -> None:
         raise NotImplementedError("initUI() must be implemented in subclass")

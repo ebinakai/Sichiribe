@@ -1,43 +1,4 @@
-import pytest
-from cores.common import load_setting, filter_dict
-import os
-import json
-from pathlib import Path
-
-
-class TestReadConfig:
-    def setup_class(self):
-        expected_setting = {
-            "a": 42,
-            "b": "test",
-            "c": [1, 2, 3],
-        }
-
-        setting_path = "tests/setting.json"
-        with open(setting_path, "w") as f:
-            json.dump(expected_setting, f)
-
-        self.setting_path = setting_path
-        self.expected_setting = expected_setting
-
-    def teardown_class(self):
-        if Path(self.setting_path).exists():
-            os.remove(self.setting_path)
-
-    def test_load_setting(self):
-        returned_setting = load_setting(
-            self.setting_path, set(self.expected_setting.keys())
-        )
-        assert returned_setting == self.expected_setting
-
-    def test_load_setting_missing_file(self):
-        with pytest.raises(FileNotFoundError):
-            load_setting("dummy/missing.json", [])
-
-    def test_load_setting_missing_key(self):
-        required_keys = ["a", "b", "d"]
-        with pytest.raises(KeyError):
-            load_setting(self.setting_path, required_keys)
+from cores.common import filter_dict
 
 
 class TestExcludeFilterDict:

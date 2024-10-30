@@ -27,39 +27,20 @@ from PySide6.QtWidgets import (
     QFileDialog,
     QLabel,
 )
-from gui.widgets.custom_qwidget import CustomQWidget
+from gui.widgets.setting_widget import SettingWidget
 from gui.utils.screen_manager import ScreenManager
-from gui.utils.data_store import DataStore
-from gui.utils.common import get_user_data_dir
-from cores.exporter import Exporter
-from cores.common import (
-    get_now_str,
-    load_setting,
-    validate_output_directory,
-    validate_params,
-    filter_dict,
-)
+from cores.common import get_now_str
+from cores.settings_manager import SettingsManager
 from cores.exporter import get_supported_formats
 import logging
 from pathlib import Path
 
 
-class ReplaySettingWindow(CustomQWidget):
+class ReplaySettingWindow(SettingWidget):
     def __init__(self, screen_manager: ScreenManager) -> None:
         self.logger = logging.getLogger("__main__").getChild(__name__)
-        self.ep = Exporter(get_user_data_dir())
         self.screen_manager = screen_manager
-        self.data_store = DataStore.get_instance()
-        self.required_keys = {
-            "video_path": lambda x: isinstance(x, str) and Path(x).exists(),
-            "num_digits": lambda x: isinstance(x, int) and x >= 1,
-            "sampling_sec": lambda x: isinstance(x, int) and x >= 1,
-            "num_frames": lambda x: isinstance(x, int) and x >= 1,
-            "video_skip_sec": lambda x: isinstance(x, int) and x >= 0,
-            "format": lambda x: x in get_supported_formats(),
-            "save_frame": lambda x: isinstance(x, bool),
-            "out_dir": lambda x: validate_output_directory(Path(x).parent),
-        }
+        self.settings_manager = SettingsManager("replay")
 
         super().__init__()
         screen_manager.add_screen("replay_setting", self, "動画解析設定")
@@ -114,9 +95,7 @@ class ReplaySettingWindow(CustomQWidget):
 
         self.back_button = QPushButton("戻る")
         self.back_button.setFixedWidth(100)
-        self.back_button.clicked.connect(
-            lambda: self.screen_manager.show_screen("menu")
-        )
+        self.back_button.clicked.connect(self.back)
         footer_layout.addWidget(self.back_button)
 
         footer_layout.addStretch()
@@ -139,19 +118,9 @@ class ReplaySettingWindow(CustomQWidget):
         main_layout.addLayout(form_layout)
         main_layout.addLayout(footer_layout)
 
-    def display(self):
-        default_setting_path = Path(get_user_data_dir()) / "setting_replay.json"
-        try:
-            params = load_setting(default_setting_path, self.required_keys.keys())
-            if validate_params(params, self.required_keys):
-                self.data_store.set_all(params)
-                self.set_ui_from_params()
-        except Exception:
-            self.logger.info(f"Failed to load default setting file")
-
     def select_file(self) -> None:
         video_path, _ = QFileDialog.getOpenFileName(
-            self, "ファイルを選択", "", "動画ファイル (*.mp4 *.avi)"
+            self, "ファイルを選択", "", "動画ファイル (*.mp4)"
         )
         if video_path:
             self.video_path.setText(video_path)
@@ -162,30 +131,26 @@ class ReplaySettingWindow(CustomQWidget):
 
     def load_setting(self) -> None:
         self.confirm_txt.setText("")
-        folder_path, _ = QFileDialog.getOpenFileName(
+        file_path, _ = QFileDialog.getOpenFileName(
             self, "ファイルを選択", "", "設定ファイル(*.json)"
         )
 
-        required_keys = set(self.required_keys.keys())
-        required_keys.add("click_points")
-
         try:
-            params = load_setting(folder_path, required_keys)
+            settings = self.settings_manager.load(file_path)
         except Exception:
-            self.logger.info(f"Failed to load setting file")
+            self.logger.info(f"Failed to load settings file")
             self.confirm_txt.setText("ファイルが読み込めませんでした")
             return
 
-        out_dir_parent = Path(params["out_dir"]).resolve().parent
-        params["out_dir"] = str(out_dir_parent / get_now_str())
-        if not validate_params(params, self.required_keys):
-            self.logger.info(f"Invalid setting file")
+        out_dir_parent = Path(settings["out_dir"]).resolve().parent
+        settings["out_dir"] = str(out_dir_parent / get_now_str())
+        if not self.settings_manager.validate(settings):
+            self.logger.info(f"Invalid settings file")
             self.confirm_txt.setText("不正なファイルです")
             return
 
-        self.data_store.set_all(params)
-        self.set_ui_from_params()
-        self.export_setting()
+        self.data_store.set_all(settings)
+        self.save_settings()
         self.screen_manager.get_screen("replay_exe").trigger("startup")
 
     def next(self) -> None:
@@ -195,29 +160,21 @@ class ReplaySettingWindow(CustomQWidget):
         else:
             self.confirm_txt.setText("")
 
-        self.get_params_from_ui()
+        self.get_settings_from_ui()
+        self.data_store.set("click_points", [])
         self.data_store.set(
             "out_dir",
             str(Path(self.data_store.get("video_path")).parent / get_now_str()),
         )
-        if not validate_params(self.data_store.get_all(), self.required_keys):
+
+        if not self.settings_manager.validate(self.data_store.get_all()):
             self.confirm_txt.setText("不正な値が入力されています")
             return
 
-        self.export_setting()
+        self.save_settings()
         self.screen_manager.get_screen("replay_exe").trigger("startup")
 
-    def export_setting(self) -> None:
-        setting = self.data_store.get_all()
-        setting = filter_dict(setting, lambda k, v: k in self.required_keys.keys())
-        self.ep.export(
-            setting,
-            method="json",
-            prefix="setting_replay",
-            with_timestamp=False,
-        )
-
-    def set_ui_from_params(self) -> None:
+    def set_ui_from_settings(self) -> None:
         self.video_path.setText(self.data_store.get("video_path"))
         self.num_digits.setValue(self.data_store.get("num_digits"))
         self.sampling_sec.setValue(self.data_store.get("sampling_sec"))
@@ -226,7 +183,7 @@ class ReplaySettingWindow(CustomQWidget):
         self.format.setCurrentText(self.data_store.get("format"))
         self.save_frame.setChecked(self.data_store.get("save_frame"))
 
-    def get_params_from_ui(self) -> None:
+    def get_settings_from_ui(self) -> None:
         self.data_store.set("video_path", self.video_path.text())
         self.data_store.set("num_digits", self.num_digits.value())
         self.data_store.set("sampling_sec", self.sampling_sec.value())

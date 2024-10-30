@@ -3,6 +3,7 @@ from unittest.mock import Mock, patch
 from PySide6.QtCore import Qt
 from gui.views.live_setting_view import LiveSettingWindow
 from gui.utils.data_store import DataStore
+import os
 
 
 @pytest.fixture
@@ -19,19 +20,12 @@ class TestLiveSettingWindow:
         self.get_now_str_patcher = patch(
             "gui.views.live_setting_view.get_now_str", return_value="now"
         )
-        self.validate_patcher = patch(
-            "gui.views.live_setting_view.validate_output_directory", return_value=True
-        )
-        exporter_patcher = patch("gui.views.live_setting_view.Exporter")
-
         self.mock_get_now_str = self.get_now_str_patcher.start()
-        self.mock_validate = self.validate_patcher.start()
-        self.mock_expoter = exporter_patcher.start()
+        os.makedirs("dummy/dummy", exist_ok=True)
 
     def teardown_class(self):
         self.mock_get_now_str.stop()
-        self.mock_validate.stop()
-        self.mock_expoter.stop()
+        os.removedirs("dummy/dummy")
 
     def setup_method(self):
         self.data_store = DataStore.get_instance()
@@ -71,28 +65,25 @@ class TestLiveSettingWindow:
         return_value=["/dummy/path.json", ""],
     )
     def test_load_setting(self, mock_dialog, test_data, window, qtbot):
-        window.set_ui_from_params = Mock()
         window.screen_manager.get_screen.return_value = Mock()
         self.data_store.set("click_points", test_data["click_points"])
+        window.settings_manager = Mock()
+        window.settings_manager.validate.return_value = True
+        window.settings_manager.load.return_value = {
+            "out_dir": "/dummy/path",
+            "click_points": test_data["click_points"],
+            "cap_size": [100, 100],
+        }
 
-        with patch("gui.views.live_setting_view.validate_params", return_value=True):
-            with patch(
-                "gui.views.live_setting_view.load_setting",
-                return_value={
-                    "out_dir": "/dummy/path",
-                    "click_points": test_data["click_points"],
-                },
-            ):
-                window.load_setting()
+        window.load_setting()
 
-        window.set_ui_from_params.assert_called_once()
         assert self.data_store.get("out_dir") == "/dummy/now"
         window.screen_manager.get_screen.assert_called_once_with(
             test_data["expected_screen"]
         )
 
     def test_next(self, window):
-        window.out_dir.setText("/dummy/path")
+        window.out_dir.setText("dummy")
         window.next()
         assert window.confirm_txt.text() == ""
 
@@ -108,7 +99,7 @@ class TestLiveSettingWindow:
         )
         assert self.data_store.get("format") == window.format.currentText()
         assert self.data_store.get("save_frame") == window.save_frame.isChecked()
-        assert self.data_store.get("out_dir").startswith("/dummy/path/")
+        assert self.data_store.get("out_dir").endswith("dummy/now")
 
     def test_next_with_empty_folder(self, window, qtbot):
         qtbot.mouseClick(window.next_button, Qt.LeftButton)

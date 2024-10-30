@@ -23,9 +23,9 @@ from gui.widgets.custom_qwidget import CustomQWidget
 from gui.widgets.mpl_canvas_widget import MplCanvas
 from gui.utils.screen_manager import ScreenManager
 from gui.utils.common import convert_cv_to_qimage
-from gui.utils.data_store import DataStore
 from gui.utils.exporter import export_result, export_params
 from gui.workers.live_detect_worker import DetectWorker
+from cores.settings_manager import SettingsManager
 import logging
 from typing import List, Optional
 import numpy as np
@@ -35,6 +35,7 @@ from datetime import timedelta
 class LiveExeWindow(CustomQWidget):
     def __init__(self, screen_manager: ScreenManager) -> None:
         self.logger = logging.getLogger("__main__").getChild(__name__)
+        self.settings_manager = SettingsManager("live")
         self.screen_manager = screen_manager
         self.results: List[int]
         self.failed_rates: List[float]
@@ -43,7 +44,6 @@ class LiveExeWindow(CustomQWidget):
         self.graph_failed_rates: List[float]
         self.graph_timestamps: List[str]
         self.worker: Optional[DetectWorker] = None
-        self.data_store = DataStore.get_instance()
 
         super().__init__()
         screen_manager.add_screen("live_exe", self, "ライブ解析中")
@@ -128,8 +128,9 @@ class LiveExeWindow(CustomQWidget):
     def startup(self) -> None:
         self.logger.info("Starting LiveExeWindow.")
         self.screen_manager.show_screen("log")
-
-        _p, _s = self.screen_manager.save_screen_size()
+        settings = self.settings_manager.remove_non_require_keys(self.data_store.get_all())
+        self.settings_manager.save(settings)
+        p_, s_ = self.screen_manager.save_screen_size()
 
         self.binarize_th.setValue(0)
         self.binarize_th_label.setText("自動設定")

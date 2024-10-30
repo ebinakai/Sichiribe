@@ -103,18 +103,6 @@ class TestWorkerCallback:
         self.data_store = DataStore.get_instance()
         self.data_store.clear()
 
-    @patch("gui.views.replay_exe_view.FrameDivideWorker")
-    def test_frame_devide_process(self, worker_class, window):
-        worker_instance = Mock()
-        worker_class.return_value = worker_instance
-
-        window.frame_devide_process()
-
-        assert worker_instance.start.called_once()
-        worker_instance.end.connect.assert_called_once_with(
-            window.frame_devide_finished
-        )
-
     def test_frame_devide_finished(self, window):
         frames = ["frame1", "frame2"]
         timestamps = ["00:01", "00:02"]
