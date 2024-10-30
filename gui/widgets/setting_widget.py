@@ -3,6 +3,7 @@ from cores.settings_manager import SettingsManager
 from logging import Logger
 from pathlib import Path
 
+
 class SettingWidget(CustomQWidget):
     def __init__(self) -> None:
         super().__init__()

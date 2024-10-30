@@ -31,7 +31,6 @@ class ReplayThresholdWindow(CustomQWidget):
         self.logger = logging.getLogger("__main__").getChild(__name__)
         self.screen_manager = screen_manager
         self.threshold: Optional[int]
-        self.fe = FrameEditor()
         self.dt = Detector(4)
         self.first_frame: Optional[np.ndarray] = None
 
@@ -88,7 +87,7 @@ class ReplayThresholdWindow(CustomQWidget):
 
     def startup(self) -> None:
         self.screen_manager.show_screen("replay_threshold")
-        self.data_store.get_all()
+        self.fe = FrameEditor(self.data_store.get("num_digits"))
 
         p_, s_ = self.screen_manager.save_screen_size()
 
@@ -114,6 +113,7 @@ class ReplayThresholdWindow(CustomQWidget):
         self.display_extract_image(image_bin)
 
     def display_extract_image(self, image: np.ndarray) -> None:
+        image = self.fe.draw_separation_lines(image)
         q_image = convert_cv_to_qimage(image)
         self.extracted_label.setPixmap(QPixmap.fromImage(q_image))
 

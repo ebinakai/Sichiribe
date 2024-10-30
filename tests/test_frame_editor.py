@@ -98,10 +98,10 @@ class TestFrameEditor:
         result = frame_editor.crop(sample_frame, invalid_points)
         assert result is None
 
-    def test_draw_debug_info(self, frame_editor, sample_frame, sample_click_points):
+    def test_draw_region_outline(self, frame_editor, sample_frame, sample_click_points):
         extract_frame = np.zeros((100, 400, 3), dtype=np.uint8)
 
-        frame_edited, extract_edited = frame_editor.draw_debug_info(
+        frame_edited, extract_edited = frame_editor.draw_region_outline(
             sample_frame, extract_frame, sample_click_points
         )
 

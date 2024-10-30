@@ -26,6 +26,7 @@ from gui.utils.common import convert_cv_to_qimage
 from gui.utils.exporter import export_result, export_params
 from gui.workers.live_detect_worker import DetectWorker
 from cores.settings_manager import SettingsManager
+from cores.frame_editor import FrameEditor
 import logging
 from typing import List, Optional
 import numpy as np
@@ -132,6 +133,7 @@ class LiveExeWindow(CustomQWidget):
             self.data_store.get_all()
         )
         self.settings_manager.save(settings)
+        self.fe = FrameEditor(self.data_store.get("num_digits"))
         p_, s_ = self.screen_manager.save_screen_size()
 
         self.binarize_th.setValue(0)
@@ -178,6 +180,7 @@ class LiveExeWindow(CustomQWidget):
         )
 
     def display_extract_image(self, image: np.ndarray) -> None:
+        image = self.fe.draw_separation_lines(image)
         q_image = convert_cv_to_qimage(image)
         self.extracted_label.setPixmap(QPixmap.fromImage(q_image))
 

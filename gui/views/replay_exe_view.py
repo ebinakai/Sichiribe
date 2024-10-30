@@ -178,6 +178,7 @@ class ReplayExeWindow(CustomQWidget):
         )
 
     def display_extract_image(self, image: np.ndarray) -> None:
+        image = self.fe.draw_separation_lines(image)
         q_image = convert_cv_to_qimage(image)
         self.extracted_label.setPixmap(QPixmap.fromImage(q_image))
 

@@ -14,7 +14,7 @@ def mock_frame_editor():
         editor = mock.return_value
         editor.order_points.return_value = [[0, 0], [100, 0], [100, 100], [0, 100]]
         editor.crop.return_value = np.zeros((100, 100, 3), dtype=np.uint8)
-        editor.draw_debug_info.return_value = (
+        editor.draw_region_outline.return_value = (
             np.zeros((200, 200, 3), dtype=np.uint8),
             np.zeros((100, 100, 3), dtype=np.uint8),
         )

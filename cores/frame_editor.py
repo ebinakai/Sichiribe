@@ -172,7 +172,7 @@ class FrameEditor:
             extract_image = self.crop(img_clone, self.click_points)
 
             # デバッグ情報描画
-            img_clone, extract_image = self.draw_debug_info(
+            img_clone, extract_image = self.draw_region_outline(
                 img_clone,
                 extract_image,
                 self.click_points,
@@ -226,23 +226,27 @@ class FrameEditor:
         ]
 
     # 選択領域の可視化
-    def draw_debug_info(
+    def draw_region_outline(
         self,
         image: np.ndarray,
         extract_image: Optional[np.ndarray],
-        click_points_: List[np.ndarray],
+        click_points: List[np.ndarray],
     ) -> Tuple[np.ndarray, Optional[np.ndarray]]:
-        for click_point in click_points_:
-            cv2.circle(image, (click_point[0], click_point[1]), 5, (0, 255, 0), -1)
-        if len(click_points_) >= 3:
-            cv2.drawContours(image, [np.array(click_points_)], -1, (0, 255, 0), 2)
-        if extract_image is not None:
-            for index in range(self.num_digits):
-                temp_x = int((extract_image.shape[1] / self.num_digits) * index)
-                temp_y = extract_image.shape[0]
+        if image is not None:
+            for click_point in click_points:
+                cv2.circle(image, (click_point[0], click_point[1]), 5, (0, 255, 0), -1)
+            if len(click_points) >= 3:
+                cv2.drawContours(image, [np.array(click_points)], -1, (0, 255, 0), 2)
 
-                if index > 0:
-                    cv2.line(
-                        extract_image, (temp_x, 0), (temp_x, temp_y), (0, 255, 0), 1
-                    )
+        if extract_image is not None:
+            extract_image = self.draw_separation_lines(extract_image)
         return image, extract_image
+
+    def draw_separation_lines(self, extract_image: np.ndarray) -> np.ndarray:
+        for index in range(self.num_digits):
+            temp_x = int((extract_image.shape[1] / self.num_digits) * index)
+            temp_y = extract_image.shape[0]
+
+            if index > 0:
+                cv2.line(extract_image, (temp_x, 0), (temp_x, temp_y), (0, 255, 0), 1)
+        return extract_image

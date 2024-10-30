@@ -201,7 +201,10 @@ class LiveSettingWindow(SettingWidget):
         self.next_page()
 
     def next_page(self) -> None:
-        if len(self.data_store.get("click_points")) == 4 and len(self.data_store.get("cap_size")) == 2:
+        if (
+            len(self.data_store.get("click_points")) == 4
+            and len(self.data_store.get("cap_size")) == 2
+        ):
             self.screen_manager.get_screen("live_exe").trigger("startup")
         else:
             self.screen_manager.get_screen("live_feed").trigger("startup")
