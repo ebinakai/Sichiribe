@@ -11,7 +11,7 @@ def splash_screen(qtbot):
     return screen
 
 
-@pytest.mark.usefixtures("prevent_window_show")
+@pytest.mark.usefixtures("prevent_window_show", "qt_test_environment")
 class TestSplashScreen:
     def test_splash_image_exists(self, splash_screen):
         assert (

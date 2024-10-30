@@ -2,24 +2,22 @@ import pytest
 from unittest.mock import MagicMock, Mock
 from unittest.mock import patch
 import numpy as np
+import os
+
+
+@pytest.fixture(scope="session", autouse=True)
+def qt_test_environment():
+    # CI環境での実行時はオフスクリーンバックエンドを使用
+    if os.environ.get('CI'):
+        os.environ['QT_QPA_PLATFORM'] = 'offscreen'
+        os.environ['XDG_RUNTIME_DIR'] = '/tmp/runtime-runner'
+    yield
 
 
 @pytest.fixture()
 def prevent_window_show():
-    def mock_show(self):
-        self._visible = True
-    
-    def mock_isVisible(self):
-        return getattr(self, '_visible', False)
-    
-    def mock_close(self):
-        self._visible = False
-    
-    with patch('PySide6.QtWidgets.QWidget.show', mock_show), \
-         patch('PySide6.QtWidgets.QWidget.isVisible', mock_isVisible), \
-         patch('PySide6.QtWidgets.QWidget.close', mock_close):
+    with patch("PySide6.QtWidgets.QWidget.show"):
         yield
-
 
 
 @pytest.fixture

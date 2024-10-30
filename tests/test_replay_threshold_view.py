@@ -18,7 +18,7 @@ def window(qtbot):
     return window
 
 
-@pytest.mark.usefixtures("prevent_window_show")
+@pytest.mark.usefixtures("prevent_window_show", "qt_test_environment")
 class TestReplayThresholdWindow:
     def setup_method(self):
         self.data_store = DataStore.get_instance()

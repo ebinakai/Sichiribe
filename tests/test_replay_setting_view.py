@@ -29,7 +29,7 @@ def window(qtbot):
     return window
 
 
-@pytest.mark.usefixtures("prevent_window_show")
+@pytest.mark.usefixtures("prevent_window_show", "qt_test_environment")
 class TestReplaySettingWindow:
     def setup_class(self):
         get_now_str_patcher = patch(

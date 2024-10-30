@@ -2,7 +2,7 @@ import pytest
 import app
 
 
-@pytest.mark.usefixtures("prevent_window_show")
+@pytest.mark.usefixtures("qt_test_environment")
 class TestApp:
     def test_splash_screen(self, qtbot):
         splash_window = app.SplashScreen()

@@ -14,7 +14,7 @@ def window(qtbot, mock_screen_manager):
     return window
 
 
-@pytest.mark.usefixtures("prevent_window_show")
+@pytest.mark.usefixtures("prevent_window_show", "qt_test_environment")
 class TestLiveSettingWindow:
     def setup_class(self):
         self.get_now_str_patcher = patch(

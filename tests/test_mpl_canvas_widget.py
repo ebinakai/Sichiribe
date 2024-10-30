@@ -12,7 +12,7 @@ def canvas(qtbot):
     return canvas
 
 
-@pytest.mark.usefixtures("prevent_window_show")
+@pytest.mark.usefixtures("prevent_window_show", "qt_test_environment")
 class TestMplCanvas:
     def test_initialization(self, canvas):
         assert isinstance(canvas.figure, Figure), "Not isinstance of Figure"

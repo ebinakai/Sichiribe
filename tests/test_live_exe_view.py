@@ -20,7 +20,7 @@ def window(qtbot, mock_screen_manager):
     return window
 
 
-@pytest.mark.usefixtures("prevent_window_show")
+@pytest.mark.usefixtures("prevent_window_show", "qt_test_environment")
 class TestMethods:
     def test_initial_ui_state(self, window):
         assert (
@@ -71,7 +71,7 @@ class TestMethods:
         assert window.graph_timestamps == ["10:00:00", "10:00:00"]
 
 
-@pytest.mark.usefixtures("prevent_window_show")
+@pytest.mark.usefixtures("prevent_window_show", "qt_test_environment")
 class TestUserActions:
     def test_cancel_action(self, window):
         window.worker = Mock()
@@ -110,7 +110,7 @@ class TestUserActions:
         )
 
 
-@pytest.mark.usefixtures("prevent_window_show")
+@pytest.mark.usefixtures("prevent_window_show", "qt_test_environment")
 class TestWorkerCallbacks:
     def test_display_extract_image(self, window):
         window.display_extract_image(np.zeros((100, 100, 3), dtype=np.uint8))

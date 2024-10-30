@@ -14,7 +14,7 @@ def main_window(qtbot):
     return window, stacked_widget
 
 
-@pytest.mark.usefixtures("prevent_window_show")
+@pytest.mark.usefixtures("prevent_window_show", "qt_test_environment")
 class TestScreenManager:
 
     class SampleWidget(CustomQWidget):

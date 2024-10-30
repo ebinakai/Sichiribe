@@ -11,7 +11,7 @@ def window(qtbot, mock_screen_manager):
     return window
 
 
-@pytest.mark.usefixtures("prevent_window_show")
+@pytest.mark.usefixtures("prevent_window_show", "qt_test_environment")
 class TestMenuWindow:
     def test_initial_ui_state(self, window):
         assert window.live_button.text() is not None

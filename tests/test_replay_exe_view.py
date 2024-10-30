@@ -20,7 +20,7 @@ def window(qtbot):
     return window
 
 
-@pytest.mark.usefixtures("prevent_window_show")
+@pytest.mark.usefixtures("prevent_window_show", "qt_test_environment")
 class TestMethods:
     def setup_method(self):
         self.data_store = DataStore.get_instance()
@@ -88,7 +88,7 @@ class TestMethods:
         assert window.screen_manager.popup.called_once()
 
 
-@pytest.mark.usefixtures("prevent_window_show")
+@pytest.mark.usefixtures("prevent_window_show", "qt_test_environment")
 class TestUserActions:
     def test_cancel_action(self, window):
         window.dt_worker = Mock()
@@ -99,7 +99,7 @@ class TestUserActions:
         assert window.term_label.text() == "中止中..."
 
 
-@pytest.mark.usefixtures("prevent_window_show")
+@pytest.mark.usefixtures("prevent_window_show", "qt_test_environment")
 class TestWorkerCallback:
     def setup_class(self):
         self.data_store = DataStore.get_instance()

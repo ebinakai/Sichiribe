@@ -35,7 +35,7 @@ def window(qtbot, mock_screen_manager, mock_frame_editor):
         return window
 
 
-@pytest.mark.usefixtures("prevent_window_show")
+@pytest.mark.usefixtures("prevent_window_show", "qt_test_environment")
 class TestSelectRegionWindow:
     def setup_method(self):
         self.data_store = DataStore.get_instance()
