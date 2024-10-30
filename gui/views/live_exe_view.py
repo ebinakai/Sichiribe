@@ -128,7 +128,9 @@ class LiveExeWindow(CustomQWidget):
     def startup(self) -> None:
         self.logger.info("Starting LiveExeWindow.")
         self.screen_manager.show_screen("log")
-        settings = self.settings_manager.remove_non_require_keys(self.data_store.get_all())
+        settings = self.settings_manager.remove_non_require_keys(
+            self.data_store.get_all()
+        )
         self.settings_manager.save(settings)
         p_, s_ = self.screen_manager.save_screen_size()
 

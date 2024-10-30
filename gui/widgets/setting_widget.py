@@ -1,7 +1,7 @@
 from gui.widgets.custom_qwidget import CustomQWidget
 from cores.settings_manager import SettingsManager
 from logging import Logger
-
+from pathlib import Path
 
 class SettingWidget(CustomQWidget):
     def __init__(self) -> None:
@@ -14,6 +14,9 @@ class SettingWidget(CustomQWidget):
             settings = self.settings_manager.load_default()
             if self.settings_manager.validate(settings):
                 self.data_store.set_all(settings)
+                out_dir = self.data_store.get("out_dir")
+                out_dir_parent = Path(out_dir).resolve().parent
+                self.data_store.set("out_dir", str(out_dir_parent))
                 self.set_ui_from_settings()
         except Exception:
             self.logger.info(f"Failed to load default setting file")

@@ -130,7 +130,9 @@ class ReplayExeWindow(CustomQWidget):
 
     def frame_devide_process(self) -> None:
         self.screen_manager.show_screen("log")
-        settings = self.settings_manager.remove_non_require_keys(self.data_store.get_all())
+        settings = self.settings_manager.remove_non_require_keys(
+            self.data_store.get_all()
+        )
         self.settings_manager.save(settings)
         self.fd_worker = FrameDivideWorker()
         self.fd_worker.end.connect(self.frame_devide_finished)

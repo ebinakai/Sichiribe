@@ -89,7 +89,7 @@ class LiveSettingWindow(SettingWidget):
         form_layout.addRow("出力フォーマット：", self.format)
 
         self.save_frame = QCheckBox()
-        form_layout.addRow("フレームを保存する：", self.save_frame)
+        form_layout.addRow("フレームを保存：", self.save_frame)
 
         self.out_dir = QLineEdit()
         self.out_dir.setReadOnly(True)
@@ -100,12 +100,15 @@ class LiveSettingWindow(SettingWidget):
         file_layout.addWidget(self.out_dir_button)
         form_layout.addRow("保存場所：", file_layout)
 
+        self.skip_region_select = QCheckBox()
+        form_layout.addRow("領域選択をスキップ：", self.skip_region_select)
+
         self.back_button = QPushButton("戻る")
         self.back_button.setFixedWidth(100)
         self.back_button.clicked.connect(self.back)
         footer_layout.addWidget(self.back_button)
 
-        footer_layout.addStretch()  # スペーサー
+        footer_layout.addStretch()
 
         self.confirm_txt = QLabel()
         self.confirm_txt.setStyleSheet("color: red")
@@ -117,13 +120,24 @@ class LiveSettingWindow(SettingWidget):
 
         self.next_button = QPushButton("実行")
         self.next_button.setFixedWidth(100)
-        self.next_button.setDefault(True)  # 強調表示されるデフォルトボタンに設定
+        self.next_button.setDefault(True)
         self.next_button.setAutoDefault(True)
         self.next_button.clicked.connect(self.next)
         footer_layout.addWidget(self.next_button)
 
         main_layout.addLayout(form_layout)
         main_layout.addLayout(footer_layout)
+
+    def display(self) -> None:
+        super().display()
+        has_click_points = (
+            self.data_store.has("click_points")
+            and self.data_store.has("cap_size")
+            and len(self.data_store.get("click_points")) == 4
+            and len(self.data_store.get("cap_size")) == 2
+        )
+        self.skip_region_select.setEnabled(has_click_points)
+        self.skip_region_select.setChecked(has_click_points)
 
     def select_folder(self) -> None:
         folder_path = QFileDialog.getExistingDirectory(self, "フォルダを選択", "")
@@ -161,10 +175,7 @@ class LiveSettingWindow(SettingWidget):
 
         self.data_store.set_all(settings)
         self.save_settings()
-        if len(settings["click_points"]) == 4 and len(settings["cap_size"]) == 2:
-            self.screen_manager.get_screen("live_exe").trigger("startup")
-        else:
-            self.screen_manager.get_screen("live_feed").trigger("startup")
+        self.next_page()
 
     def next(self) -> None:
         if self.out_dir.text() == "":
@@ -174,10 +185,9 @@ class LiveSettingWindow(SettingWidget):
             self.confirm_txt.setText("")
 
         self.get_settings_from_ui()
-        self.save_settings()
-
-        self.data_store.set("click_points", [])
-        self.data_store.set("cap_size", [])
+        if not self.skip_region_select.isChecked():
+            self.data_store.set("click_points", [])
+            self.data_store.set("cap_size", [])
         self.data_store.set(
             "out_dir",
             str(Path(self.data_store.get("out_dir")).resolve() / get_now_str()),
@@ -187,7 +197,14 @@ class LiveSettingWindow(SettingWidget):
             self.confirm_txt.setText("不正な値が入力されています")
             return
 
-        self.screen_manager.get_screen("live_feed").trigger("startup")
+        self.save_settings()
+        self.next_page()
+
+    def next_page(self) -> None:
+        if len(self.data_store.get("click_points")) == 4 and len(self.data_store.get("cap_size")) == 2:
+            self.screen_manager.get_screen("live_exe").trigger("startup")
+        else:
+            self.screen_manager.get_screen("live_feed").trigger("startup")
 
     def set_ui_from_settings(self) -> None:
         self.device_num.setValue(self.data_store.get("device_num"))

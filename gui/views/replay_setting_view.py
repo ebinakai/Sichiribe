@@ -91,7 +91,10 @@ class ReplaySettingWindow(SettingWidget):
         form_layout.addRow("出力フォーマット：", self.format)
 
         self.save_frame = QCheckBox()
-        form_layout.addRow("キャプチャしたフレームを保存する：", self.save_frame)
+        form_layout.addRow("キャプチャしたフレームを保存：", self.save_frame)
+
+        self.skip_region_select = QCheckBox()
+        form_layout.addRow("領域選択をスキップ：", self.skip_region_select)
 
         self.back_button = QPushButton("戻る")
         self.back_button.setFixedWidth(100)
@@ -117,6 +120,15 @@ class ReplaySettingWindow(SettingWidget):
 
         main_layout.addLayout(form_layout)
         main_layout.addLayout(footer_layout)
+
+    def display(self) -> None:
+        super().display()
+        has_click_points = (
+            self.data_store.has("click_points")
+            and len(self.data_store.get("click_points")) == 4
+        )
+        self.skip_region_select.setEnabled(has_click_points)
+        self.skip_region_select.setChecked(has_click_points)
 
     def select_file(self) -> None:
         video_path, _ = QFileDialog.getOpenFileName(
@@ -161,7 +173,8 @@ class ReplaySettingWindow(SettingWidget):
             self.confirm_txt.setText("")
 
         self.get_settings_from_ui()
-        self.data_store.set("click_points", [])
+        if not self.skip_region_select.isChecked():
+            self.data_store.set("click_points", [])
         self.data_store.set(
             "out_dir",
             str(Path(self.data_store.get("video_path")).parent / get_now_str()),
