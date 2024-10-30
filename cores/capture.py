@@ -22,7 +22,7 @@ class FrameCapture:
 
     def show_camera_feed(self) -> None:
 
-        while cv2.waitKey(1) & 0xFF != ord("y"):
+        while cv2.waitKey(10) & 0xFF != ord("y"):
             frame = self.capture()
             if frame is None:
                 break

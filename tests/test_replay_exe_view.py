@@ -48,7 +48,7 @@ class TestMethods:
 
         window.frame_devide_process = Mock()
         window.trigger("continue")
-        assert window.frame_devide_process.called_once()
+        window.frame_devide_process.assert_called_once()
 
         with pytest.raises(ValueError):
             window.trigger("invalid")
@@ -63,29 +63,27 @@ class TestMethods:
 
         window.startup()
 
-        assert window.graph_label.gen_graph.called_once()
+        window.graph_label.gen_graph.assert_called_once()
         assert window.term_label.text() == ""
         assert window.results == []
         assert window.failed_rates == []
         assert window.graph_results == []
         assert window.graph_failed_rates == []
         assert window.graph_timestamps == []
-        assert mock_frame_editor.called_once()
-        assert mock_frame_editor_instance.frame_devide.called_once()
+        mock_frame_editor.assert_called_once()
+        mock_frame_editor_instance.frame_devide.assert_called_once()
         window.screen_manager.get_screen.assert_called_once_with("region_select")
 
     @patch("gui.views.replay_exe_view.export_result")
     @patch("gui.views.replay_exe_view.export_settings")
     def test_export_process(self, export_settings, export_result, window):
-        export_result = Mock()
-        export_settings = Mock()
         self.data_store.set("out_dir", "test")
 
         window.export_process()
 
-        assert export_result.called_once()
-        assert export_settings.called_once()
-        assert window.screen_manager.popup.called_once()
+        export_result.assert_called_once()
+        export_settings.assert_called_once()
+        window.screen_manager.popup.assert_called_once()
 
 
 @pytest.mark.usefixtures("prevent_window_show", "qt_test_environment")
@@ -123,7 +121,7 @@ class TestWorkerCallback:
 
         window.detect_process()
 
-        assert worker_instance.start.called_once()
+        worker_instance.start.assert_called_once()
         worker_instance.progress.connect.assert_called_once_with(window.detect_progress)
         worker_instance.finished.connect.assert_called_once_with(window.detect_finished)
         worker_instance.cancelled.connect.assert_called_once_with(
@@ -138,7 +136,7 @@ class TestWorkerCallback:
 
         window.model_not_found()
 
-        assert window.clear_env.called_once()
+        window.clear_env.assert_called_once()
         window.screen_manager.show_screen.assert_called_once_with("menu")
 
     def test_detect_progress(self, window):
@@ -174,7 +172,7 @@ class TestWorkerCallback:
 
         window.detect_cancelled()
 
-        assert window.term_label.setText.called_once()
+        window.term_label.setText.assert_called_once()
         assert len(self.data_store.get("timestamps")) == len(window.results)
 
     def test_update_graph(self, window):

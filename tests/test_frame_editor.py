@@ -48,7 +48,7 @@ class TestFrameEditor:
 
         assert isinstance(frames, list)
         assert isinstance(frames[0][0], np.ndarray)
-        assert mock_cap.release.called_once()
+        mock_cap.release.assert_called_once()
 
     @patch("cv2.VideoCapture")
     def test_frame_devide_single_frame(
@@ -65,7 +65,7 @@ class TestFrameEditor:
         )
 
         assert isinstance(frame, np.ndarray)
-        assert mock_cap.release.called_once()
+        mock_cap.release.assert_called_once()
 
     def test_generate_timestamp(self, frame_editor):
         n = 5
@@ -133,7 +133,7 @@ class TestFrameEditor:
 
         assert isinstance(result, list)
         assert len(result) == 4
-        assert mock_destroy.called_once()
+        mock_destroy.assert_called_once()
 
     def test_mouse_callback(self, frame_editor):
         frame_editor.mouse_callback(cv2.EVENT_LBUTTONDOWN, 100, 100, None, None)

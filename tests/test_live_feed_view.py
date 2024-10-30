@@ -39,7 +39,7 @@ class TestLiveFeedWindow:
         assert window.results == []
         assert window.failed_rates == []
         assert window.feed_label.text() != ""
-        assert window.screen_manager.save_screen_size.called_once()
+        window.screen_manager.save_screen_size.assert_called_once()
         window.screen_manager.show_screen.assert_called_once_with("live_feed")
         mock_worker_class.assert_called_once()
         mock_worker_instance.cap_size.connect.assert_called_once_with(
@@ -51,7 +51,7 @@ class TestLiveFeedWindow:
             window.feed_cancelled
         )
         mock_worker_instance.error.connect.assert_called_once_with(window.feed_error)
-        assert mock_worker_instance.start.called_once()
+        mock_worker_instance.start.assert_called_once()
 
     def test_back_button(self, window, qtbot):
         window.worker = Mock()

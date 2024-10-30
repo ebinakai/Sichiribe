@@ -77,7 +77,7 @@ class TestUserActions:
         window.worker = Mock()
         window.cancel()
 
-        assert window.worker.cancel.called_once()
+        window.worker.cancel.assert_called_once()
         assert window.term_label.text() == "中止中..."
 
     @pytest.mark.parametrize(

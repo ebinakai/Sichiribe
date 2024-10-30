@@ -33,7 +33,7 @@ class TestReplayThresholdWindow:
         window.startup = Mock()
         window.trigger("startup")
 
-        assert window.startup.called_once()
+        window.startup.assert_called_once()
 
         with pytest.raises(ValueError):
             window.trigger("invalid")

@@ -64,7 +64,7 @@ class TestSelectRegionWindow:
 
         assert window.prev_screen == "replay_exe"
         assert window.fe is not None
-        assert window.screen_manager.save_screen_size.called_once()
+        window.screen_manager.save_screen_size.assert_called_once()
         window.screen_manager.show_screen.assert_called_with("region_select")
 
     def test_label_clicked_add_points(self, window):
@@ -79,7 +79,7 @@ class TestSelectRegionWindow:
             window.label_clicked(event)
 
         assert len(window.click_points) == 4
-        assert window.fe.order_points.called_once()
+        window.fe.order_points.assert_called_once()
 
     def test_finish_select_with_incomplete_points(self, window):
         window.click_points = [(50, 50)]
