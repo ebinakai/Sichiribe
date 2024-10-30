@@ -8,7 +8,7 @@ from gui.utils.data_store import DataStore
 @pytest.fixture
 def expected_settings():
     return {
-        "video_path": "sample/sample.mp4",  # このファイルは実在する必要がある
+        "video_path": "samples/sample.mp4",  # このファイルは実在する必要がある
         "num_digits": 4,
         "sampling_sec": 10,
         "num_frames": 10,
