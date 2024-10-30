@@ -122,10 +122,10 @@ CNNモデルを学習させるためには以下のプログラムを実行す�
 
 ```bash
 # 学習(ファイル内のパラメーターを調整してから実行)
-python cnn/train.py
+python train/train.py
 
 # 軽量モデルに変換
-python cnn/conv_keras2tf.py
+python train/conv_keras2tf.py
 ```
 
 ## 参考資料
