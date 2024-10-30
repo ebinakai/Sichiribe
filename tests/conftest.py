@@ -8,9 +8,9 @@ import os
 @pytest.fixture(scope="session", autouse=True)
 def qt_test_environment():
     # CI環境での実行時はオフスクリーンバックエンドを使用
-    if os.environ.get('CI'):
-        os.environ['QT_QPA_PLATFORM'] = 'offscreen'
-        os.environ['XDG_RUNTIME_DIR'] = '/tmp/runtime-runner'
+    if os.environ.get("CI"):
+        os.environ["QT_QPA_PLATFORM"] = "offscreen"
+        os.environ["XDG_RUNTIME_DIR"] = "/tmp/runtime-runner"
     yield
 
 

@@ -1,49 +1,47 @@
-import pytest
-from unittest.mock import Mock
-from cores.cnn import CNNCore, cnn_init
-
-
-@pytest.fixture
-def detector():
-    detector = cnn_init(num_digits=4)
-    return detector
+from unittest.mock import patch
+from cores.cnn import CNNCore
+import numpy as np
 
 
 class TestCNN:
-    def test_detector_initialization(self, detector):
-        assert isinstance(detector, CNNCore)
+    def setup_method(self):
+        self.cnn = CNNCore(3)
+        self.predictions = np.array([[0, 1, 2], [0, 1, 1], [1, 2, 2], [1, 1, 2]])
+        self.image = np.zeros((100, 300), dtype=np.uint8)
 
-    @pytest.mark.parametrize(
-        "test_case",
-        [
-            ("single_path", lambda path, _: path),  # Single path
-            ("list_of_paths", lambda path, _: [path]),  # List of paths
-            ("single_image", lambda _, img: img),  # Single image
-            ("list_of_images", lambda _, img: [img]),  # List of images
-        ],
-    )
-    def test_prediction(self, detector, sample_frame_gs, test_case):
-        detector.load_image = Mock()
-        detector.load_image.return_value = sample_frame_gs
-        case_name, input_data_factory = test_case
-        input_data = input_data_factory("dummy.jpg", sample_frame_gs)
+    def test_init(self):
+        assert self.cnn.num_digits == 3
+        assert self.cnn.image_width == 100
+        assert self.cnn.image_height == 100
+        assert self.cnn.color_setting == 1
 
-        result, failed_rate = detector.predict(input_data)
+    def test_find_mode_per_column_np(self):
+        expected_result = np.array([0, 1, 2])
+        expected_errors_per_digit = np.array([0.5, 0.25, 0.25])
 
-        # Validate prediction results
-        assert result is not None, f"{case_name}: Prediction result should not be None"
-        assert isinstance(result, int), f"{case_name}: Result should be an int"
-        assert isinstance(
-            failed_rate, float
-        ), f"{case_name}: Failed rate should be a float"
+        result, errors_per_digit = self.cnn.find_mode_per_column_np(self.predictions)
+
+        np.testing.assert_array_equal(errors_per_digit, expected_errors_per_digit)
+        np.testing.assert_array_equal(result, expected_result)
+
+    def test_preprocess_image(self):
+        processed_images = self.cnn.preprocess_image(self.image)
+
+        expected_shape = (3, 100, 100, 1)
         assert (
-            0 <= failed_rate <= 1
-        ), f"{case_name}: Failed rate should be between 0 and 1"
+            processed_images.shape == expected_shape
+        ), f"Expected shape {expected_shape}, but got {processed_images.shape}"
 
-    def test_prediction_with_invalid_path(self, detector):
-        with pytest.raises(Exception):
-            detector.predict("nonexistent_image.jpg")
+        # 値の範囲をチェック (0から1の範囲)
+        assert np.all(processed_images >= 0) and np.all(
+            processed_images <= 1
+        ), "Image values should be in range [0, 1]."
 
-    def test_prediction_with_invalid_image(self, detector):
-        with pytest.raises(Exception):
-            detector.predict(None)
+    def test_predict(self):
+        with patch(
+            "cores.cnn.CNNCore.inference_7seg_classifier", return_value=[1, 1, 1]
+        ):
+            result, failed_rate = self.cnn.predict(self.image)
+
+            assert result == 111
+            assert failed_rate == 0

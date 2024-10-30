@@ -111,6 +111,7 @@ class TestFrameEditor:
         assert extract_edited.shape == extract_frame.shape
 
     @pytest.mark.timeout(0.5)
+    @patch("cv2.setMouseCallback")
     @patch("cv2.namedWindow")
     @patch("cv2.imshow")
     @patch("cv2.waitKey")
@@ -121,6 +122,7 @@ class TestFrameEditor:
         mock_wait_key,
         mock_imshow,
         mock_name_window,
+        mock_set_mouse_callback,
         frame_editor,
         sample_frame,
         sample_click_points,

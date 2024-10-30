@@ -11,7 +11,7 @@ class Detector(ABC):
 
     def load_image(self, image: Union[str, np.ndarray]) -> np.ndarray:
         if isinstance(image, np.ndarray):
-            if len(image.shape) == 1:
+            if len(image.shape) == 2:
                 return image
             else:
                 return cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
