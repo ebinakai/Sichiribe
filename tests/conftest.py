@@ -6,8 +6,20 @@ import numpy as np
 
 @pytest.fixture()
 def prevent_window_show():
-    with patch("PySide6.QtWidgets.QWidget.show"):
+    def mock_show(self):
+        self._visible = True
+    
+    def mock_isVisible(self):
+        return getattr(self, '_visible', False)
+    
+    def mock_close(self):
+        self._visible = False
+    
+    with patch('PySide6.QtWidgets.QWidget.show', mock_show), \
+         patch('PySide6.QtWidgets.QWidget.isVisible', mock_isVisible), \
+         patch('PySide6.QtWidgets.QWidget.close', mock_close):
         yield
+
 
 
 @pytest.fixture

@@ -13,6 +13,7 @@ def qapp():
     app.quit()
 
 
+@pytest.mark.usefixtures("prevent_window_show")
 class TestCustomQWidget:
     def test_init(self, qapp):
         with pytest.raises(NotImplementedError):
