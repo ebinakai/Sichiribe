@@ -1,57 +1,26 @@
-from unittest.mock import Mock, patch
-from cores.exporter import Exporter
-import os
+from cores.export_utils import build_data_records
 
 
-class TestExporter:
-    def setup_class(self):
-        self.exporter = Exporter("dummy_dir")
-
-    def teardown_class(self):
-        os.rmdir("dummy_dir")
-
-    def test_format(self):
-
-        data = [1, 2, 3]
-        data2 = [0.5, 0.1, 0]
-        timestamp = [
-            "2024-10-01T00:00:00Z",
-            "2024-10-01T01:00:00Z",
-            "2024-10-01T02:00:00Z",
+class TestBuildDataRecords:
+    def test_basic_case(self):
+        data_dict = {
+            "timestamp": [1, 2, 3],
+            "value": [100, 200, 300],
+            "failed": [False, True, False],
+        }
+        expected = [
+            {"timestamp": 1, "value": 100, "failed": False},
+            {"timestamp": 2, "value": 200, "failed": True},
+            {"timestamp": 3, "value": 300, "failed": False},
         ]
-        expected_output = [
-            {"timestamp": "2024-10-01T00:00:00Z", "value": 1, "failed": 0.5},
-            {"timestamp": "2024-10-01T01:00:00Z", "value": 2, "failed": 0.1},
-            {"timestamp": "2024-10-01T02:00:00Z", "value": 3, "failed": 0},
-        ]
+        assert build_data_records(data_dict) == expected
 
-        actual_output = self.exporter.format(data, data2, timestamp)
-        assert actual_output == expected_output
+    def test_empty_dict(self):
+        data_dict = {}
+        expected = []
+        assert build_data_records(data_dict) == expected
 
-    @patch("cores.exporter.get_now_str")
-    def test_generate_filepath(self, mock_get_now_str):
-        mock_get_now_str.return_value = "20240535000000"
-        prefix = "test"
-        extension = "csv"
-        expected_output = "dummy_dir/test_20240535000000.csv"
-
-        actual_output = self.exporter.generate_filepath(
-            prefix, extension, with_timestamp=True
-        )
-        assert str(actual_output) == expected_output
-
-    def test_export_csv(self):
-        data = {"a": 1, "b": 2}
-        prefix = "test"
-        self.exporter.to_csv = Mock()
-        self.exporter.export(data, "csv", prefix)
-
-        self.exporter.to_csv.assert_called_once_with([data], prefix, True)
-
-    def test_export_json(self):
-        data = {"a": 1, "b": 2}
-        prefix = "test"
-        self.exporter.to_json = Mock()
-        self.exporter.export(data, "json", prefix)
-
-        self.exporter.to_json.assert_called_once_with(data, prefix, True)
+    def test_single_key_single_value(self):
+        data_dict = {"timestamp": [1]}
+        expected = [{"timestamp": 1}]
+        assert build_data_records(data_dict) == expected

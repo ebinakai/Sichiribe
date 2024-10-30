@@ -2,6 +2,7 @@ import pytest
 from unittest.mock import Mock, patch
 from gui.views.replay_exe_view import ReplayExeWindow
 from gui.utils.data_store import DataStore
+from cores.frame_editor import FrameEditor
 import numpy as np
 
 
@@ -13,6 +14,7 @@ def window(qtbot):
     window.graph_results = []
     window.graph_failed_rates = []
     window.graph_timestamps = []
+    window.fe = FrameEditor()
     qtbot.addWidget(window)
     window.show()
     return window
@@ -73,16 +75,16 @@ class TestMethods:
         window.screen_manager.get_screen.assert_called_once_with("region_select")
 
     @patch("gui.views.replay_exe_view.export_result")
-    @patch("gui.views.replay_exe_view.export_params")
-    def test_export_process(self, export_params, export_result, window):
+    @patch("gui.views.replay_exe_view.export_settings")
+    def test_export_process(self, export_settings, export_result, window):
         export_result = Mock()
-        export_params = Mock()
+        export_settings = Mock()
         self.data_store.set("out_dir", "test")
 
         window.export_process()
 
         assert export_result.called_once()
-        assert export_params.called_once()
+        assert export_settings.called_once()
         assert window.screen_manager.popup.called_once()
 
 

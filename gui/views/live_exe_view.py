@@ -23,7 +23,7 @@ from gui.widgets.custom_qwidget import CustomQWidget
 from gui.widgets.mpl_canvas_widget import MplCanvas
 from gui.utils.screen_manager import ScreenManager
 from gui.utils.common import convert_cv_to_qimage
-from gui.utils.exporter import export_result, export_params
+from gui.utils.exporter import export_result, export_settings
 from gui.workers.live_detect_worker import DetectWorker
 from cores.settings_manager import SettingsManager
 from cores.frame_editor import FrameEditor
@@ -199,7 +199,7 @@ class LiveExeWindow(CustomQWidget):
     def export_process(self) -> None:
         self.logger.info("Data exporting...")
         export_result(self.data_store.get_all())
-        export_params(self.data_store.get_all())
+        export_settings(self.data_store.get_all())
         self.screen_manager.popup(f"保存場所：{self.data_store.get('out_dir')}")
 
     def clear_env(self) -> None:

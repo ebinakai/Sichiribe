@@ -17,7 +17,7 @@ from PySide6.QtGui import QPixmap
 from gui.widgets.custom_qwidget import CustomQWidget
 from gui.utils.screen_manager import ScreenManager
 from gui.utils.common import convert_cv_to_qimage
-from gui.utils.exporter import export_result, export_params
+from gui.utils.exporter import export_result, export_settings
 from gui.widgets.mpl_canvas_widget import MplCanvas
 from gui.workers.frame_devide_worker import FrameDivideWorker
 from gui.workers.replay_detect_worker import DetectWorker
@@ -202,12 +202,12 @@ class ReplayExeWindow(CustomQWidget):
     def export_process(self) -> None:
         self.logger.info("Data exporting...")
         export_result(self.data_store.get_all())
-        export_params(self.data_store.get_all())
+        export_settings(self.data_store.get_all())
         self.screen_manager.popup(f"保存場所：{self.data_store.get('out_dir')}")
 
     def clear_env(self) -> None:
         self.graph_label.clear()
-        self.term_label.setText("")
         self.extracted_label.clear()
+        self.term_label.setText("")
         self.logger.info("Environment cleared.")
         self.screen_manager.restore_screen_size()

@@ -31,7 +31,7 @@ from gui.widgets.setting_widget import SettingWidget
 from gui.utils.screen_manager import ScreenManager
 from cores.common import get_now_str
 from cores.settings_manager import SettingsManager
-from cores.exporter import get_supported_formats
+from cores.export_utils import get_supported_formats
 import logging
 from pathlib import Path
 

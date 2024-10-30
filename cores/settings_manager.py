@@ -1,5 +1,5 @@
 from pathlib import Path
-from cores.exporter import get_supported_formats
+from cores.export_utils import get_supported_formats
 from cores.common import filter_dict, is_directory_writable
 from typing import Dict, Any, Callable
 from platformdirs import user_data_dir

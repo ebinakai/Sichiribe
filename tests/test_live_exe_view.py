@@ -1,6 +1,7 @@
 import pytest
 from unittest.mock import Mock
 from gui.views.live_exe_view import LiveExeWindow
+from cores.frame_editor import FrameEditor
 import numpy as np
 from datetime import timedelta
 
@@ -14,6 +15,7 @@ def window(qtbot, mock_screen_manager):
     window.graph_results = []
     window.graph_failed_rates = []
     window.graph_timestamps = []
+    window.fe = FrameEditor()
     qtbot.addWidget(window)
     return window
 

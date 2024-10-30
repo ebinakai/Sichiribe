@@ -29,7 +29,7 @@ def convert_cv_to_qimage(cv_img: np.ndarray) -> QImage:
         return qimage
 
     else:
-        raise ValueError("Unsupported number of channels: {}".format(channels))
+        raise ValueError(f"Unsupported number of channels: {channels}")
 
 
 def resize_image(

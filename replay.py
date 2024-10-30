@@ -6,7 +6,7 @@
 from cores.cnn import cnn_init
 from cores.common import get_now_str
 from cores.settings_manager import SettingsManager
-from cores.exporter import Exporter, get_supported_formats
+from cores.export_utils import export, get_supported_formats, build_data_records
 from cores.frame_editor import FrameEditor
 from pathlib import Path
 import argparse
@@ -75,7 +75,6 @@ def main(settings) -> None:
     detector = cnn_init(num_digits=settings["num_digits"])
 
     out_dir = ROOT / "results" / get_now_str() / f"frames"
-    exporter = Exporter(out_dir=str(out_dir))
 
     if "click_points" in settings and len(settings["click_points"]) == 4:
         click_points = settings["click_points"]
@@ -101,13 +100,16 @@ def main(settings) -> None:
         logger.info(f"Detected Result: {result}")
         logger.info(f"Failed Rate: {failed_rate}")
 
-    data = exporter.format(results, failed_rates, timestamps)
-    exporter.export(
-        data, method=settings["format"], prefix="result", with_timestamp=False
+    data = build_data_records(
+        {
+            "results": results,
+            "failed_rates": failed_rates,
+            "timestamps": timestamps,
+        }
     )
-
     settings = settings_manager.remove_non_require_keys(settings)
-    exporter.export(settings, method="json", prefix="settings", with_timestamp=False)
+    export(data, format=settings["format"], out_dir=out_dir, prefix="result")
+    export(settings, format=settings["format"], out_dir=out_dir, prefix="settings")
 
 
 if __name__ == "__main__":

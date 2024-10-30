@@ -41,10 +41,9 @@ Info.plist
 *.dmg
 
 # 推論結果
-result_*.csv
-result_*.json
-parameters_*.csv
-parameters_*.json
+result.csv
+result.json
+settings.json
 
 # vocode
 .vscode/
