@@ -230,13 +230,12 @@ class FrameEditor:
         self,
         image: np.ndarray,
         extract_image: Optional[np.ndarray],
-        click_points: List[np.ndarray],
+        click_points: List,
     ) -> Tuple[np.ndarray, Optional[np.ndarray]]:
-        if image is not None:
-            for click_point in click_points:
-                cv2.circle(image, (click_point[0], click_point[1]), 5, (0, 255, 0), -1)
-            if len(click_points) >= 3:
-                cv2.drawContours(image, [np.array(click_points)], -1, (0, 255, 0), 2)
+        for click_point in click_points:
+            cv2.circle(image, (click_point[0], click_point[1]), 5, (0, 255, 0), -1)
+        if len(click_points) >= 3:
+            cv2.drawContours(image, [click_points], -1, (0, 255, 0), 2)  # type: ignore
 
         if extract_image is not None:
             extract_image = self.draw_separation_lines(extract_image)

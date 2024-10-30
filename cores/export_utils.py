@@ -2,7 +2,7 @@ import logging
 import json
 import csv
 from itertools import zip_longest
-from typing import List, Dict, Any
+from typing import List, Dict, Any, Union
 from pathlib import Path
 
 logger = logging.getLogger("__main__").getChild(__name__)
@@ -12,7 +12,9 @@ def get_supported_formats() -> List[str]:
     return ["csv", "json"]
 
 
-def export(data: List | Dict, format: str, out_dir: str | Path, prefix: str) -> None:
+def export(
+    data: Union[List, Dict], format: str, out_dir: Union[str, Path], prefix: str
+) -> None:
     Path(out_dir).mkdir(parents=True, exist_ok=True)
     if format == "csv":
         if isinstance(data, dict):
@@ -26,7 +28,7 @@ def export(data: List | Dict, format: str, out_dir: str | Path, prefix: str) -> 
         raise ValueError("Invalid export method.")
 
 
-def to_json(data: Dict | List, out_dir, prefix: str) -> None:
+def to_json(data: Union[Dict, List], out_dir, prefix: str) -> None:
     out_path = Path(out_dir) / f"{prefix}.json"
     with open(out_path, "w") as f:
         json.dump(data, f)

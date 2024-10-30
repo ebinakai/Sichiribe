@@ -1,7 +1,7 @@
 from pathlib import Path
 from cores.export_utils import get_supported_formats
 from cores.common import filter_dict, is_directory_writable
-from typing import Dict, Any, Callable
+from typing import Dict, Any, Callable, Union
 from platformdirs import user_data_dir
 import json
 import logging
@@ -58,7 +58,7 @@ class SettingsManager:
     def load_default(self) -> Dict[str, Any]:
         return self.load(self.default_path)
 
-    def load(self, filepath: str | Path) -> Dict[str, Any]:
+    def load(self, filepath: Union[str, Path]) -> Dict[str, Any]:
         if not Path(filepath).exists():
             raise FileNotFoundError(f"File not found: {filepath}")
 

@@ -11,14 +11,12 @@ class Detector(ABC):
 
     def load_image(self, image: Union[str, np.ndarray]) -> np.ndarray:
         if isinstance(image, np.ndarray):
-            if len(image.shape) == 3:
-                image_gs = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+            if len(image.shape) == 1:
+                return image
             else:
-                image_gs = image
+                return cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
         else:
-            image_gs = cv2.imread(image, cv2.IMREAD_GRAYSCALE)
-
-        return image_gs
+            return cv2.imread(image, cv2.IMREAD_GRAYSCALE)
 
     @abstractmethod
     def predict(self, *args, **kwargs) -> Any:

@@ -2,13 +2,13 @@ import os
 import shutil
 import logging
 import datetime
-from typing import Dict, Any, Callable
+from typing import Dict, Any, Callable, Union
 from pathlib import Path
 
 logger = logging.getLogger("__main__").getChild(__name__)
 
 
-def clear_directory(directory: str | Path) -> None:
+def clear_directory(directory: Union[str, Path]) -> None:
     dir_path = Path(directory)
     if not dir_path.exists():
         logging.debug(f"The specified directory does not exist: {dir_path}")
