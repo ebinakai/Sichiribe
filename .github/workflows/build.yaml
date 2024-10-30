@@ -8,6 +8,10 @@ on:
       - gui/**
       - cores/**
       - app.py
+    paths-ignore:
+      - '**/*.md'
+      - '.gitignore'
+      - 'sample/**'
 
 jobs:
   build:
