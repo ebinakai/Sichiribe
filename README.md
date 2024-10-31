@@ -76,44 +76,6 @@ curl -L -o model/model_100x100.tflite https://github.com/EbinaKai/Sichiribe/rele
 - [CLIによるカメラ映像のリアルタイム解析のやり方](https://github.com/EbinaKai/Sichiribe/wiki/How-to-use-CLI#execution-live)
 - [CLIによる動画ファイルの解析のやり方](https://github.com/EbinaKai/Sichiribe/wiki/How-to-use-CLI#execution-replay)
 
-## ファイル構造
-
-| ファイル | 説明 |
-| --- | --- |  
-| `app.py` | GUIアプリケーションの起動 |
-| `live.py` | 外部カメラからライブ解析 |
-| `replay.py` | 動画ファイルから解析 |
-| `cores/common.py` | コアな汎用的な機能の関数詰め合わせ |
-| `cores/capture.py` | カメラにアクセスする機能 |
-| `cores/frame_editor.py` | 動画のフレームに関する機能及び7セグメント表示器の領域選択機能 |
-| `cores/detector.py` | 7セグ表示器から数字を推測するプログラムの親クラス |
-| `cores/cnn.py` | CNNモデルを用いて画像から数字を取得するプログラムのコア部分 |
-| `cores/cnn.py` | CNNモデルをTensorflowのフルバージョン(.kerasモデル)で動かす場合 |
-| `cores/cnn_lite.py` | CNNモデルをtflite-runtime(.tfliteモデル)で動かす場合 |
-| `cores/export_utils.py` | 取得した結果を任意の形式で出力・保存する機能 |
-| `train/train.py` | CNNモデルを学習させるプログラム |
-| `train/conv_keras2tf.py` | Kerasモデルをtflite形式に変換するプログラム |
-| `gui/utils/common.py` | GUI用の汎用的な機能の関数詰め合わせ |
-| `**gui**/utils/router.py` | GUIの各ページのルーティング関数 |
-| `gui/utils/screen_manager.py` | GUIの各ページの管理クラス |
-| `gui/views/splash_view.py` | GUI起動後のスプラッシュ画像 |
-| `gui/views/main_view.py` | メインページ。この中に各ページをラップする |
-| `gui/views/menu_view.py` | ライブ解析・動画ファイル解析を選択 |
-| `gui/views/log_view.py` | ログの表示画面 |
-| `gui/views/region_select_view.py` | 7セグメント表示機の領域選択画面 |
-| `gui/views/live_setting_view.py` | ライブ解析の設定画面 |
-| `gui/views/live_feed_view.py` | ライブ解析のカメラ画角確認画面 |
-| `gui/views/live_exe_view.py` | ライブ解析の処理画面。推論結果のグラフと7セグ画像が表示される |
-| `gui/views/replay_setting_view.py` | 動画ファイル解析の設定画面 |
-| `gui/views/replay_threshold_view.py` | ２値化のしきい値を設定 |
-| `gui/views/replay_exe_view.py` | 動画ファイル解析の処理画面。推論結果のグラフが表示される |
-| `gui/workers/live_feed_worker.py` | ライブ解析のカメラ画角確認のバックグランド処理 |
-| `gui/workers/live_detect_worker.py` | ライブ解析の推論のバックグランド処理 |
-| `gui/workers/frame_devide_worker.py` | 動画ファイル解析のフレーム分割のバックグランド処理 |
-| `gui/workers/replay_detect_worker.py` | 動画ファイル解析の推論のバックグランド処理 |
-| `gui/widgets/mpl_canvas_widget.py` | グラフを表示するウィジェット |
-| `sample/*` | テスト用ファイル |
-
 ## モデル学習
 
 CNNモデルを学習させるためには以下のプログラムを実行する。
