@@ -60,7 +60,10 @@ pip install -r requirements.txt
 学習済モデルは、[Github | Release v0.1.1](https://github.com/EbinaKai/Sichiribe/releases/tag/v0.1.1) または [Github | Release v0.1.2](https://github.com/EbinaKai/Sichiribe/releases/tag/v0.1.2) においてあるので、そこからダウンロードして `model/` フォルダを作成して設置する。
 
 ```bash
-mkdir model
+mkdir -p model
+
+# onnxruntime を使用する場合（デフォルト）
+curl -L -o model/model_100x100.onnx https://github.com/EbinaKai/Sichiribe/releases/download/v0.1.6/model_100x100.onnx
 
 # tensorflow を使用する場合
 curl -L -o model/model_100x100.keras https://github.com/EbinaKai/Sichiribe/releases/download/v0.1.1/model_100x100.keras
