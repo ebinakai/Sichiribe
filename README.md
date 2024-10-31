@@ -57,7 +57,7 @@ pip install -r requirements.txt
 
 ## モデルの用意
 
-学習済モデルは、[Github | Release v0.1.1](https://github.com/EbinaKai/Sichiribe/releases/tag/v0.1.1) または [Github | Release v0.1.2](https://github.com/EbinaKai/Sichiribe/releases/tag/v0.1.2) においてあるので、そこからダウンロードして `model/` フォルダを作成して設置する。
+学習済モデルは、[Github | Release v0.1.6](https://github.com/EbinaKai/Sichiribe/releases/tag/v0.1.6) 、[Github | Release v0.1.1](https://github.com/EbinaKai/Sichiribe/releases/tag/v0.1.1) または [Github | Release v0.1.2](https://github.com/EbinaKai/Sichiribe/releases/tag/v0.1.2) においてあるので、そこからダウンロードして `model/` フォルダを作成して設置する。
 
 ```bash
 mkdir -p model
