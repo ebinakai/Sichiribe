@@ -12,7 +12,7 @@ class TestSettingsManager:
             "device_num": 0,
             "num_digits": 4,
             "sampling_sec": 10,
-            "num_frames": 10,
+            "batch_frames": 10,
             "total_sampling_sec": 1,
             "format": "csv",
             "save_frame": False,

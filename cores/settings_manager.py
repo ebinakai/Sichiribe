@@ -15,33 +15,29 @@ class SettingsManager:
         self.default_path = self._get_default_setting_path(pattern)
 
     def _get_required_keys(self, pattern: str) -> Dict[str, Callable[[Any], bool]]:
+        base_settings = {
+            "num_digits": lambda x: isinstance(x, int) and x >= 1,
+            "sampling_sec": lambda x: isinstance(x, int) and x >= 1,
+            "batch_frames": lambda x: isinstance(x, int) and x >= 1,
+            "format": lambda x: x in get_supported_formats(),
+            "save_frame": lambda x: isinstance(x, bool),
+            "out_dir": lambda x: is_directory_writable(Path(x).parent),
+            "click_points": lambda x: isinstance(x, list),
+        }
         if pattern == "live":
-            return {
+            additional_settings = {
                 "device_num": lambda x: isinstance(x, int) and x >= 0,
-                "num_digits": lambda x: isinstance(x, int) and x >= 1,
-                "sampling_sec": lambda x: isinstance(x, int) and x >= 1,
-                "num_frames": lambda x: isinstance(x, int) and x >= 1,
                 "total_sampling_sec": lambda x: isinstance(x, int) and x >= 1,
-                "format": lambda x: x in get_supported_formats(),
-                "save_frame": lambda x: isinstance(x, bool),
-                "out_dir": lambda x: is_directory_writable(Path(x).parent),
-                "click_points": lambda x: isinstance(x, list),
                 "cap_size": lambda x: isinstance(x, list) or isinstance(x, tuple),
             }
         elif pattern == "replay":
-            return {
+            additional_settings = {
                 "video_path": lambda x: isinstance(x, str) and Path(x).exists(),
-                "num_digits": lambda x: isinstance(x, int) and x >= 1,
-                "sampling_sec": lambda x: isinstance(x, int) and x >= 1,
-                "num_frames": lambda x: isinstance(x, int) and x >= 1,
                 "video_skip_sec": lambda x: isinstance(x, int) and x >= 0,
-                "format": lambda x: x in get_supported_formats(),
-                "save_frame": lambda x: isinstance(x, bool),
-                "out_dir": lambda x: is_directory_writable(Path(x).parent),
-                "click_points": lambda x: isinstance(x, list),
             }
         else:
             raise ValueError(f"Invalid pattern: {pattern}")
+        return {**base_settings, **additional_settings}
 
     def _get_default_setting_path(self, pattern: str) -> Path:
         appname = "Sichiribe"

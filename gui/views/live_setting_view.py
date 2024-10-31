@@ -69,12 +69,12 @@ class LiveSettingWindow(SettingWidget):
         self.sampling_sec.valueChanged.connect(self.calc_max_frames)
         form_layout.addRow("動画をサンプリングする頻度(秒)：", self.sampling_sec)
 
-        self.num_frames = QSpinBox()
-        self.num_frames.setValue(10)
-        self.num_frames.setFixedWidth(50)
-        self.num_frames.setMinimum(1)
-        self.num_frames.setMaximum(60)
-        form_layout.addRow("取得するフレーム数 / サンプリング：", self.num_frames)
+        self.batch_frames = QSpinBox()
+        self.batch_frames.setValue(10)
+        self.batch_frames.setFixedWidth(50)
+        self.batch_frames.setMinimum(1)
+        self.batch_frames.setMaximum(60)
+        form_layout.addRow("取得するフレーム数 / サンプリング：", self.batch_frames)
 
         self.total_sampling_min = QSpinBox()
         self.total_sampling_min.setValue(1)
@@ -147,9 +147,11 @@ class LiveSettingWindow(SettingWidget):
 
     def calc_max_frames(self) -> None:
         sampling_sec = self.sampling_sec.value()
-        self.num_frames.setMaximum(sampling_sec * 5)
+        self.batch_frames.setMaximum(sampling_sec * 5)
 
     def back(self) -> None:
+        self.get_settings_from_ui()
+        self.settings_manager.save(self.data_store.get_all())
         self.confirm_txt.setText("")
         self.screen_manager.show_screen("menu")
 
@@ -188,10 +190,6 @@ class LiveSettingWindow(SettingWidget):
         if not self.skip_region_select.isChecked():
             self.data_store.set("click_points", [])
             self.data_store.set("cap_size", [])
-        self.data_store.set(
-            "out_dir",
-            str(Path(self.data_store.get("out_dir")).resolve() / get_now_str()),
-        )
 
         if not self.settings_manager.validate(self.data_store.get_all()):
             self.confirm_txt.setText("不正な値が入力されています")
@@ -213,7 +211,7 @@ class LiveSettingWindow(SettingWidget):
         self.device_num.setValue(self.data_store.get("device_num"))
         self.num_digits.setValue(self.data_store.get("num_digits"))
         self.sampling_sec.setValue(self.data_store.get("sampling_sec"))
-        self.num_frames.setValue(self.data_store.get("num_frames"))
+        self.batch_frames.setValue(self.data_store.get("batch_frames"))
         self.total_sampling_min.setValue(
             self.data_store.get("total_sampling_sec") // 60
         )
@@ -225,8 +223,8 @@ class LiveSettingWindow(SettingWidget):
         self.data_store.set("device_num", self.device_num.value())
         self.data_store.set("num_digits", self.num_digits.value())
         self.data_store.set("sampling_sec", self.sampling_sec.value())
-        self.data_store.set("num_frames", self.num_frames.value())
+        self.data_store.set("batch_frames", self.batch_frames.value())
         self.data_store.set("total_sampling_sec", self.total_sampling_min.value() * 60)
         self.data_store.set("format", self.format.currentText())
         self.data_store.set("save_frame", self.save_frame.isChecked())
-        self.data_store.set("out_dir", self.out_dir.text())
+        self.data_store.set("out_dir", str(Path(self.out_dir.text()) / get_now_str()))

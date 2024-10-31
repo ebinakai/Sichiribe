@@ -26,7 +26,7 @@ class TestMethods:
         self.data_store = DataStore.get_instance()
         self.data_store.clear()
         self.data_store.set("sampling_sec", 10)
-        self.data_store.set("num_frames", 10)
+        self.data_store.set("batch_frames", 10)
         self.data_store.set("num_digits", 4)
         self.data_store.set("video_path", "dummy/path.mp4")
         self.data_store.set("video_skip_sec", 0)
@@ -58,7 +58,7 @@ class TestMethods:
         extracted_frame = Mock()
         window.graph_label = Mock()
         mock_frame_editor_instance = Mock()
-        mock_frame_editor_instance.frame_devide.return_value = extracted_frame
+        mock_frame_editor_instance.frame_devide.return_value = extracted_frame, []
         mock_frame_editor.return_value = mock_frame_editor_instance
 
         window.startup()

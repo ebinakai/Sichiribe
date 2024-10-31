@@ -72,12 +72,12 @@ class ReplaySettingWindow(SettingWidget):
         self.sampling_sec.setMinimum(1)
         form_layout.addRow("動画をサンプリングする頻度 (秒)：", self.sampling_sec)
 
-        self.num_frames = QSpinBox()
-        self.num_frames.setValue(30)
-        self.num_frames.setFixedWidth(50)
-        self.num_frames.setMinimum(1)
+        self.batch_frames = QSpinBox()
+        self.batch_frames.setValue(30)
+        self.batch_frames.setFixedWidth(50)
+        self.batch_frames.setMinimum(1)
         form_layout.addRow(
-            "一回のサンプリングで何フレーム取得するか：", self.num_frames
+            "一回のサンプリングで何フレーム取得するか：", self.batch_frames
         )
 
         self.video_skip_sec = QSpinBox()
@@ -138,6 +138,8 @@ class ReplaySettingWindow(SettingWidget):
             self.video_path.setText(video_path)
 
     def back(self) -> None:
+        self.get_settings_from_ui()
+        self.settings_manager.save(self.data_store.get_all())
         self.confirm_txt.setText("")
         self.screen_manager.show_screen("menu")
 
@@ -191,7 +193,7 @@ class ReplaySettingWindow(SettingWidget):
         self.video_path.setText(self.data_store.get("video_path"))
         self.num_digits.setValue(self.data_store.get("num_digits"))
         self.sampling_sec.setValue(self.data_store.get("sampling_sec"))
-        self.num_frames.setValue(self.data_store.get("num_frames"))
+        self.batch_frames.setValue(self.data_store.get("batch_frames"))
         self.video_skip_sec.setValue(self.data_store.get("video_skip_sec"))
         self.format.setCurrentText(self.data_store.get("format"))
         self.save_frame.setChecked(self.data_store.get("save_frame"))
@@ -200,7 +202,7 @@ class ReplaySettingWindow(SettingWidget):
         self.data_store.set("video_path", self.video_path.text())
         self.data_store.set("num_digits", self.num_digits.value())
         self.data_store.set("sampling_sec", self.sampling_sec.value())
-        self.data_store.set("num_frames", self.num_frames.value())
+        self.data_store.set("batch_frames", self.batch_frames.value())
         self.data_store.set("video_skip_sec", self.video_skip_sec.value())
         self.data_store.set("format", self.format.currentText())
         self.data_store.set("save_frame", self.save_frame.isChecked())

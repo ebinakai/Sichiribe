@@ -47,11 +47,6 @@ class MplCanvas(FigureCanvasQTAgg):
         ylabel2: str,
         dark_theme: bool = False,
     ) -> None:
-        self.title = title
-        self.xlabel = xlabel
-        self.ylabel1 = ylabel1
-        self.ylabel2 = ylabel2
-
         if dark_theme:
             plt.style.use("dark_background")
             title_color = "white"

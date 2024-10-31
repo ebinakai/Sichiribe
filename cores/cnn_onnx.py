@@ -1,12 +1,15 @@
 from cores.cnn import CNNCore
 import logging
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, List
 import numpy as np
 from pathlib import Path
 import onnxruntime as ort
 
 if TYPE_CHECKING:
     from onnxruntime.capi.onnxruntime_inference_collection import InferenceSession
+
+FILE = Path(__file__).resolve()
+ROOT = FILE.parent / ".."
 
 
 class CNNOnnx(CNNCore):
@@ -17,8 +20,7 @@ class CNNOnnx(CNNCore):
         self.logger = logging.getLogger("__main__").getChild(__name__)
 
         # 学習済みモデルの絶対パスを取得
-        current_dir = Path(__file__).resolve().parent
-        model_path = current_dir / ".." / "model" / model_filename
+        model_path = ROOT / "model" / model_filename
         self.model_path = model_path.resolve()
         self.logger.debug(f"Load model path: {self.model_path}")
 
@@ -30,7 +32,7 @@ class CNNOnnx(CNNCore):
         self.input_name = self.model.get_inputs()[0].name
         self.logger.info("ONNX Model loaded.")
 
-    def inference_7seg_classifier(self, image):
+    def inference_7seg_classifier(self, image: np.ndarray) -> List[int]:
         # 各桁に分割
         preprocessed_images = self.preprocess_image(image)
 
@@ -46,8 +48,8 @@ class CNNOnnx(CNNCore):
 
         # (num_digits, num_classes) 形状に変換
         predictions_ = np.array(predictions).squeeze()
-        argmax_indices = predictions_.argmax(
-            axis=1
-        )  # 各行に対して最大値のインデックスを取得
+
+        # 各行に対して最大値のインデックスを取得
+        argmax_indices = predictions_.argmax(axis=1)
 
         return argmax_indices

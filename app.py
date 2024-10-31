@@ -12,6 +12,8 @@ import sys
 import logging
 import argparse
 
+SPLASH_SHOW_MS = 2000
+
 
 def setup_logging(debug_mode: bool) -> None:
     formatter = "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
@@ -31,16 +33,14 @@ def main() -> None:
     args = get_args()
     setup_logging(args.debug)
 
-    show_splash_ms = 2000
-
     app = QApplication([])
 
     splash_window = SplashScreen()
     splash_window.show()
     window = MainWindow()
 
-    QTimer.singleShot(show_splash_ms, window.show)
-    QTimer.singleShot(show_splash_ms, splash_window.close)
+    QTimer.singleShot(SPLASH_SHOW_MS, window.show)
+    QTimer.singleShot(SPLASH_SHOW_MS, splash_window.close)
 
     sys.exit(app.exec())
 

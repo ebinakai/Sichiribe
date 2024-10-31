@@ -69,12 +69,10 @@ def get_args() -> argparse.Namespace:
         "--debug", help="デバッグモードを有効にする", action="store_true"
     )
     args = parser.parse_args()
-
     return args
 
 
 def main(settings: Dict[str, Any]) -> None:
-
     out_dir = ROOT / "results" / get_now_str()
     if settings["save_frame"]:
         (out_dir / "frames").mkdir(parents=True, exist_ok=True)
@@ -99,15 +97,15 @@ def main(settings: Dict[str, Any]) -> None:
 
     start_time = time.time()
     end_time = start_time + settings["total_sampling_sec"]
-    frame_count = 0
+    saved_frame_count = 0
     timestamps = []
     results = []
     failed_rates = []
     while time.time() < end_time:
         temp_time = time.time()
-        frames = []
+        frame_batch = []
 
-        for i in range(settings["num_frames"]):
+        for _ in range(settings["batch_frames"]):
             frame = frame_capture.capture()
 
             if frame is None:
@@ -116,16 +114,18 @@ def main(settings: Dict[str, Any]) -> None:
             cropped_frame = frame_editor.crop(frame, click_points)
             if cropped_frame is None:
                 continue
-            frames.append(cropped_frame)
+            frame_batch.append(cropped_frame)
 
             if settings["save_frame"]:
-                frame_filename = out_dir / f"frame_{frame_count}.jpg"
+                frame_filename = out_dir / f"frame_{saved_frame_count}.jpg"
                 cv2.imwrite(str(frame_filename), cropped_frame)
-                logger.debug(f"Frame {frame_count} has been saved as: {frame_filename}")
-                frame_count += 1
+                logger.debug(
+                    f"Frame {saved_frame_count} has been saved as: {frame_filename}"
+                )
+                saved_frame_count += 1
 
-        if len(frames) != 0:
-            value, failed_rate = detector.predict(frames)
+        if len(frame_batch) > 0:
+            value, failed_rate = detector.predict(frame_batch)
             logger.info(f"Detected: {value}, Failed rate: {failed_rate}")
             results.append(value)
             failed_rates.append(failed_rate)
@@ -170,7 +170,6 @@ if __name__ == "__main__":
     settings["total_sampling_sec"] = settings.pop("total_sampling_min") * 60
 
     settings_manager = SettingsManager("live")
-
     setting_path = settings.pop("setting")
     if setting_path is not None:
         settings = settings_manager.load(setting_path)

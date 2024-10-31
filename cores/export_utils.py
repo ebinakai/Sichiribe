@@ -23,7 +23,7 @@ def export(
     elif format == "json":
         to_json(data, out_dir, prefix)
     elif format == "dummy":
-        pass
+        return
     else:
         raise ValueError("Invalid export method.")
 
