@@ -10,16 +10,12 @@ from pathlib import Path
 class FrameEditor:
     def __init__(
         self,
-        sampling_sec: int = 3,
-        num_frames_per_sample: int = 10,
         num_digits: int = 4,
         crop_width: int = 100,
         crop_height: int = 100,
     ) -> None:
 
         self.return_frames: List[List[Union[str, np.ndarray]]] = []
-        self.sampling_sec = sampling_sec
-        self.num_frames_per_sample = num_frames_per_sample
         self.num_digits = num_digits
         self.crop_width = crop_width
         self.crop_height = crop_height
@@ -36,12 +32,14 @@ class FrameEditor:
         self,
         video_path: str,
         video_skip_sec: int = 0,
+        sampling_sec: int = 3,
+        batch_frames: int = 10,
         save_frame: bool = True,
         out_dir: str = "frames",
         is_crop: bool = True,
         click_points: List = [],
         extract_single_frame: bool = False,
-    ) -> Union[np.ndarray, List[List[np.ndarray]]]:
+    ) -> Tuple[Union[np.ndarray, List[List[np.ndarray]]], List[str]]:
         self.click_points = click_points
 
         if save_frame:
@@ -54,11 +52,11 @@ class FrameEditor:
             exit(1)
 
         fps = cap.get(cv2.CAP_PROP_FPS)
-        interval_frames = 1 if self.sampling_sec == 0 else int(fps * self.sampling_sec)
+        interval_frames = 1 if sampling_sec == 0 else int(fps * sampling_sec)
         skip_frames = fps * video_skip_sec
         frame_count = 0
-        saved_frame_count = 0
-        frames = []
+        frame_batch = []
+        timestamps: List = []
         return_frames = []
         return_frame = None
 
@@ -72,7 +70,8 @@ class FrameEditor:
                 break
 
             # サンプリング間隔に基づいてフレームを保存
-            if frame_count % interval_frames < self.num_frames_per_sample:
+            if frame_count % interval_frames < batch_frames:
+                self.logger.debug(f"Frame collected: {frame_count}")
 
                 if is_crop:
                     if len(self.click_points) != 4:
@@ -80,6 +79,7 @@ class FrameEditor:
                     cropped_frame = self.crop(frame, self.click_points)
                     if cropped_frame is None:
                         self.logger.error("Error: Could not crop image.")
+                        frame_count += 1
                         continue
                     frame = cropped_frame
 
@@ -91,36 +91,21 @@ class FrameEditor:
                 if save_frame:
                     frame_filename = Path(out_dir) / f"frame_{frame_count:06d}.jpg"
                     cv2.imwrite(str(frame_filename), frame)
-                    saved_frame_count += 1
-                    self.logger.debug(f"Frame saved to '{frame_filename}'.")
-                frames.append(frame)
+                frame_batch.append(frame)
 
-            elif len(frames) != 0:
-                return_frames.append(frames)
-                frames = []
+            elif len(frame_batch) != 0:
+                return_frames.append(frame_batch)
+                i = len(timestamps)
+                timestamp = timedelta(seconds=sampling_sec * i + video_skip_sec)
+                timestamps.append(str(timestamp))
+                frame_batch = []
 
             frame_count += 1
 
         cap.release()
         self.logger.debug("Capture resources released.")
-
-        if saved_frame_count > 0:
-            self.logger.info(
-                f"Extracted {saved_frame_count} frames were saved to '{out_dir}' directory."
-            )
-
-        return return_frames if return_frame is None else return_frame
-
-    # 切り出したフレームの間隔からタイムスタンプを生成
-    def generate_timestamp(self, n: int) -> List[str]:
-        timestamps = []
-
-        for i in range(0, n):
-            timestamp = timedelta(seconds=self.sampling_sec * i)
-            # タイムスタンプを "HH:MM:SS" 形式でリストに追加
-            timestamps.append(str(timestamp))
-
-        return timestamps
+        return_value = return_frames if return_frame is None else return_frame
+        return return_value, timestamps
 
     # クリックポイント4点から画像を切り出す
     def crop(
@@ -161,14 +146,13 @@ class FrameEditor:
         cv2.setMouseCallback(window_name, self.mouse_callback)
 
         while True:
-            key = cv2.waitKey(100)
+            key = cv2.waitKey(1)
             if key == ord("y") and len(self.click_points) == 4:  # yキーで選択終了
                 cv2.destroyAllWindows()
                 cv2.waitKey(1)
                 return self.click_points
 
             img_clone = img.copy()
-
             extract_image = self.crop(img_clone, self.click_points)
 
             # デバッグ情報描画
@@ -178,7 +162,6 @@ class FrameEditor:
                 self.click_points,
             )
 
-            # 描画更新
             cv2.imshow(window_name, img_clone)
             if extract_image is not None:
                 cv2.imshow("Result", extract_image)
@@ -196,8 +179,6 @@ class FrameEditor:
                 )
                 closest_index = np.argmin(distances)
                 self.click_points[closest_index] = new_point
-
-            if len(self.click_points) == 4:
                 self.click_points = self.order_points(self.click_points)
 
     def order_points(self, click_points: List) -> List:
@@ -235,7 +216,7 @@ class FrameEditor:
         for click_point in click_points:
             cv2.circle(image, (click_point[0], click_point[1]), 5, (0, 255, 0), -1)
         if len(click_points) >= 3:
-            cv2.drawContours(image, [click_points], -1, (0, 255, 0), 2)  # type: ignore
+            cv2.drawContours(image, [np.array(click_points)], -1, (0, 255, 0), 2)  # type: ignore
 
         if extract_image is not None:
             extract_image = self.draw_separation_lines(extract_image)

@@ -8,7 +8,7 @@ from typing import Optional
 class FrameCapture:
     def __init__(
         self,
-        device_num=0,
+        device_num: int = 0,
     ) -> None:
 
         self.logger = logging.getLogger("__main__").getChild(__name__)

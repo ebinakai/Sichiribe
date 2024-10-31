@@ -104,14 +104,12 @@ class ReplayExeWindow(CustomQWidget):
         self.graph_timestamps = []
 
         # 最初のフレームを取得
-        self.fe = FrameEditor(
-            self.data_store.get("sampling_sec"),
-            self.data_store.get("num_frames"),
-            self.data_store.get("num_digits"),
-        )
-        first_frame = self.fe.frame_devide(
-            self.data_store.get("video_path"),
-            self.data_store.get("video_skip_sec"),
+        self.fe = FrameEditor(self.data_store.get("num_digits"))
+        first_frame, _ = self.fe.frame_devide(
+            video_path=self.data_store.get("video_path"),
+            video_skip_sec=self.data_store.get("video_skip_sec"),
+            sampling_sec=self.data_store.get("sampling_sec"),
+            batch_frames=self.data_store.get("batch_frames"),
             save_frame=False,
             is_crop=False,
             extract_single_frame=True,

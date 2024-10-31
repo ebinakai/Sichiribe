@@ -44,15 +44,13 @@ def resize_image(
     # 短辺に合わせてアスペクト比を維持してリサイズ
     if resize_scale_width < resize_scale_height:
         resize_scale = resize_scale_width
-        target_width = int(target_height)
-        target_height = int(target_width * aspect_ratio)
+        target_height = target_width * aspect_ratio
     else:
         resize_scale = resize_scale_height
-        target_width = int(target_height / aspect_ratio)
-        target_height = int(target_height)
+        target_width = target_height / aspect_ratio
 
     resized_image = cv2.resize(
-        image, (target_width, target_height), interpolation=cv2.INTER_AREA
+        image, (int(target_width), int(target_height)), interpolation=cv2.INTER_AREA
     )
 
     return resized_image, resize_scale

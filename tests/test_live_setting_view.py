@@ -35,7 +35,7 @@ class TestLiveSettingWindow:
         assert window.device_num.value() == 0
         assert window.num_digits.value() == 4
         assert window.sampling_sec.value() == 10
-        assert window.num_frames.value() == 10
+        assert window.batch_frames.value() == 10
         assert window.total_sampling_min.value() == 1
         assert window.format.count() > 0
         assert window.save_frame.isChecked() is False
@@ -51,7 +51,7 @@ class TestLiveSettingWindow:
     def test_calc_max_frames(self, window):
         window.sampling_sec.setValue(10)
         window.calc_max_frames()
-        assert window.num_frames.maximum() == 50
+        assert window.batch_frames.maximum() == 50
 
     @pytest.mark.parametrize(
         "test_data",
@@ -92,7 +92,7 @@ class TestLiveSettingWindow:
         assert self.data_store.get("device_num") == window.device_num.value()
         assert self.data_store.get("num_digits") == window.num_digits.value()
         assert self.data_store.get("sampling_sec") == window.sampling_sec.value()
-        assert self.data_store.get("num_frames") == window.num_frames.value()
+        assert self.data_store.get("batch_frames") == window.batch_frames.value()
         assert (
             self.data_store.get("total_sampling_sec")
             == window.total_sampling_min.value() * 60

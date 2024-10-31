@@ -73,7 +73,7 @@ class DetectWorker(QThread):
         end_time = time.time() + self.data_store.get("total_sampling_sec")
         frame_count = 0
         timestamps = []
-        first_loop = True
+        is_first_loop = True
 
         while time.time() < end_time and not self.is_cancelled:
             temp_time = time.time()
@@ -84,7 +84,7 @@ class DetectWorker(QThread):
             timestamp_str = str(timestamp)
             timestamps.append(timestamp_str)
 
-            frames = []
+            frame_batch = []
             self._is_capturing = True
             for i in range(self.data_store.get("num_digits")):
                 frame = self.fc.capture()
@@ -98,7 +98,7 @@ class DetectWorker(QThread):
                 if cropped_frame is None:
                     self.logger.error("Failed to crop the frame.")
                     continue
-                frames.append(cropped_frame)
+                frame_batch.append(cropped_frame)
 
                 if self.data_store.get("save_frame"):
                     frame_filename = (
@@ -114,15 +114,17 @@ class DetectWorker(QThread):
             self._is_capturing = False
 
             # GUI への送信用の画像二値化であり、predict 内で再度処理する
-            image_bin = self.dt.preprocess_binarization(frames[0], self.binarize_th)
+            image_bin = self.dt.preprocess_binarization(
+                frame_batch[0], self.binarize_th
+            )
             self.send_image.emit(image_bin)
 
-            value, failed_rate = self.dt.predict(frames, self.binarize_th)
+            value, failed_rate = self.dt.predict(frame_batch, self.binarize_th)
             self.logger.info(f"Detected: {value}, Failed rate: {failed_rate}")
 
-            if first_loop:
+            if is_first_loop:
                 self.ready.emit()
-                first_loop = False
+                is_first_loop = False
 
             self.progress.emit(value, failed_rate, timestamp_str)
 

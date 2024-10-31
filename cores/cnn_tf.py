@@ -2,7 +2,7 @@ from tensorflow.keras.models import load_model
 from cores.cnn import CNNCore
 import os
 import logging
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, List
 import numpy as np
 from pathlib import Path
 
@@ -14,6 +14,9 @@ logging.getLogger("h5py").setLevel(logging.ERROR)
 if TYPE_CHECKING:
     from tensorflow.keras.models import Model
 
+FILE = Path(__file__).resolve()
+ROOT = FILE.parent / ".."
+
 
 class CNNTf(CNNCore):
     model: "Model"
@@ -23,8 +26,7 @@ class CNNTf(CNNCore):
         self.logger = logging.getLogger("__main__").getChild(__name__)
 
         # 学習済みモデルの絶対パスを取得
-        current_dir = Path(__file__).resolve().parent
-        model_path = current_dir / ".." / "model" / model_filename
+        model_path = ROOT / "model" / model_filename
         self.model_path = model_path.resolve()
         self.logger.debug("Load model path: %s" % self.model_path)
 
@@ -34,7 +36,7 @@ class CNNTf(CNNCore):
         self.model = load_model(self.model_path)
         self.logger.info("CNN Model loaded.")
 
-    def inference_7seg_classifier(self, image):
+    def inference_7seg_classifier(self, image: np.ndarray) -> List[int]:
         # 各桁に分割
         preprocessed_images = self.preprocess_image(image)
 
@@ -42,8 +44,7 @@ class CNNTf(CNNCore):
             np.array(preprocessed_images), verbose=0
         )  # verbose=0: ログ出力を抑制
 
-        argmax_indices = predictions.argmax(
-            axis=1
-        )  # 各行に対して最大値のインデックスを取得
+        # 各行に対して最大値のインデックスを取得
+        argmax_indices = predictions.argmax(axis=1)
 
         return argmax_indices

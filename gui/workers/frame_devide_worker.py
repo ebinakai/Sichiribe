@@ -19,22 +19,19 @@ class FrameDivideWorker(QThread):
         super().__init__()
         self.data_store = DataStore.get_instance()
         self.out_dir = str(Path(self.data_store.get("out_dir")) / "frames")
-        self.fe = FrameEditor(
-            self.data_store.get("sampling_sec"),
-            self.data_store.get("num_frames"),
-            self.data_store.get("num_digits"),
-        )
+        self.fe = FrameEditor(self.data_store.get("num_digits"))
         self.logger = logging.getLogger("__main__").getChild(__name__)
 
     def run(self) -> None:
-        frames = self.fe.frame_devide(
-            self.data_store.get("video_path"),
-            self.data_store.get("video_skip_sec"),
-            self.data_store.get("save_frame"),
-            self.out_dir,
+        frames, timestamps = self.fe.frame_devide(
+            video_path=self.data_store.get("video_path"),
+            video_skip_sec=self.data_store.get("video_skip_sec"),
+            sampling_sec=self.data_store.get("sampling_sec"),
+            batch_frames=self.data_store.get("batch_frames"),
+            save_frame=self.data_store.get("save_frame"),
+            out_dir=self.out_dir,
             click_points=self.data_store.get("click_points"),
         )
 
-        timestamps = self.fe.generate_timestamp(len(frames))
         self.end.emit(frames, timestamps)
         return None

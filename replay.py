@@ -64,37 +64,35 @@ def get_args() -> argparse.Namespace:
         "--debug", help="デバッグモードを有効にする", action="store_true"
     )
     args = parser.parse_args()
-
     return args
 
 
 def main(settings) -> None:
-    frame_editor = FrameEditor(
-        settings["sampling_sec"], settings["num_frames"], settings["num_digits"]
-    )
+    frame_editor = FrameEditor(settings["num_digits"])
     detector = cnn_init(num_digits=settings["num_digits"])
 
-    out_dir = ROOT / "results" / get_now_str() / f"frames"
+    out_dir = ROOT / "results" / get_now_str()
 
     if "click_points" in settings and len(settings["click_points"]) == 4:
         click_points = settings["click_points"]
     else:
         click_points = []
 
-    sampled_frames = frame_editor.frame_devide(
+    sampled_frames, timestamps = frame_editor.frame_devide(
         video_path=settings["video_path"],
         video_skip_sec=settings["video_skip_sec"],
+        sampling_sec=settings["sampling_sec"],
+        batch_frames=settings["batch_frames"],
         save_frame=settings["save_frame"],
         out_dir=str(out_dir / "frames"),
         click_points=click_points,
     )
     settings["click_points"] = frame_editor.get_click_points()
-    timestamps = frame_editor.generate_timestamp(len(sampled_frames))
 
     results = []
     failed_rates = []
-    for frames in sampled_frames:
-        result, failed_rate = detector.predict(frames)
+    for frame_batch in sampled_frames:
+        result, failed_rate = detector.predict(frame_batch)
         results.append(result)
         failed_rates.append(failed_rate)
         logger.info(f"Detected Result: {result}")

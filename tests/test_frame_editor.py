@@ -8,8 +8,6 @@ from cores.frame_editor import FrameEditor
 @pytest.fixture
 def frame_editor():
     return FrameEditor(
-        sampling_sec=3,
-        num_frames_per_sample=10,
         num_digits=4,
         crop_width=100,
         crop_height=100,
@@ -28,8 +26,6 @@ def sample_click_points():
 
 class TestFrameEditor:
     def test_initial_ui_state(self, frame_editor):
-        assert frame_editor.sampling_sec == 3
-        assert frame_editor.num_frames_per_sample == 10
         assert frame_editor.num_digits == 4
         assert frame_editor.crop_width == 100
         assert frame_editor.crop_height == 100
@@ -44,7 +40,14 @@ class TestFrameEditor:
         mock_cap.read.side_effect = [(True, sample_frame)] * 100 + [(False, None)]
         mock_video_capture.return_value = mock_cap
 
-        frames = frame_editor.frame_devide("dummy.mp4", save_frame=False, is_crop=False)
+        frames, _ = frame_editor.frame_devide(
+            video_path="dummy.mp4",
+            video_skip_sec=0,
+            sampling_sec=3,
+            batch_frames=10,
+            save_frame=False,
+            is_crop=False,
+        )
 
         assert isinstance(frames, list)
         assert isinstance(frames[0][0], np.ndarray)
@@ -60,22 +63,18 @@ class TestFrameEditor:
         mock_cap.read.return_value = (True, sample_frame)
         mock_video_capture.return_value = mock_cap
 
-        frame = frame_editor.frame_devide(
-            "dummy.mp4", save_frame=False, is_crop=False, extract_single_frame=True
+        frame, _ = frame_editor.frame_devide(
+            video_path="dummy.mp4",
+            video_skip_sec=0,
+            sampling_sec=3,
+            batch_frames=10,
+            save_frame=False,
+            is_crop=False,
+            extract_single_frame=True,
         )
 
         assert isinstance(frame, np.ndarray)
         mock_cap.release.assert_called_once()
-
-    def test_generate_timestamp(self, frame_editor):
-        n = 5
-        timestamps = frame_editor.generate_timestamp(n)
-
-        assert isinstance(timestamps, list)
-        assert len(timestamps) == n
-        assert all(isinstance(ts, str) for ts in timestamps)
-        assert timestamps[0] == "0:00:00"
-        assert timestamps[1] == "0:00:03"
 
     def test_order_points(self, frame_editor, sample_click_points):
         expected_points = sample_click_points.copy()

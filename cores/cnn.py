@@ -153,5 +153,5 @@ def cnn_init(num_digits: int, model_filename: Optional[str] = None) -> CNNCore:
             "No compatible machine learning library found. Cannot select a model."
         )
         raise ImportError(
-            "No compatible model library found. Please install TensorFlow Lite, TensorFlow, or ONNX Runtime."
+            "No compatible model library found. Please install TensorFlow, TensorFlow Lite, or ONNX Runtime."
         )

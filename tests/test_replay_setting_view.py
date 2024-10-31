@@ -11,7 +11,7 @@ def expected_settings():
         "video_path": "samples/sample.mp4",  # このファイルは実在する必要がある
         "num_digits": 4,
         "sampling_sec": 10,
-        "num_frames": 10,
+        "batch_frames": 10,
         "video_skip_sec": 0,
         "format": "csv",
         "save_frame": False,
@@ -49,7 +49,7 @@ class TestReplaySettingWindow:
         assert window.video_path.text() == ""
         assert window.num_digits.value() == 4
         assert window.sampling_sec.value() == 5
-        assert window.num_frames.value() == 30
+        assert window.batch_frames.value() == 30
         assert window.video_skip_sec.value() == 0
         assert window.format.count() > 0
         assert window.save_frame.isChecked() is False
@@ -90,7 +90,7 @@ class TestReplaySettingWindow:
         assert self.data_store.get("video_path") == window.video_path.text()
         assert self.data_store.get("num_digits") == window.num_digits.value()
         assert self.data_store.get("sampling_sec") == window.sampling_sec.value()
-        assert self.data_store.get("num_frames") == window.num_frames.value()
+        assert self.data_store.get("batch_frames") == window.batch_frames.value()
         assert self.data_store.get("video_skip_sec") == window.video_skip_sec.value()
         assert self.data_store.get("format") == window.format.currentText()
         assert self.data_store.get("save_frame") == window.save_frame.isChecked()

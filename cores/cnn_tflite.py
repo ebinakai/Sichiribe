@@ -14,6 +14,9 @@ logging.getLogger("h5py").setLevel(logging.ERROR)
 if TYPE_CHECKING:
     from tflite_runtime.interpreter import Interpreter
 
+FILE = Path(__file__).resolve()
+ROOT = FILE.parent / ".."
+
 
 class CNNLite(CNNCore):
     model: "Interpreter"
@@ -25,8 +28,7 @@ class CNNLite(CNNCore):
         self.logger = logging.getLogger("__main__").getChild(__name__)
 
         # 学習済みモデルの絶対パスを取得
-        current_dir = Path(__file__).resolve().parent
-        model_path = current_dir / ".." / "model" / model_filename
+        model_path = ROOT / "model" / model_filename
         self.model_path = model_path.resolve()
         self.logger.debug("Load model path: %s" % self.model_path)
 
@@ -41,7 +43,7 @@ class CNNLite(CNNCore):
         self.logger.info("TFLite Model loaded.")
 
     # 画像から数字を推論
-    def inference_7seg_classifier(self, image):
+    def inference_7seg_classifier(self, image: np.ndarray) -> List[int]:
         # 各桁に分割
         preprocessed_images = self.preprocess_image(image)
 
@@ -59,8 +61,8 @@ class CNNLite(CNNCore):
 
         # (num_digits, num_classes) 形状に変換
         predictions_ = np.array(predictions).squeeze()
-        argmax_indices = predictions_.argmax(
-            axis=1
-        )  # 各行に対して最大値のインデックスを取得
+
+        # 各行に対して最大値のインデックスを取得
+        argmax_indices = predictions_.argmax(axis=1)
 
         return argmax_indices

@@ -14,7 +14,7 @@ def clear_directory(directory: Union[str, Path]) -> None:
         logging.debug(f"The specified directory does not exist: {dir_path}")
         return
 
-    # ディレクトリ内の全ファイルとサブディレクトリを削除
+    # ディレクトリ自体は削除せず、全ファイルとサブディレクトリを削除
     for path in dir_path.iterdir():
         try:
             if path.is_file() or path.is_symlink():
