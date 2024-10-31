@@ -33,12 +33,11 @@
 - 動画を入力して、その動画を解析する
 - カメラを接続して、リアルタイムで解析する
 - 上記に項目をCLI及び、GUIで実行する
-- [MacOS用のビルド(署名なし)](https://github.com/EbinaKai/Sichiribe/releases/tag/v0.1.5)
+- [ビルド(Mac版は署名なし)](https://github.com/EbinaKai/Sichiribe/releases/tag/v0.1.7)
 
 ## インストール
 
 仮想環境の作成等はMacOS・Linuxに準拠するため、Windowsで実行する際などは適宜読み替えてほしい。  
-また、Linux環境以外で `tflite-runtime` を用いたい場合は [こちら](https://github.com/EbinaKai/Sichiribe/wiki/How-to-build-tflite%E2%80%90runtime) を参照するとよい。
 
 ```bash
 # リポジトリのクローン
