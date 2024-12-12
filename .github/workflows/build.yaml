@@ -54,7 +54,6 @@ jobs:
         with:
           nuitka-version: main
           script-name: Sichiribe.py
-          standalone: true
           enable-plugins: pyside6
           include-module: matplotlib.backends.backend_qt5agg
           include-data-dir: |
@@ -70,8 +69,6 @@ jobs:
         with:
           nuitka-version: main
           script-name: Sichiribe.py
-          onefile: true
-          standalone: true
           enable-plugins: pyside6
           include-module: matplotlib.backends.backend_qt5agg
           include-data-dir: |
@@ -79,6 +76,7 @@ jobs:
             gui/images=gui/images
           linux-icon: res/Sichiribe_icon.png
           windows-icon-from-ico: res/Sichiribe_icon.png
+          mode: none
 
       - name: Fix app bundle structure
         if: matrix.os == 'macos-latest'
