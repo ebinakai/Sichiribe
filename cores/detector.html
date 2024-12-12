@@ -45,19 +45,19 @@ hljs.highlightAll();
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">class Detector(ABC):
-    &#34;&#34;&#34;推論処理を行うための抽象クラス
-    &#34;&#34;&#34;
+    &#34;&#34;&#34;推論処理を行うための抽象クラス&#34;&#34;&#34;
+
     def __init__(self) -&gt; None:
         self.logger = logging.getLogger(&#34;__main__&#34;).getChild(__name__)
 
     def load_image(self, image: Union[str, np.ndarray]) -&gt; np.ndarray:
         &#34;&#34;&#34;画像を読み込む
-        
+
         グレースケール画像に変換して返す
-        
+
         Args:
             image (Union[str, np.ndarray]): 画像のパスまたは画像データ
-            
+
         Returns:
             np.ndarray: グレースケールの画像データ
         &#34;&#34;&#34;
@@ -86,7 +86,7 @@ hljs.highlightAll();
         &#34;&#34;&#34;画像の前処理を行う
 
         画像の2値化、ノイズ除去を行う
-        
+
         Args:
             image (np.ndarray): 画像データ
             binarize_th (Optional[int], optional): 2値化の閾値。Noneの場合は大津の2値化を行う。デフォルトはNone

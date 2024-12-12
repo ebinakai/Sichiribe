@@ -46,8 +46,8 @@ hljs.highlightAll();
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">class FrameCapture:
-    &#34;&#34;&#34;フレームのキャプチャに関するクラス
-    &#34;&#34;&#34;
+    &#34;&#34;&#34;フレームのキャプチャに関するクラス&#34;&#34;&#34;
+
     def __init__(
         self,
         device_num: int = 0,
@@ -66,7 +66,7 @@ hljs.highlightAll();
         &#34;&#34;&#34;カメラフィードを表示する
 
         OpenCVのウィンドウがアクティブな間、フレームを取得し続ける
-        
+
         yキーを押すとウィンドウが閉じる
         &#34;&#34;&#34;
         while cv2.waitKey(10) &amp; 0xFF != ord(&#34;y&#34;):
@@ -82,8 +82,7 @@ hljs.highlightAll();
         cv2.waitKey(1)
 
     def capture(self) -&gt; Optional[np.ndarray]:
-        &#34;&#34;&#34;フレームを取得する
-        &#34;&#34;&#34;
+        &#34;&#34;&#34;フレームを取得する&#34;&#34;&#34;
         ret, frame = self.cap.read()
         if ret:
             return frame
@@ -92,18 +91,17 @@ hljs.highlightAll();
             return None
 
     def release(self) -&gt; None:
-        &#34;&#34;&#34;カメラリソースを解放する
-        &#34;&#34;&#34;
+        &#34;&#34;&#34;カメラリソースを解放する&#34;&#34;&#34;
         self.cap.release()
         cv2.destroyAllWindows()
 
     def set_cap_size(self, width: float, height: float) -&gt; tuple[float, float]:
         &#34;&#34;&#34;カメラの解像度を設定する
-        
+
         Args:
             width (float): 幅
             height (float): 高さ
-        
+
         Returns:
             tuple[float, float]: 設定された幅と高さ
         &#34;&#34;&#34;

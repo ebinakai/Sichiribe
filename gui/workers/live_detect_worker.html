@@ -62,7 +62,7 @@ See help(type(self)) for accurate signature.</p></div>
 </summary>
 <pre><code class="python">class DetectWorker(QThread):
     &#34;&#34;&#34;リアルタイム解析を行うワーカークラス
-    
+
     Attributes:
         ready: 推論処理が開始されたことを通知するシグナル
         error: エラーが発生したことを通知するシグナル
@@ -70,6 +70,7 @@ See help(type(self)) for accurate signature.</p></div>
         send_image: 画像を送信するシグナル
         remaining_time: 残り時間を通知するシグナル
     &#34;&#34;&#34;
+
     ready = Signal()
     error = Signal(str)
     progress = Signal(int, float, str)
@@ -92,7 +93,7 @@ See help(type(self)) for accurate signature.</p></div>
 
     def run(self) -&gt; None:
         &#34;&#34;&#34;スレッド処理を実行する
-        
+
         1. モデルのロード
         2. カメラのオープン
         3. フレームのキャプチャ

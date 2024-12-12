@@ -52,6 +52,7 @@ hljs.highlightAll();
     シングルトロンパターンで実装されている
     また、スレッドセーフな実装となっている
     &#34;&#34;&#34;
+
     _instance = None
     _lock = Lock()
 
@@ -94,13 +95,13 @@ hljs.highlightAll();
 
     def get(self, key: str) -&gt; Any:
         &#34;&#34;&#34;指定されたキーの値を取得する
-        
+
         Args:
             key (str): キー
-        
+
         Returns:
             Any: 指定されたキーの値
-            
+
         Raises:
             ValueError: 指定されたキーが存在しない場合に発生
         &#34;&#34;&#34;
@@ -110,8 +111,7 @@ hljs.highlightAll();
             return self.shared_data.get(key)
 
     def get_all(self) -&gt; Dict:
-        &#34;&#34;&#34;すべてのキーと値を取得する
-        &#34;&#34;&#34;
+        &#34;&#34;&#34;すべてのキーと値を取得する&#34;&#34;&#34;
         with self._data_lock:
             return self.shared_data
 
@@ -128,8 +128,7 @@ hljs.highlightAll();
             return key in self.shared_data.keys()
 
     def clear(self) -&gt; None:
-        &#34;&#34;&#34;すべてのキーと値を削除する
-        &#34;&#34;&#34;
+        &#34;&#34;&#34;すべてのキーと値を削除する&#34;&#34;&#34;
         with self._data_lock:
             self.shared_data.clear()</code></pre>
 </details>

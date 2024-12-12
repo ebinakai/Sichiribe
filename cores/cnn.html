@@ -62,8 +62,8 @@ hljs.highlightAll();
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">class CNNCore(Detector):
-    &#34;&#34;&#34;CNNを使用した7セグメント数字認識のための基底クラス
-    &#34;&#34;&#34;
+    &#34;&#34;&#34;CNNを使用した7セグメント数字認識のための基底クラス&#34;&#34;&#34;
+
     def __init__(self, num_digits: int) -&gt; None:
         self.num_digits = num_digits
         self.model: Optional[Any]
@@ -97,10 +97,10 @@ hljs.highlightAll();
         &#34;&#34;&#34;画像を準備する
 
         各桁を一度に処理できるように画像をトリミングし、リサイズする
-        
+
         Args:
             image (np.ndarray): 入力画像
-            
+
         Returns:
             np.ndarray: 画像の準備結果
         &#34;&#34;&#34;
@@ -178,10 +178,10 @@ hljs.highlightAll();
         self, predictions: np.ndarray
     ) -&gt; Tuple[np.ndarray, np.ndarray]:
         &#34;&#34;&#34;各列の最頻値を取得する
-        
+
         Args:
             predictions (np.ndarray): 推論結果の配列
-            
+
         Returns:
             Tuple[np.ndarray, np.ndarray]: 最頻値の配列と各桁のエラー率の配列
         &#34;&#34;&#34;

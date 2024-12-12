@@ -63,7 +63,7 @@ See help(type(self)) for accurate signature.</p></div>
 </summary>
 <pre><code class="python">class LiveFeedWorker(QThread):
     &#34;&#34;&#34;ライブフィードを取得するワーカークラス
-    
+
     Attributes:
         cap_size: キャプチャサイズを通知するシグナル
         progress: フレームを通知するシグナル
@@ -71,6 +71,7 @@ See help(type(self)) for accurate signature.</p></div>
         cancelled: キャンセルを通知するシグナル
         error: エラーを通知するシグナル
     &#34;&#34;&#34;
+
     cap_size = Signal(tuple)
     progress = Signal(np.ndarray)
     end = Signal(np.ndarray)
@@ -134,7 +135,7 @@ See help(type(self)) for accurate signature.</p></div>
 
     def stop(self) -&gt; None:
         &#34;&#34;&#34;スレッド処理を停止する
-        
+
         このメソッドを呼び出すと、終了フラグが立つ
         &#34;&#34;&#34;
         self.logger.info(&#34;Capture Feed stopping...&#34;)
@@ -142,7 +143,7 @@ See help(type(self)) for accurate signature.</p></div>
 
     def cancel(self) -&gt; None:
         &#34;&#34;&#34;スレッド処理をキャンセルする
-        
+
         このメソッドを呼び出すと、キャンセルフラグが立つ
         &#34;&#34;&#34;
         self.logger.info(&#34;Capture Feed canceling...&#34;)

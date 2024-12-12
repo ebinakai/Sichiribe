@@ -72,13 +72,14 @@ See help(type(self)) for accurate signature.</p></div>
 </summary>
 <pre><code class="python">class DetectWorker(QThread):
     &#34;&#34;&#34;動画ファイル解析を行うワーカークラス
-    
+
     Attributes:
         progress: 推論結果を通知するシグナル
         send_image: 画像を送信するシグナル
         cancelled: キャンセルを通知するシグナル
         model_not_found: モデルが見つからないことを通知するシグナル
     &#34;&#34;&#34;
+
     progress = Signal(int, float, str)
     send_image = Signal(np.ndarray)
     cancelled = Signal()
@@ -131,7 +132,7 @@ See help(type(self)) for accurate signature.</p></div>
 
     def cancel(self) -&gt; None:
         &#34;&#34;&#34;スレッド処理をキャンセルする
-        
+
         このメソッドが呼ばれると、キャンセルフラグが立つ
         &#34;&#34;&#34;
         self.logger.info(&#34;DetectWorker terminating...&#34;)
