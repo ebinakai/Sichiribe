@@ -45,15 +45,15 @@ def resize_image(
 ) -> tuple[np.ndarray, float]:
     """
     画像を指定したサイズにアスペクト比を維持してリサイズする
-    
+
     Args:
         image (np.ndarray): 入力画像
         target_width (float): ターゲットの幅
         target_height (float): ターゲットの高さ
-        
+
     Returns:
         tuple[np.ndarray, float]: リサイズ後の画像とリサイズスケール
-    
+
     """
 
     height, width = image.shape[:2]
@@ -79,7 +79,7 @@ def resize_image(
 def center_window(window: QWidget) -> None:
     """
     ウィンドウを画面の中央に配置する
-    
+
     Args:
         window (QWidget): 対象ウィンドウ
     """
@@ -96,7 +96,7 @@ def center_window(window: QWidget) -> None:
 def get_user_data_dir() -> str:
     """
     ユーザーデータディレクトリを取得する
-    
+
     Returns:
         str: ユーザーデータディレクトリのパス
     """

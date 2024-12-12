@@ -13,8 +13,8 @@ ROOT = FILE.parent / ".."
 
 
 class CNNOnnx(CNNCore):
-    """ONNX形式の学習済みモデルを使用したCNNクラス
-    """
+    """ONNX形式の学習済みモデルを使用したCNNクラス"""
+
     model: "InferenceSession"
 
     def __init__(self, num_digits: int, model_filename: str) -> None:

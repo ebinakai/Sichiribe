@@ -8,7 +8,7 @@ import time
 
 class LiveFeedWorker(QThread):
     """ライブフィードを取得するワーカークラス
-    
+
     Attributes:
         cap_size: キャプチャサイズを通知するシグナル
         progress: フレームを通知するシグナル
@@ -16,6 +16,7 @@ class LiveFeedWorker(QThread):
         cancelled: キャンセルを通知するシグナル
         error: エラーを通知するシグナル
     """
+
     cap_size = Signal(tuple)
     progress = Signal(np.ndarray)
     end = Signal(np.ndarray)
@@ -79,7 +80,7 @@ class LiveFeedWorker(QThread):
 
     def stop(self) -> None:
         """スレッド処理を停止する
-        
+
         このメソッドを呼び出すと、終了フラグが立つ
         """
         self.logger.info("Capture Feed stopping...")
@@ -87,7 +88,7 @@ class LiveFeedWorker(QThread):
 
     def cancel(self) -> None:
         """スレッド処理をキャンセルする
-        
+
         このメソッドを呼び出すと、キャンセルフラグが立つ
         """
         self.logger.info("Capture Feed canceling...")

@@ -9,7 +9,7 @@ help:
 	@echo "make check                 - run all the above commands"
 
 lint:
-	mypy --config-file mypy.ini --show-error-context --show-column-numbers --pretty .
+	mypy --config-file pyproject.toml --show-error-context --show-column-numbers --pretty .
 
 format:
 	black --exclude 'env' --verbose .
@@ -29,7 +29,7 @@ docs:
 	
 
 check:
-	mypy --config-file mypy.ini .
+	mypy --config-file pyproject.toml .
 	black --exclude 'env' .
 	autoflake --recursive --in-place --remove-unused-variables --remove-all-unused-imports --exclude "env" ./
 	pytest --quiet tests/*py

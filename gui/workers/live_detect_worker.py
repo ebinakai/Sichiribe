@@ -14,7 +14,7 @@ from pathlib import Path
 
 class DetectWorker(QThread):
     """リアルタイム解析を行うワーカークラス
-    
+
     Attributes:
         ready: 推論処理が開始されたことを通知するシグナル
         error: エラーが発生したことを通知するシグナル
@@ -22,6 +22,7 @@ class DetectWorker(QThread):
         send_image: 画像を送信するシグナル
         remaining_time: 残り時間を通知するシグナル
     """
+
     ready = Signal()
     error = Signal(str)
     progress = Signal(int, float, str)
@@ -44,7 +45,7 @@ class DetectWorker(QThread):
 
     def run(self) -> None:
         """スレッド処理を実行する
-        
+
         1. モデルのロード
         2. カメラのオープン
         3. フレームのキャプチャ

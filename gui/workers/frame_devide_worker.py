@@ -14,10 +14,11 @@ import logging
 
 class FrameDivideWorker(QThread):
     """動画ファイルからフレームを切り出すワーカークラス
-    
+
     Attributes:
         end: フレームの切り出し処理が完了したことを通知するシグナル
     """
+
     end = Signal(list, list)
 
     def __init__(self) -> None:

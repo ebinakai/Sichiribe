@@ -12,6 +12,7 @@ class MainWindow(QMainWindow):
     3. 画面の定義は、gui/views/* にある各画面のクラスを使う
     4. 画面のルーティングは、gui/utils/router.py にて行う
     """
+
     def __init__(self) -> None:
         super().__init__()
 

@@ -81,10 +81,10 @@ def main(settings: Dict[str, Any]) -> None:
 
     Args:
         settings (Dict[str, Any]): 設定情報
-    
+
     Notes:
         処理の流れ:
-        
+
         1. カメラフィードを表示
         2. 画角を調整するためにクリックポイントを選択
         3. サンプリングを開始

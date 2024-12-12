@@ -23,8 +23,8 @@ from datetime import timedelta
 
 
 class LiveExeWindow(CustomQWidget):
-    """リアルタイム解析を行うViewクラス
-    """
+    """リアルタイム解析を行うViewクラス"""
+
     def __init__(self, screen_manager: ScreenManager) -> None:
         self.logger = logging.getLogger("__main__").getChild(__name__)
         self.settings_manager = SettingsManager("live")
@@ -41,8 +41,7 @@ class LiveExeWindow(CustomQWidget):
         screen_manager.add_screen("live_exe", self, "ライブ解析中")
 
     def initUI(self):
-        """ウィジェットのUIを初期化する
-        """
+        """ウィジェットのUIを初期化する"""
         main_layout = QVBoxLayout()
         graph_layout = QVBoxLayout()
         extracted_image_layout = QHBoxLayout()
@@ -98,7 +97,7 @@ class LiveExeWindow(CustomQWidget):
     def trigger(self, action, *args):
         """
         ウィジェットのアクションをトリガーする
-        
+
         Args:
             action (str): 実行するアクションの名前
 
@@ -111,8 +110,7 @@ class LiveExeWindow(CustomQWidget):
             raise ValueError(f"Invalid action: {action}")
 
     def cancel(self) -> None:
-        """解析を中止する
-        """
+        """解析を中止する"""
         if self.worker is not None:
             self.term_label.setText("中止中...")
             self.worker.cancel()
@@ -121,7 +119,7 @@ class LiveExeWindow(CustomQWidget):
         """
         画像二値化しきい値を更新する
         しきい値が0の場合は自動設定にする
-        
+
         Args:
             value (Optional[int]): 画像二値化しきい値
         """
@@ -132,8 +130,7 @@ class LiveExeWindow(CustomQWidget):
             self.worker.update_binarize_th(value)
 
     def graph_clear(self) -> None:
-        """グラフをクリアする
-        """
+        """グラフをクリアする"""
         self.graph_results = []
         self.graph_failed_rates = []
         self.graph_timestamps = []
@@ -185,7 +182,7 @@ class LiveExeWindow(CustomQWidget):
 
     def detect_progress(self, result: int, failed_rate: float, timestamp: str) -> None:
         """解析進捗を表示する
-        
+
         Args:
             result (int): 推論結果
             failed_rate (float): 失敗率
@@ -198,7 +195,7 @@ class LiveExeWindow(CustomQWidget):
 
     def update_graph(self, result: int, failed_rate: float, timestamp: str) -> None:
         """グラフを更新する
-        
+
         Args:
             result (int): 推論結果
             failed_rate (float): 失敗率
@@ -223,15 +220,14 @@ class LiveExeWindow(CustomQWidget):
 
     def update_remaining_time(self, remaining_time: float) -> None:
         """残り時間を表示する
-        
+
         Args:
             remaining_time (float): 残り時間
         """
         self.remaining_time_label.setText(str(timedelta(seconds=int(remaining_time))))
 
     def detect_finished(self) -> None:
-        """解析結果の保存し、環境をクリアしたあと、メニュー画面に戻る
-        """
+        """解析結果の保存し、環境をクリアしたあと、メニュー画面に戻る"""
         self.logger.info("Detect finished.")
         self.data_store.set("results", self.results)
         self.data_store.set("failed_rates", self.failed_rates)
@@ -241,16 +237,14 @@ class LiveExeWindow(CustomQWidget):
         self.clear_env()
 
     def export_process(self) -> None:
-        """解析結果をエクスポートする
-        """
+        """解析結果をエクスポートする"""
         self.logger.info("Data exporting...")
         export_result(self.data_store.get_all())
         export_settings(self.data_store.get_all())
         self.screen_manager.popup(f"保存場所：{self.data_store.get('out_dir')}")
 
     def clear_env(self) -> None:
-        """環境をクリアする
-        """
+        """環境をクリアする"""
         self.graph_label.clear()
         self.extracted_label.clear()
         self.term_label.setText("")

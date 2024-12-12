@@ -12,6 +12,7 @@ class SettingWidget(CustomQWidget):
         get_settings_from_ui: UIから設定を取得する
         set_ui_from_settings: 設定からUIを設定する
     """
+
     def __init__(self) -> None:
         super().__init__()
         self.settings_manager: SettingsManager
@@ -33,8 +34,7 @@ class SettingWidget(CustomQWidget):
             self.logger.info(f"Failed to load default setting file")
 
     def save_settings(self) -> None:
-        """画面間共有データストアから設定を保存する
-        """
+        """画面間共有データストアから設定を保存する"""
         try:
             self.settings_manager.save(self.data_store.get_all())
         except Exception:

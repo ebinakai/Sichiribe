@@ -19,8 +19,8 @@ ROOT = FILE.parent / ".."
 
 
 class CNNTf(CNNCore):
-    """TensorFlow形式の学習済みモデルを使用したCNNクラス
-    """
+    """TensorFlow形式の学習済みモデルを使用したCNNクラス"""
+
     model: "Model"
 
     def __init__(self, num_digits: int, model_filename: str) -> None:
@@ -43,7 +43,7 @@ class CNNTf(CNNCore):
 
         Args:
             image (np.ndarray): 推論対象の画像
-            
+
         Returns:
             List[int]: 各桁の推論結果
         """

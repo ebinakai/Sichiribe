@@ -27,8 +27,7 @@ class MplCanvas(FigureCanvasQTAgg):
         self.clear()
 
     def clear(self) -> None:
-        """グラフをクリアする
-        """
+        """グラフをクリアする"""
         self.axes1.clear()
         self.axes2.clear()
         self.draw()
@@ -98,7 +97,7 @@ class MplCanvas(FigureCanvasQTAgg):
         y_val2: Union[List[int], List[float]],
     ) -> None:
         """既存のプロットを更新する
-        
+
         Args:
             x_val (List[str]): 時間軸の値
             y_val1 (Union[List[int], List[float]]): 左側のy軸の値

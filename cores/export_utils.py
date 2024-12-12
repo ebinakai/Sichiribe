@@ -57,7 +57,7 @@ def to_json(data: Union[Dict, List], out_dir: Union[str, Path], prefix: str) -> 
 
 def to_csv(data: List[Dict], out_dir: Union[str, Path], prefix: str) -> None:
     """CSV形式でデータをエクスポートする
-    
+
     Args:
         data (List[Dict]): エクポートするデータ
         out_dir (Union[str, Path]): 出力ディレクトリ
@@ -77,10 +77,10 @@ def build_data_records(data_dict: Dict[str, List[Any]]) -> List[Dict[str, Any]]:
 
     Args:
         data_dict (Dict[str, List[Any]]): データ
-        
+
     Returns:
         List[Dict[str, Any]]: レコード形式のデータ
-        
+
     Example:
         data_dict = {
             "name": ["Alice", "Bob", "Charlie"],
@@ -88,7 +88,7 @@ def build_data_records(data_dict: Dict[str, List[Any]]) -> List[Dict[str, Any]]:
         }
         build_data_records(data_dict)
         # => [
-        #      {"name": "Alice", "age": 20},    
+        #      {"name": "Alice", "age": 20},
         #      {"name": "Bob", "age": 25},
         #      {"name": "Charlie", "age": 30},
         #    ]

@@ -12,8 +12,8 @@ logging.getLogger("h5py").setLevel(logging.ERROR)
 
 
 class CNNCore(Detector):
-    """CNNを使用した7セグメント数字認識のための基底クラス
-    """
+    """CNNを使用した7セグメント数字認識のための基底クラス"""
+
     def __init__(self, num_digits: int) -> None:
         self.num_digits = num_digits
         self.model: Optional[Any]
@@ -47,10 +47,10 @@ class CNNCore(Detector):
         """画像を準備する
 
         各桁を一度に処理できるように画像をトリミングし、リサイズする
-        
+
         Args:
             image (np.ndarray): 入力画像
-            
+
         Returns:
             np.ndarray: 画像の準備結果
         """
@@ -128,10 +128,10 @@ class CNNCore(Detector):
         self, predictions: np.ndarray
     ) -> Tuple[np.ndarray, np.ndarray]:
         """各列の最頻値を取得する
-        
+
         Args:
             predictions (np.ndarray): 推論結果の配列
-            
+
         Returns:
             Tuple[np.ndarray, np.ndarray]: 最頻値の配列と各桁のエラー率の配列
         """
@@ -153,7 +153,7 @@ class CNNCore(Detector):
 
 def cnn_init(num_digits: int, model_filename: Optional[str] = None) -> CNNCore:
     """インストールされているライブラリに応じてCNNモデルを選択する
-    
+
     Args:
         num_digits (int): 推論する桁数
         model_filename (Optional[str], optional): モデルファイル名。Noneの場合はデフォルトのモデルを使用。デフォルトはNone。

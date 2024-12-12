@@ -12,6 +12,7 @@ class ScreenInfo:
     """
     画面情報を保持するデータクラス
     """
+
     widget: CustomQWidget
     title: str
 
@@ -19,7 +20,7 @@ class ScreenInfo:
 class ScreenManager:
     """
     画面の管理を行うクラス
-    
+
     Methods:
         add_screen: 画面を追加する
         show_screen: 画面を表示する
@@ -31,6 +32,7 @@ class ScreenManager:
         popup: ポップアップメッセージボックスを表示する
         quit: アプリケーションを終了する
     """
+
     def __init__(self, stacked_widget: QStackedWidget, main_window: QMainWindow):
         self.stacked_widget = stacked_widget
         self.main_window = main_window
@@ -45,7 +47,7 @@ class ScreenManager:
             name (str): 画面呼び出し時の名前
             widget (CustomQWidget): 画面のウィジェットオブジェクト
             title (str): 画面のタイトル
-            
+
         Returns:
             None
         """
@@ -56,7 +58,7 @@ class ScreenManager:
         """
         Args:
             name (str): 画面の名前
-        """ 
+        """
         if name in self.screens:
             widget = self.screens[name].widget
             widget.display()
@@ -70,7 +72,7 @@ class ScreenManager:
         """
         Args:
             name (str): 画面の名前
-            
+
         Returns:
             CustomQWidget: 画面のウィジェットオブジェクト
         """
@@ -103,8 +105,8 @@ class ScreenManager:
 
     def restore_screen_size(self) -> None:
         """
-            保存された画面の位置とサイズを復元する
-            リサイズ後は、保存された位置とサイズはクリアされる
+        保存された画面の位置とサイズを復元する
+        リサイズ後は、保存された位置とサイズはクリアされる
         """
         QApplication.processEvents()
         if self.window_pos is not None and self.window_size is not None:

@@ -8,16 +8,17 @@ import logging
 
 
 class LogEmitter(QObject):
-    """ログを送信するためのクラス
-    """
+    """ログを送信するためのクラス"""
+
     new_log = Signal(str)
 
 
 class QTextEditLogger(logging.Handler):
     """ログをQTextEditに表示するためのハンドラ
-    
+
     スレッド間通信のためにQObjectを継承している
     """
+
     def __init__(self, emitter: LogEmitter) -> None:
         super().__init__()
         self.emitter = emitter
@@ -35,6 +36,7 @@ class LogWindow(CustomQWidget):
     2. ログはログハンドラを使って受け取ることで、別スレッドで実行中のワーカーからもログを受け取れる
     3. 処理中で、表示するコンテンツがない場合に使う
     """
+
     def __init__(self, screen_manager: ScreenManager) -> None:
         self.screen_manager = screen_manager
 
@@ -42,8 +44,7 @@ class LogWindow(CustomQWidget):
         screen_manager.add_screen("log", self, "ログ")
 
     def initUI(self):
-        """UIの初期化
-        """
+        """UIの初期化"""
         layout = QVBoxLayout()
         self.setLayout(layout)
 
@@ -62,12 +63,11 @@ class LogWindow(CustomQWidget):
 
     def display(self):
         """画面表示時の処理
-        
+
         画面表示時にログをクリアする
         """
         self.log_display.clear()
 
     def append_log(self, message: str) -> None:
-        """ログを画面に追加する
-        """
+        """ログを画面に追加する"""
         self.log_display.append(message)

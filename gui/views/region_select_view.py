@@ -42,8 +42,7 @@ class RegionSelectWindow(CustomQWidget):
         self.target_height = int((screen_rect.height() - 100) * 0.8)
 
     def initUI(self):
-        """UIの初期化
-        """
+        """UIの初期化"""
         main_layout = QVBoxLayout()
         header_layout = QVBoxLayout()
         image_layout = QVBoxLayout()
@@ -110,7 +109,7 @@ class RegionSelectWindow(CustomQWidget):
 
     def set_image(self, image: np.ndarray) -> None:
         """領域選択用の画像を設定する
-        
+
         画像を画面サイズに合わせてリサイズする
 
         Args:
@@ -120,7 +119,7 @@ class RegionSelectWindow(CustomQWidget):
         self.image, self.resize_scale = resize_image(
             image, self.target_width, self.target_height
         )
-        
+
         height, width, channel = self.image.shape
         self.image_size = QSize(width, height)
 
@@ -128,7 +127,7 @@ class RegionSelectWindow(CustomQWidget):
 
     def label_clicked(self, event: QMouseEvent) -> None:
         """ラベルがクリックされたときの処理
-        
+
         マウスイベントからクリックされた座標を取得し、クリックポイントを更新する
         """
         if (
@@ -186,7 +185,7 @@ class RegionSelectWindow(CustomQWidget):
 
     def update_image(self, image: np.ndarray) -> None:
         """画像を更新する
-        
+
         1. 選択領域を切り出す
         2. クリックポイントを描画して表示する
         3. 切り取った画像を表示する
@@ -223,8 +222,7 @@ class RegionSelectWindow(CustomQWidget):
         QTimer.singleShot(1, lambda: self.window().move(window_pos.x(), 1))
 
     def finish_select(self) -> None:
-        """選択を終了して次の画面に遷移する
-        """
+        """選択を終了して次の画面に遷移する"""
         if len(self.click_points) != 4:
             self.confirm_txt.setText("7セグメント領域を囲ってください")
             return
@@ -239,8 +237,7 @@ class RegionSelectWindow(CustomQWidget):
         QTimer.singleShot(1, self.switch_next)
 
     def cancel_select(self) -> None:
-        """選択をキャンセルして前の画面に戻る
-        """
+        """選択をキャンセルして前の画面に戻る"""
         self.logger.info("Region selection canceled.")
         self.clear_env()
         QTimer.singleShot(1, lambda: self.switch_back())
@@ -276,8 +273,7 @@ class RegionSelectWindow(CustomQWidget):
         self.prev_screen = ""
 
     def clear_env(self) -> None:
-        """環境をクリアする
-        """
+        """環境をクリアする"""
         self.main_label.clear()
         self.extracted_label.clear()
         self.click_points = []

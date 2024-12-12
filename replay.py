@@ -73,13 +73,13 @@ def get_args() -> argparse.Namespace:
 
 def main(settings) -> None:
     """動画ファイルから7セグメントディスプレイの数字を読み取る
-    
+
     Args:
         settings (Dict[str, Any]): 設定情報
-        
+
     Notes:
         処理の流れ:
-        
+
         1. 動画ファイルからフレームをサンプリング
         2. サンプリングしたフレームをCNNで解析
         3. 解析結果をエクスポート

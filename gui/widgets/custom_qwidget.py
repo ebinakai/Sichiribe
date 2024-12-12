@@ -4,9 +4,10 @@ from gui.utils.data_store import DataStore
 
 class CustomQWidget(QWidget):
     """カスタムウィジェットの基底クラス
-    
+
     このウィジェットを継承して各GUIコンポーネントを作成する
     """
+
     def __init__(self) -> None:
         super().__init__()
         self.initUI()
@@ -32,6 +33,4 @@ class CustomQWidget(QWidget):
         raise NotImplementedError("trigger() must be implemented in subclass if used")
 
     def display(self) -> None:
-        """ウィジェットを表示されたときの処理
-        """
-        pass
+        """ウィジェットを表示されたときの処理"""

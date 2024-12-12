@@ -6,19 +6,19 @@ from abc import ABC, abstractmethod
 
 
 class Detector(ABC):
-    """推論処理を行うための抽象クラス
-    """
+    """推論処理を行うための抽象クラス"""
+
     def __init__(self) -> None:
         self.logger = logging.getLogger("__main__").getChild(__name__)
 
     def load_image(self, image: Union[str, np.ndarray]) -> np.ndarray:
         """画像を読み込む
-        
+
         グレースケール画像に変換して返す
-        
+
         Args:
             image (Union[str, np.ndarray]): 画像のパスまたは画像データ
-            
+
         Returns:
             np.ndarray: グレースケールの画像データ
         """
@@ -47,7 +47,7 @@ class Detector(ABC):
         """画像の前処理を行う
 
         画像の2値化、ノイズ除去を行う
-        
+
         Args:
             image (np.ndarray): 画像データ
             binarize_th (Optional[int], optional): 2値化の閾値。Noneの場合は大津の2値化を行う。デフォルトはNone

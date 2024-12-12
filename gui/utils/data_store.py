@@ -8,6 +8,7 @@ class DataStore:
     シングルトロンパターンで実装されている
     また、スレッドセーフな実装となっている
     """
+
     _instance = None
     _lock = Lock()
 
@@ -50,13 +51,13 @@ class DataStore:
 
     def get(self, key: str) -> Any:
         """指定されたキーの値を取得する
-        
+
         Args:
             key (str): キー
-        
+
         Returns:
             Any: 指定されたキーの値
-            
+
         Raises:
             ValueError: 指定されたキーが存在しない場合に発生
         """
@@ -66,8 +67,7 @@ class DataStore:
             return self.shared_data.get(key)
 
     def get_all(self) -> Dict:
-        """すべてのキーと値を取得する
-        """
+        """すべてのキーと値を取得する"""
         with self._data_lock:
             return self.shared_data
 
@@ -84,7 +84,6 @@ class DataStore:
             return key in self.shared_data.keys()
 
     def clear(self) -> None:
-        """すべてのキーと値を削除する
-        """
+        """すべてのキーと値を削除する"""
         with self._data_lock:
             self.shared_data.clear()

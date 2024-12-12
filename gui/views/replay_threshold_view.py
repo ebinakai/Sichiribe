@@ -19,8 +19,8 @@ import numpy as np
 
 
 class ReplayThresholdWindow(CustomQWidget):
-    """動画解析のしきい値設定画面を表示するViewクラス
-    """
+    """動画解析のしきい値設定画面を表示するViewクラス"""
+
     def __init__(self, screen_manager: ScreenManager) -> None:
         self.logger = logging.getLogger("__main__").getChild(__name__)
         self.screen_manager = screen_manager
@@ -32,8 +32,7 @@ class ReplayThresholdWindow(CustomQWidget):
         screen_manager.add_screen("replay_threshold", self, "二値化しきい値設定")
 
     def initUI(self):
-        """UIの初期化
-        """
+        """UIの初期化"""
         main_layout = QVBoxLayout()
         extracted_image_layout = QHBoxLayout()
         form_layout = QFormLayout()
@@ -90,8 +89,7 @@ class ReplayThresholdWindow(CustomQWidget):
             raise ValueError("Invalid action.")
 
     def startup(self) -> None:
-        """各種初期化処理を行う
-        """
+        """各種初期化処理を行う"""
         self.screen_manager.show_screen("replay_threshold")
         self.fe = FrameEditor(self.data_store.get("num_digits"))
 
@@ -135,7 +133,7 @@ class ReplayThresholdWindow(CustomQWidget):
 
     def next(self) -> None:
         """次へボタンがクリックされたときの処理
-        
+
         しきい値をパラメータに保存し、次の画面に遷移する
         """
         self.logger.info("Set threshold finished.")
@@ -144,8 +142,7 @@ class ReplayThresholdWindow(CustomQWidget):
         self.screen_manager.get_screen("replay_exe").trigger("continue")
 
     def clear_env(self) -> None:
-        """環境をクリアする
-        """
+        """環境をクリアする"""
         self.extracted_label.clear()
         self.binarize_th.setValue(0)
         self.logger.info("Environment cleared.")

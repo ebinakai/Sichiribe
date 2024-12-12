@@ -33,8 +33,7 @@ def clear_directory(directory: Union[str, Path]) -> None:
 
 
 def get_now_str() -> str:
-    """現在時刻を表す文字列を取得する
-    """
+    """現在時刻を表す文字列を取得する"""
     return datetime.datetime.now().strftime("%Y%m%d%H%M%S")
 
 
@@ -55,7 +54,7 @@ def is_directory_writable(directory_path: Path) -> bool:
 
     Args:
         directory_path (Path): チェック対象のディレクトリのパス
-        
+
     Returns:
         bool: ディレクトリが存在し、書き込み可能な場合はTrue、それ以外はFalse
     """

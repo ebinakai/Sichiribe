@@ -38,8 +38,7 @@ def get_args() -> argparse.Namespace:
 
 
 def main() -> None:
-    """GUIアプリケーションのエントリーポイント
-    """
+    """GUIアプリケーションのエントリーポイント"""
     args = get_args()
     setup_logging(args.debug)
 

@@ -10,8 +10,8 @@ logger = logging.getLogger("__main__").getChild(__name__)
 
 
 class SettingsManager:
-    """設定ファイルの読み込み、保存、検証を行うクラス
-    """
+    """設定ファイルの読み込み、保存、検証を行うクラス"""
+
     def __init__(self, pattern: str) -> None:
         self.required_keys = self._get_required_keys(pattern)
         self.default_path = self._get_default_setting_path(pattern)
@@ -53,8 +53,7 @@ class SettingsManager:
         return {**base_settings, **additional_settings}
 
     def _get_default_setting_path(self, pattern: str) -> Path:
-        """設定ファイルのデフォルトパスを取得する
-        """
+        """設定ファイルのデフォルトパスを取得する"""
         appname = "Sichiribe"
         appauthor = "EbinaKai"
         user_dir = user_data_dir(appname, appauthor)
@@ -79,12 +78,12 @@ class SettingsManager:
 
         Args:
             filepath (Union[str, Path]): 設定ファイルのパス
-            
+
         Raises:
             FileNotFoundError: ファイルが存在しない場合
             TypeError: ファイルの内容が辞書でない場合
             KeyError: 必要なキーが存在しない場合
-            
+
         Returns:
             Dict[str, Any]: 設定ファイルの内容
         """
@@ -107,7 +106,7 @@ class SettingsManager:
 
         Args:
             settings (Dict[str, Any]): 設定ファイルの内容
-            
+
         Returns:
             bool: 検証結果
         """
@@ -126,7 +125,7 @@ class SettingsManager:
 
         Args:
             settings (Dict[str, Any]): 設定ファイルの内容
-            
+
         Returns:
             Dict[str, Any]: 不要なキーを削除した設定ファイルの内容
         """
@@ -134,10 +133,10 @@ class SettingsManager:
 
     def save(self, settings: Dict[str, Any]) -> None:
         """設定ファイルを保存する
-        
+
         Args:
             settings (Dict[str, Any]): 保存する設定ファイルの内容
-            
+
         Raises:
             ValueError: 検証に失敗した場合
         """
