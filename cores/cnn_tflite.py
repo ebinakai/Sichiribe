@@ -1,4 +1,21 @@
-from tflite_runtime import interpreter as tflite
+"""
+CNN Implementation using TensorFlow Lite
+
+Requirements:
+- tflite_runtime
+
+Alternative Implementations:
+- cnn_tf.py (TensorFlow version)
+- cnn_onnx.py (ONNX version)
+
+Note: If TensorFlow Lite is not installed, please install it or use an alternative implementation.
+"""
+
+try:
+    from tflite_runtime import interpreter as tflite
+except ImportError:
+    pass
+
 from cores.cnn import CNNCore
 import os
 import logging

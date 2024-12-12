@@ -36,7 +36,7 @@ jobs:
           mv train _train
           mv tests _tests
           mkdir -p html
-          pdoc --output-dir html --html --force --skip-errors .
+          pdoc --html --force .
           mv html/sichiribe docs
 
       - name: Deploy Documentation

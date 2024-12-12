@@ -1,9 +1,26 @@
+"""
+CNN Implementation using ONNX
+
+Requirements:
+- tflite_runtime
+
+Alternative Implementations:
+- cnn_tf.py (TensorFlow version)
+- cnn_tflite.py (TFLite version)
+
+Note: If ONNX is not installed, please install it or use an alternative implementation.
+"""
+
+try:
+    import onnxruntime as ort
+except ImportError:
+    pass
+
 from cores.cnn import CNNCore
 import logging
 from typing import TYPE_CHECKING, List
 import numpy as np
 from pathlib import Path
-import onnxruntime as ort
 
 if TYPE_CHECKING:
     from onnxruntime.capi.onnxruntime_inference_collection import InferenceSession

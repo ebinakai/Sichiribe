@@ -1,4 +1,21 @@
-from tensorflow.keras.models import load_model
+"""
+CNN Implementation using TensorFlow
+
+Requirements:
+- tensorflow
+
+Alternative Implementations:
+- cnn_tflite.py (TFLite version)
+- cnn_onnx.py (ONNX version)
+
+Note: If TensorFlow is not installed, please install it or use an alternative implementation.
+"""
+
+try:
+    from tensorflow.keras.models import load_model
+except ImportError:
+    pass
+
 from cores.cnn import CNNCore
 import os
 import logging

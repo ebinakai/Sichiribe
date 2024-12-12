@@ -23,11 +23,12 @@ test:
 docs:
 	mv train _train
 	mv tests _tests
-	pdoc --output-dir docs --html --force --skip-errors .
+	mkdir -p html
+	pdoc --html --force .
+	rm -rf docs && mv html/sichiribe docs
 	mv _train train
 	mv _tests tests
 	
-
 check:
 	mypy --config-file pyproject.toml .
 	black --exclude 'env' .

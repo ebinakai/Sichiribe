@@ -54,6 +54,7 @@ jobs:
         with:
           nuitka-version: main
           script-name: Sichiribe.py
+          standalone: true
           enable-plugins: pyside6
           include-module: matplotlib.backends.backend_qt5agg
           include-data-dir: |
@@ -62,7 +63,6 @@ jobs:
           macos-app-name: Sichiribe
           macos-app-icon: res/Sichiribe_icon.png
           macos-app-protected-resource: "NSCameraUsageDescription:Camera access"
-          mode: app
 
       - name: Build for ubuntu-latest, windows-latest
         if: ${{ matrix.os == 'ubuntu-latest' || matrix.os == 'windows-latest' }}
@@ -70,6 +70,7 @@ jobs:
         with:
           nuitka-version: main
           script-name: Sichiribe.py
+          onefile: true
           standalone: true
           enable-plugins: pyside6
           include-module: matplotlib.backends.backend_qt5agg
@@ -78,7 +79,6 @@ jobs:
             gui/images=gui/images
           linux-icon: res/Sichiribe_icon.png
           windows-icon-from-ico: res/Sichiribe_icon.png
-          mode: app
 
       - name: Fix app bundle structure
         if: matrix.os == 'macos-latest'
