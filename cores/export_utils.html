@@ -49,16 +49,18 @@ hljs.highlightAll();
 <dd>レコード形式のデータ</dd>
 </dl>
 <h2 id="example">Example</h2>
-<p>data_dict = {
-"name": ["Alice", "Bob", "Charlie"],
-"age": [20, 25, 30],
+<pre><code class="language-python">data_dict = {
+    &quot;name&quot;: [&quot;Alice&quot;, &quot;Bob&quot;, &quot;Charlie&quot;],
+    &quot;age&quot;: [20, 25, 30],
 }
-build_data_records(data_dict)</p>
-<h1 id="_1">=&gt; [</h1>
-<h1 id="name-alice-age-20">{"name": "Alice", "age": 20},</h1>
-<h1 id="name-bob-age-25">{"name": "Bob", "age": 25},</h1>
-<h1 id="name-charlie-age-30">{"name": "Charlie", "age": 30},</h1>
-<h1 id="_2">]</h1></div>
+
+build_data_records(data_dict)
+# =&gt; [  
+#      {&quot;name&quot;: &quot;Alice&quot;, &quot;age&quot;: 20},  
+#      {&quot;name&quot;: &quot;Bob&quot;, &quot;age&quot;: 25},  
+#      {&quot;name&quot;: &quot;Charlie&quot;, &quot;age&quot;: 30},  
+#    ]
+</code></pre></div>
 </dd>
 <dt id="sichiribe.cores.export_utils.export"><code class="name flex">
 <span>def <span class="ident">export</span></span>(<span>data: List | Dict, format: str, out_dir: str | pathlib.Path, prefix: str) ‑> None</span>
