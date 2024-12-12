@@ -33,6 +33,434 @@ hljs.highlightAll();
 <section>
 </section>
 <section>
+<h2 class="section-title" id="header-classes">Classes</h2>
+<dl>
+<dt id="sichiribe.gui.views.region_select_view.RegionSelectWindow"><code class="flex name class">
+<span>class <span class="ident">RegionSelectWindow</span></span>
+<span>(</span><span>screen_manager: gui.utils.screen_manager.ScreenManager)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>映像中の7セグメント領域を選択する画面のViewクラス</p>
+<ol>
+<li>4点を選択することで7セグメント領域を囲むことができる</li>
+<li>opencvの画像処理を行うため、FrameEditorクラスを利用する</li>
+<li>選択が終わると次の画面に遷移する</li>
+</ol>
+<p><strong>init</strong>(self, parent: Optional[PySide6.QtWidgets.QWidget] = None, f: PySide6.QtCore.Qt.WindowType = Default(Qt.WindowFlags)) -&gt; None</p>
+<p>Initialize self.
+See help(type(self)) for accurate signature.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class RegionSelectWindow(CustomQWidget):
+    &#34;&#34;&#34;
+    映像中の7セグメント領域を選択する画面のViewクラス
+
+    1. 4点を選択することで7セグメント領域を囲むことができる
+    2. opencvの画像処理を行うため、FrameEditorクラスを利用する
+    3. 選択が終わると次の画面に遷移する
+    &#34;&#34;&#34;
+
+    def __init__(self, screen_manager: ScreenManager) -&gt; None:
+        self.logger = logging.getLogger(&#34;__main__&#34;).getChild(__name__)
+        self.screen_manager = screen_manager
+        self.click_points: List = []
+        self.image_size: QSize
+
+        super().__init__()
+        screen_manager.add_screen(&#34;region_select&#34;, self, &#34;7セグメント領域選択&#34;)
+
+        screen = QApplication.primaryScreen()
+        screen_rect = screen.availableGeometry()
+        self.target_width = int(screen_rect.width() * 0.8)
+        self.target_height = int((screen_rect.height() - 100) * 0.8)
+
+    def initUI(self):
+        &#34;&#34;&#34;UIの初期化&#34;&#34;&#34;
+        main_layout = QVBoxLayout()
+        header_layout = QVBoxLayout()
+        image_layout = QVBoxLayout()
+        extracted_image_layout = QHBoxLayout()
+        footer_layout = QHBoxLayout()
+        self.setLayout(main_layout)
+
+        header_layout.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        image_layout.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        extracted_image_layout.setAlignment(Qt.AlignmentFlag.AlignCenter)
+
+        self.header_description = QLabel(&#34;7セグメント領域として4点を選択してください&#34;)
+        header_layout.addWidget(self.header_description)
+
+        self.main_label = ClickableLabel(self, self.label_clicked)
+        # サイズポリシーを設定して、ラベルが画像サイズに合わせて変わるようにする
+        self.main_label.setSizePolicy(
+            QSizePolicy.Policy.Fixed, QSizePolicy.Policy.Fixed
+        )
+        image_layout.addWidget(self.main_label)
+
+        self.extracted_label = QLabel()
+        self.extracted_label.setMinimumHeight(100)
+        extracted_image_layout.addWidget(self.extracted_label)
+
+        self.back_button = QPushButton(&#34;戻る&#34;)
+        self.back_button.setFixedWidth(100)
+        self.back_button.clicked.connect(self.cancel_select)
+        footer_layout.addWidget(self.back_button)
+
+        footer_layout.addStretch()
+
+        footer_right_layout = QHBoxLayout()
+        self.confirm_txt = QLabel()
+        self.confirm_txt.setStyleSheet(&#34;color: red&#34;)
+        footer_right_layout.addWidget(self.confirm_txt)
+        self.next_button = QPushButton(&#34;次へ&#34;)
+        self.next_button.setDefault(True)  # 強調表示されるデフォルトボタンに設定
+        self.next_button.setAutoDefault(True)
+        self.next_button.setFixedWidth(100)
+        self.next_button.clicked.connect(self.finish_select)
+        footer_right_layout.addWidget(self.next_button)
+
+        footer_layout.addLayout(footer_right_layout)
+
+        main_layout.addLayout(header_layout)
+        main_layout.addLayout(image_layout)
+        main_layout.addLayout(extracted_image_layout)
+        main_layout.addLayout(footer_layout)
+
+    def trigger(self, action, *args) -&gt; None:
+        &#34;&#34;&#34;アクションをトリガーする
+
+        Args:
+            action (str): アクション名
+
+        Raises:
+            ValueError: アクションが不正な場合
+        &#34;&#34;&#34;
+        if action == &#34;startup&#34;:
+            self.startup(*args)
+        else:
+            raise ValueError(f&#34;Invalid action: {action}&#34;)
+
+    def set_image(self, image: np.ndarray) -&gt; None:
+        &#34;&#34;&#34;領域選択用の画像を設定する
+
+        画像を画面サイズに合わせてリサイズする
+
+        Args:
+            image (np.ndarray): 領域選択用の画像
+        &#34;&#34;&#34;
+        self.image_original = image
+        self.image, self.resize_scale = resize_image(
+            image, self.target_width, self.target_height
+        )
+
+        height, width, channel = self.image.shape
+        self.image_size = QSize(width, height)
+
+        self.update_image(self.image.copy())
+
+    def label_clicked(self, event: QMouseEvent) -&gt; None:
+        &#34;&#34;&#34;ラベルがクリックされたときの処理
+
+        マウスイベントからクリックされた座標を取得し、クリックポイントを更新する
+        &#34;&#34;&#34;
+        if (
+            event.button() == Qt.MouseButton.LeftButton
+            or event.button() == Qt.MouseButton.NoButton
+            and len(self.click_points) == 4
+        ):
+
+            # QLabel内の座標を取得
+            label_pos = event.position().toPoint()
+
+            if (
+                label_pos.x() &lt;= 0
+                or label_pos.x() &gt;= self.image_size.width()
+                or label_pos.y() &lt;= 0
+                or label_pos.y() &gt;= self.image_size.height()
+            ):
+                return
+
+            new_point = np.array([label_pos.x(), label_pos.y()]).astype(np.int32)
+
+            if len(self.click_points) &lt; 4:
+                self.click_points.append(new_point)
+            else:
+                # 最も近い点を入れ替える
+                distances = np.linalg.norm(
+                    np.array(self.click_points) - new_point, axis=1
+                )
+                closest_index = np.argmin(distances)
+                self.click_points[closest_index] = new_point
+
+            if len(self.click_points) == 4:
+                self.click_points = self.fe.order_points(self.click_points)
+
+            self.update_image(self.image.copy())
+
+    def display_image(self, image: np.ndarray) -&gt; None:
+        &#34;&#34;&#34;画像をラベルに表示する
+
+        Args:
+            image (np.ndarray): 表示する画像
+        &#34;&#34;&#34;
+        q_image = convert_cv_to_qimage(image)
+        self.main_label.setPixmap(QPixmap.fromImage(q_image))
+        self.main_label.adjustSize()
+
+    def display_extract_image(self, image: np.ndarray) -&gt; None:
+        &#34;&#34;&#34;切り取った画像をラベルに表示する
+
+        Args:
+            image (np.ndarray): 表示する画像
+        &#34;&#34;&#34;
+        q_image = convert_cv_to_qimage(image)
+        self.extracted_label.setPixmap(QPixmap.fromImage(q_image))
+
+    def update_image(self, image: np.ndarray) -&gt; None:
+        &#34;&#34;&#34;画像を更新する
+
+        1. 選択領域を切り出す
+        2. クリックポイントを描画して表示する
+        3. 切り取った画像を表示する
+        &#34;&#34;&#34;
+        click_points = np.array(self.click_points) / self.resize_scale
+        extract_image = self.fe.crop(self.image_original, click_points.tolist())
+        image, extract_image = self.fe.draw_region_outline(
+            image, extract_image, self.click_points
+        )
+        self.display_image(image)
+
+        if extract_image is not None:
+            self.display_extract_image(extract_image)
+
+    def startup(self, prev_screen: str) -&gt; None:
+        &#34;&#34;&#34;画面を起動する
+
+        Args:
+            prev_screen (str): 前の画面名
+        &#34;&#34;&#34;
+        self.logger.info(&#34;Starting RegionSelectWindow.&#34;)
+        self.prev_screen = prev_screen
+        self.fe = FrameEditor(num_digits=self.data_store.get(&#34;num_digits&#34;))
+
+        window_pos, _ = self.screen_manager.save_screen_size()
+
+        screen = QApplication.primaryScreen()
+        screen_rect = screen.availableGeometry()
+        self.target_width = int(screen_rect.width() * 0.8)
+        self.target_height = int((screen_rect.height() - 100) * 0.8)
+
+        self.set_image(self.data_store.get(&#34;first_frame&#34;))
+        self.screen_manager.show_screen(&#34;region_select&#34;)
+        QTimer.singleShot(1, lambda: self.window().move(window_pos.x(), 1))
+
+    def finish_select(self) -&gt; None:
+        &#34;&#34;&#34;選択を終了して次の画面に遷移する&#34;&#34;&#34;
+        if len(self.click_points) != 4:
+            self.confirm_txt.setText(&#34;7セグメント領域を囲ってください&#34;)
+            return
+
+        self.logger.info(&#34;Region selection finished.&#34;)
+        click_points = np.array(self.click_points) / self.resize_scale
+        self.data_store.set(&#34;click_points&#34;, click_points.tolist())
+
+        self.clear_env()
+
+        # ウィンドウサイズの適用を待ってから次の画面に遷移
+        QTimer.singleShot(1, self.switch_next)
+
+    def cancel_select(self) -&gt; None:
+        &#34;&#34;&#34;選択をキャンセルして前の画面に戻る&#34;&#34;&#34;
+        self.logger.info(&#34;Region selection canceled.&#34;)
+        self.clear_env()
+        QTimer.singleShot(1, lambda: self.switch_back())
+
+    def switch_back(self) -&gt; None:
+        &#34;&#34;&#34;前の画面に戻る
+
+        Raises:
+            ValueError: 前の画面が不正な場合
+        &#34;&#34;&#34;
+        self.logger.debug(f&#34;Switching to back screen({self.prev_screen}).&#34;)
+        if self.prev_screen == &#34;replay_exe&#34;:
+            self.screen_manager.show_screen(&#34;replay_setting&#34;)
+        elif self.prev_screen == &#34;live_feed&#34;:
+            self.screen_manager.get_screen(&#34;live_feed&#34;).trigger(&#34;startup&#34;)
+        else:
+            raise ValueError(&#34;Invalid previous screen.&#34;)
+        self.prev_screen = &#34;&#34;
+
+    def switch_next(self) -&gt; None:
+        &#34;&#34;&#34;次の画面に遷移する
+
+        Raises:
+            ValueError: 次の画面が不正な場合
+        &#34;&#34;&#34;
+        self.logger.debug(f&#34;Switching to next screen({self.prev_screen}).&#34;)
+        if self.prev_screen == &#34;replay_exe&#34;:
+            self.screen_manager.get_screen(&#34;replay_threshold&#34;).trigger(&#34;startup&#34;)
+        elif self.prev_screen == &#34;live_feed&#34;:
+            self.screen_manager.get_screen(&#34;live_exe&#34;).trigger(&#34;startup&#34;)
+        else:
+            raise ValueError(&#34;Invalid previous screen.&#34;)
+        self.prev_screen = &#34;&#34;
+
+    def clear_env(self) -&gt; None:
+        &#34;&#34;&#34;環境をクリアする&#34;&#34;&#34;
+        self.main_label.clear()
+        self.extracted_label.clear()
+        self.click_points = []
+        self.confirm_txt.setText(&#34;&#34;)
+        self.screen_manager.restore_screen_size()
+        self.logger.info(&#34;Environment cleared.&#34;)</code></pre>
+</details>
+<h3>Ancestors</h3>
+<ul class="hlist">
+<li>gui.widgets.custom_qwidget.CustomQWidget</li>
+<li>PySide6.QtWidgets.QWidget</li>
+<li>PySide6.QtCore.QObject</li>
+<li>PySide6.QtGui.QPaintDevice</li>
+<li>Shiboken.Object</li>
+</ul>
+<h3>Class variables</h3>
+<dl>
+<dt id="sichiribe.gui.views.region_select_view.RegionSelectWindow.staticMetaObject"><code class="name">var <span class="ident">staticMetaObject</span></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+</dl>
+<h3>Methods</h3>
+<dl>
+<dt id="sichiribe.gui.views.region_select_view.RegionSelectWindow.cancel_select"><code class="name flex">
+<span>def <span class="ident">cancel_select</span></span>(<span>self) ‑> None</span>
+</code></dt>
+<dd>
+<div class="desc"><p>選択をキャンセルして前の画面に戻る</p></div>
+</dd>
+<dt id="sichiribe.gui.views.region_select_view.RegionSelectWindow.clear_env"><code class="name flex">
+<span>def <span class="ident">clear_env</span></span>(<span>self) ‑> None</span>
+</code></dt>
+<dd>
+<div class="desc"><p>環境をクリアする</p></div>
+</dd>
+<dt id="sichiribe.gui.views.region_select_view.RegionSelectWindow.display_extract_image"><code class="name flex">
+<span>def <span class="ident">display_extract_image</span></span>(<span>self, image: numpy.ndarray) ‑> None</span>
+</code></dt>
+<dd>
+<div class="desc"><p>切り取った画像をラベルに表示する</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>image</code></strong> :&ensp;<code>np.ndarray</code></dt>
+<dd>表示する画像</dd>
+</dl></div>
+</dd>
+<dt id="sichiribe.gui.views.region_select_view.RegionSelectWindow.display_image"><code class="name flex">
+<span>def <span class="ident">display_image</span></span>(<span>self, image: numpy.ndarray) ‑> None</span>
+</code></dt>
+<dd>
+<div class="desc"><p>画像をラベルに表示する</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>image</code></strong> :&ensp;<code>np.ndarray</code></dt>
+<dd>表示する画像</dd>
+</dl></div>
+</dd>
+<dt id="sichiribe.gui.views.region_select_view.RegionSelectWindow.finish_select"><code class="name flex">
+<span>def <span class="ident">finish_select</span></span>(<span>self) ‑> None</span>
+</code></dt>
+<dd>
+<div class="desc"><p>選択を終了して次の画面に遷移する</p></div>
+</dd>
+<dt id="sichiribe.gui.views.region_select_view.RegionSelectWindow.initUI"><code class="name flex">
+<span>def <span class="ident">initUI</span></span>(<span>self)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>UIの初期化</p></div>
+</dd>
+<dt id="sichiribe.gui.views.region_select_view.RegionSelectWindow.label_clicked"><code class="name flex">
+<span>def <span class="ident">label_clicked</span></span>(<span>self, event: PySide6.QtGui.QMouseEvent) ‑> None</span>
+</code></dt>
+<dd>
+<div class="desc"><p>ラベルがクリックされたときの処理</p>
+<p>マウスイベントからクリックされた座標を取得し、クリックポイントを更新する</p></div>
+</dd>
+<dt id="sichiribe.gui.views.region_select_view.RegionSelectWindow.set_image"><code class="name flex">
+<span>def <span class="ident">set_image</span></span>(<span>self, image: numpy.ndarray) ‑> None</span>
+</code></dt>
+<dd>
+<div class="desc"><p>領域選択用の画像を設定する</p>
+<p>画像を画面サイズに合わせてリサイズする</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>image</code></strong> :&ensp;<code>np.ndarray</code></dt>
+<dd>領域選択用の画像</dd>
+</dl></div>
+</dd>
+<dt id="sichiribe.gui.views.region_select_view.RegionSelectWindow.startup"><code class="name flex">
+<span>def <span class="ident">startup</span></span>(<span>self, prev_screen: str) ‑> None</span>
+</code></dt>
+<dd>
+<div class="desc"><p>画面を起動する</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>prev_screen</code></strong> :&ensp;<code>str</code></dt>
+<dd>前の画面名</dd>
+</dl></div>
+</dd>
+<dt id="sichiribe.gui.views.region_select_view.RegionSelectWindow.switch_back"><code class="name flex">
+<span>def <span class="ident">switch_back</span></span>(<span>self) ‑> None</span>
+</code></dt>
+<dd>
+<div class="desc"><p>前の画面に戻る</p>
+<h2 id="raises">Raises</h2>
+<dl>
+<dt><code>ValueError</code></dt>
+<dd>前の画面が不正な場合</dd>
+</dl></div>
+</dd>
+<dt id="sichiribe.gui.views.region_select_view.RegionSelectWindow.switch_next"><code class="name flex">
+<span>def <span class="ident">switch_next</span></span>(<span>self) ‑> None</span>
+</code></dt>
+<dd>
+<div class="desc"><p>次の画面に遷移する</p>
+<h2 id="raises">Raises</h2>
+<dl>
+<dt><code>ValueError</code></dt>
+<dd>次の画面が不正な場合</dd>
+</dl></div>
+</dd>
+<dt id="sichiribe.gui.views.region_select_view.RegionSelectWindow.trigger"><code class="name flex">
+<span>def <span class="ident">trigger</span></span>(<span>self, action, *args) ‑> None</span>
+</code></dt>
+<dd>
+<div class="desc"><p>アクションをトリガーする</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>action</code></strong> :&ensp;<code>str</code></dt>
+<dd>アクション名</dd>
+</dl>
+<h2 id="raises">Raises</h2>
+<dl>
+<dt><code>ValueError</code></dt>
+<dd>アクションが不正な場合</dd>
+</dl></div>
+</dd>
+<dt id="sichiribe.gui.views.region_select_view.RegionSelectWindow.update_image"><code class="name flex">
+<span>def <span class="ident">update_image</span></span>(<span>self, image: numpy.ndarray) ‑> None</span>
+</code></dt>
+<dd>
+<div class="desc"><p>画像を更新する</p>
+<ol>
+<li>選択領域を切り出す</li>
+<li>クリックポイントを描画して表示する</li>
+<li>切り取った画像を表示する</li>
+</ol></div>
+</dd>
+</dl>
+</dd>
+</dl>
 </section>
 </article>
 <nav id="sidebar">
@@ -43,6 +471,29 @@ hljs.highlightAll();
 <li><h3>Super-module</h3>
 <ul>
 <li><code><a title="sichiribe.gui.views" href="index.html">sichiribe.gui.views</a></code></li>
+</ul>
+</li>
+<li><h3><a href="#header-classes">Classes</a></h3>
+<ul>
+<li>
+<h4><code><a title="sichiribe.gui.views.region_select_view.RegionSelectWindow" href="#sichiribe.gui.views.region_select_view.RegionSelectWindow">RegionSelectWindow</a></code></h4>
+<ul class="">
+<li><code><a title="sichiribe.gui.views.region_select_view.RegionSelectWindow.cancel_select" href="#sichiribe.gui.views.region_select_view.RegionSelectWindow.cancel_select">cancel_select</a></code></li>
+<li><code><a title="sichiribe.gui.views.region_select_view.RegionSelectWindow.clear_env" href="#sichiribe.gui.views.region_select_view.RegionSelectWindow.clear_env">clear_env</a></code></li>
+<li><code><a title="sichiribe.gui.views.region_select_view.RegionSelectWindow.display_extract_image" href="#sichiribe.gui.views.region_select_view.RegionSelectWindow.display_extract_image">display_extract_image</a></code></li>
+<li><code><a title="sichiribe.gui.views.region_select_view.RegionSelectWindow.display_image" href="#sichiribe.gui.views.region_select_view.RegionSelectWindow.display_image">display_image</a></code></li>
+<li><code><a title="sichiribe.gui.views.region_select_view.RegionSelectWindow.finish_select" href="#sichiribe.gui.views.region_select_view.RegionSelectWindow.finish_select">finish_select</a></code></li>
+<li><code><a title="sichiribe.gui.views.region_select_view.RegionSelectWindow.initUI" href="#sichiribe.gui.views.region_select_view.RegionSelectWindow.initUI">initUI</a></code></li>
+<li><code><a title="sichiribe.gui.views.region_select_view.RegionSelectWindow.label_clicked" href="#sichiribe.gui.views.region_select_view.RegionSelectWindow.label_clicked">label_clicked</a></code></li>
+<li><code><a title="sichiribe.gui.views.region_select_view.RegionSelectWindow.set_image" href="#sichiribe.gui.views.region_select_view.RegionSelectWindow.set_image">set_image</a></code></li>
+<li><code><a title="sichiribe.gui.views.region_select_view.RegionSelectWindow.startup" href="#sichiribe.gui.views.region_select_view.RegionSelectWindow.startup">startup</a></code></li>
+<li><code><a title="sichiribe.gui.views.region_select_view.RegionSelectWindow.staticMetaObject" href="#sichiribe.gui.views.region_select_view.RegionSelectWindow.staticMetaObject">staticMetaObject</a></code></li>
+<li><code><a title="sichiribe.gui.views.region_select_view.RegionSelectWindow.switch_back" href="#sichiribe.gui.views.region_select_view.RegionSelectWindow.switch_back">switch_back</a></code></li>
+<li><code><a title="sichiribe.gui.views.region_select_view.RegionSelectWindow.switch_next" href="#sichiribe.gui.views.region_select_view.RegionSelectWindow.switch_next">switch_next</a></code></li>
+<li><code><a title="sichiribe.gui.views.region_select_view.RegionSelectWindow.trigger" href="#sichiribe.gui.views.region_select_view.RegionSelectWindow.trigger">trigger</a></code></li>
+<li><code><a title="sichiribe.gui.views.region_select_view.RegionSelectWindow.update_image" href="#sichiribe.gui.views.region_select_view.RegionSelectWindow.update_image">update_image</a></code></li>
+</ul>
+</li>
 </ul>
 </li>
 </ul>

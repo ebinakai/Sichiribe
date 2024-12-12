@@ -33,6 +33,309 @@ hljs.highlightAll();
 <section>
 </section>
 <section>
+<h2 class="section-title" id="header-classes">Classes</h2>
+<dl>
+<dt id="sichiribe.gui.views.replay_setting_view.ReplaySettingWindow"><code class="flex name class">
+<span>class <span class="ident">ReplaySettingWindow</span></span>
+<span>(</span><span>screen_manager: gui.utils.screen_manager.ScreenManager)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>動画ファイル解析の設定を行うViewクラス</p>
+<p>以下を設定する</p>
+<ul>
+<li>解析する動画のパス</li>
+<li>7セグメント表示器の桁数</li>
+<li>動画をサンプリングする頻度</li>
+<li>一回のサンプリングで何フレーム取得するか</li>
+<li>動画の解析を始めるタイミング</li>
+<li>出力形式</li>
+<li>キャプチャしたフレームを保存するか</li>
+</ul>
+<p><strong>init</strong>(self, parent: Optional[PySide6.QtWidgets.QWidget] = None, f: PySide6.QtCore.Qt.WindowType = Default(Qt.WindowFlags)) -&gt; None</p>
+<p>Initialize self.
+See help(type(self)) for accurate signature.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class ReplaySettingWindow(SettingWidget):
+    &#34;&#34;&#34;動画ファイル解析の設定を行うViewクラス
+
+    以下を設定する
+
+    - 解析する動画のパス
+    - 7セグメント表示器の桁数
+    - 動画をサンプリングする頻度
+    - 一回のサンプリングで何フレーム取得するか
+    - 動画の解析を始めるタイミング
+    - 出力形式
+    - キャプチャしたフレームを保存するか
+    &#34;&#34;&#34;
+
+    def __init__(self, screen_manager: ScreenManager) -&gt; None:
+        self.logger = logging.getLogger(&#34;__main__&#34;).getChild(__name__)
+        self.screen_manager = screen_manager
+        self.settings_manager = SettingsManager(&#34;replay&#34;)
+
+        super().__init__()
+        screen_manager.add_screen(&#34;replay_setting&#34;, self, &#34;動画解析設定&#34;)
+
+    def initUI(self):
+        &#34;&#34;&#34;ウィジェットのUIを初期化する&#34;&#34;&#34;
+        main_layout = QVBoxLayout()
+        form_layout = QFormLayout()
+        footer_layout = QHBoxLayout()
+        self.setLayout(main_layout)
+
+        self.video_path = QLineEdit()
+        self.video_path.setReadOnly(True)
+        self.video_path_button = QPushButton(&#34;ファイル選択&#34;)
+        self.video_path_button.clicked.connect(self.select_file)
+        file_layout = QVBoxLayout()
+        file_layout.addWidget(self.video_path)
+        file_layout.addWidget(self.video_path_button)
+        form_layout.addRow(&#34;解析する動画のパス：&#34;, file_layout)
+
+        self.num_digits = QSpinBox()
+        self.num_digits.setValue(4)
+        self.num_digits.setFixedWidth(50)
+        self.num_digits.setMinimum(1)
+        form_layout.addRow(&#34;7セグメント表示器の桁数：&#34;, self.num_digits)
+
+        self.sampling_sec = QSpinBox()
+        self.sampling_sec.setValue(5)
+        self.sampling_sec.setFixedWidth(50)
+        self.sampling_sec.setMinimum(1)
+        form_layout.addRow(&#34;動画をサンプリングする頻度 (秒)：&#34;, self.sampling_sec)
+
+        self.batch_frames = QSpinBox()
+        self.batch_frames.setValue(30)
+        self.batch_frames.setFixedWidth(50)
+        self.batch_frames.setMinimum(1)
+        form_layout.addRow(
+            &#34;一回のサンプリングで何フレーム取得するか：&#34;, self.batch_frames
+        )
+
+        self.video_skip_sec = QSpinBox()
+        self.video_skip_sec.setValue(0)
+        self.video_skip_sec.setFixedWidth(50)
+        form_layout.addRow(&#34;動画の解析を始めるタイミング (秒)：&#34;, self.video_skip_sec)
+
+        self.format = QComboBox()
+        for fmt in get_supported_formats():
+            self.format.addItem(fmt)
+        form_layout.addRow(&#34;出力フォーマット：&#34;, self.format)
+
+        self.save_frame = QCheckBox()
+        form_layout.addRow(&#34;キャプチャしたフレームを保存：&#34;, self.save_frame)
+
+        self.skip_region_select = QCheckBox()
+        form_layout.addRow(&#34;領域選択をスキップ：&#34;, self.skip_region_select)
+
+        self.back_button = QPushButton(&#34;戻る&#34;)
+        self.back_button.setFixedWidth(100)
+        self.back_button.clicked.connect(self.back)
+        footer_layout.addWidget(self.back_button)
+
+        footer_layout.addStretch()
+
+        self.confirm_txt = QLabel()
+        self.confirm_txt.setStyleSheet(&#34;color: red&#34;)
+        footer_layout.addWidget(self.confirm_txt)
+
+        self.load_button = QPushButton(&#34;構成ファイルから実行&#34;)
+        self.load_button.clicked.connect(self.load_setting)
+        footer_layout.addWidget(self.load_button)
+
+        self.next_button = QPushButton(&#34;実行&#34;)
+        self.next_button.setFixedWidth(100)
+        self.next_button.setDefault(True)  # 強調表示されるデフォルトボタンに設定
+        self.next_button.setAutoDefault(True)
+        self.next_button.clicked.connect(self.next)
+        footer_layout.addWidget(self.next_button)
+
+        main_layout.addLayout(form_layout)
+        main_layout.addLayout(footer_layout)
+
+    def display(self) -&gt; None:
+        &#34;&#34;&#34;ウィジェットを表示時の処理
+
+        画面表示時に設定ファイルからパラメータを読み込んでUIに反映する
+        &#34;&#34;&#34;
+        super().display()
+        has_click_points = (
+            self.data_store.has(&#34;click_points&#34;)
+            and len(self.data_store.get(&#34;click_points&#34;)) == 4
+        )
+        self.skip_region_select.setEnabled(has_click_points)
+        self.skip_region_select.setChecked(has_click_points)
+
+    def select_file(self) -&gt; None:
+        &#34;&#34;&#34;ファイル選択ダイアログを表示して動画ファイルを選択する&#34;&#34;&#34;
+        video_path, _ = QFileDialog.getOpenFileName(
+            self, &#34;ファイルを選択&#34;, &#34;&#34;, &#34;動画ファイル (*.mp4)&#34;
+        )
+        if video_path:
+            self.video_path.setText(video_path)
+
+    def back(self) -&gt; None:
+        &#34;&#34;&#34;戻るボタンがクリックされたときの処理
+
+        メニュー画面に戻る
+        &#34;&#34;&#34;
+        self.get_settings_from_ui()
+        self.settings_manager.save(self.data_store.get_all())
+        self.confirm_txt.setText(&#34;&#34;)
+        self.screen_manager.show_screen(&#34;menu&#34;)
+
+    def load_setting(self) -&gt; None:
+        &#34;&#34;&#34;設定ファイルからパラメータを読み込んで実行する
+
+        - 構成ファイルとして、設定ファイル(*.json)を指定する
+        - 構成ファイルの click_points に 4 つの座標が含まれている場合、カメラフィードと領域選択画面をスキップして実行する
+        &#34;&#34;&#34;
+        self.confirm_txt.setText(&#34;&#34;)
+        file_path, _ = QFileDialog.getOpenFileName(
+            self, &#34;ファイルを選択&#34;, &#34;&#34;, &#34;設定ファイル(*.json)&#34;
+        )
+
+        try:
+            settings = self.settings_manager.load(file_path)
+        except Exception:
+            self.logger.info(f&#34;Failed to load settings file&#34;)
+            self.confirm_txt.setText(&#34;ファイルが読み込めませんでした&#34;)
+            return
+
+        out_dir_parent = Path(settings[&#34;out_dir&#34;]).resolve().parent
+        settings[&#34;out_dir&#34;] = str(out_dir_parent / get_now_str())
+        if not self.settings_manager.validate(settings):
+            self.logger.info(f&#34;Invalid settings file&#34;)
+            self.confirm_txt.setText(&#34;不正なファイルです&#34;)
+            return
+
+        self.data_store.set_all(settings)
+        self.save_settings()
+        self.screen_manager.get_screen(&#34;replay_exe&#34;).trigger(&#34;startup&#34;)
+
+    def next(self) -&gt; None:
+        &#34;&#34;&#34;次へボタンがクリックされたときの処理&#34;&#34;&#34;
+        if self.video_path.text() == &#34;&#34;:
+            self.confirm_txt.setText(&#34;動画ファイルを選択してください&#34;)
+            return
+        else:
+            self.confirm_txt.setText(&#34;&#34;)
+
+        self.get_settings_from_ui()
+        if not self.skip_region_select.isChecked():
+            self.data_store.set(&#34;click_points&#34;, [])
+        self.data_store.set(
+            &#34;out_dir&#34;,
+            str(Path(self.data_store.get(&#34;video_path&#34;)).parent / get_now_str()),
+        )
+
+        if not self.settings_manager.validate(self.data_store.get_all()):
+            self.confirm_txt.setText(&#34;不正な値が入力されています&#34;)
+            return
+
+        self.save_settings()
+        self.screen_manager.get_screen(&#34;replay_exe&#34;).trigger(&#34;startup&#34;)
+
+    def set_ui_from_settings(self) -&gt; None:
+        &#34;&#34;&#34;設定ファイルからパラメータを読み込んでUIに反映する&#34;&#34;&#34;
+        self.video_path.setText(self.data_store.get(&#34;video_path&#34;))
+        self.num_digits.setValue(self.data_store.get(&#34;num_digits&#34;))
+        self.sampling_sec.setValue(self.data_store.get(&#34;sampling_sec&#34;))
+        self.batch_frames.setValue(self.data_store.get(&#34;batch_frames&#34;))
+        self.video_skip_sec.setValue(self.data_store.get(&#34;video_skip_sec&#34;))
+        self.format.setCurrentText(self.data_store.get(&#34;format&#34;))
+        self.save_frame.setChecked(self.data_store.get(&#34;save_frame&#34;))
+
+    def get_settings_from_ui(self) -&gt; None:
+        &#34;&#34;&#34;UIから設定値を取得してデータストアに保存する&#34;&#34;&#34;
+        self.data_store.set(&#34;video_path&#34;, self.video_path.text())
+        self.data_store.set(&#34;num_digits&#34;, self.num_digits.value())
+        self.data_store.set(&#34;sampling_sec&#34;, self.sampling_sec.value())
+        self.data_store.set(&#34;batch_frames&#34;, self.batch_frames.value())
+        self.data_store.set(&#34;video_skip_sec&#34;, self.video_skip_sec.value())
+        self.data_store.set(&#34;format&#34;, self.format.currentText())
+        self.data_store.set(&#34;save_frame&#34;, self.save_frame.isChecked())
+        self.data_store.set(&#34;out_dir&#34;, self.video_path.text())</code></pre>
+</details>
+<h3>Ancestors</h3>
+<ul class="hlist">
+<li>gui.widgets.setting_widget.SettingWidget</li>
+<li>gui.widgets.custom_qwidget.CustomQWidget</li>
+<li>PySide6.QtWidgets.QWidget</li>
+<li>PySide6.QtCore.QObject</li>
+<li>PySide6.QtGui.QPaintDevice</li>
+<li>Shiboken.Object</li>
+</ul>
+<h3>Class variables</h3>
+<dl>
+<dt id="sichiribe.gui.views.replay_setting_view.ReplaySettingWindow.staticMetaObject"><code class="name">var <span class="ident">staticMetaObject</span></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+</dl>
+<h3>Methods</h3>
+<dl>
+<dt id="sichiribe.gui.views.replay_setting_view.ReplaySettingWindow.back"><code class="name flex">
+<span>def <span class="ident">back</span></span>(<span>self) ‑> None</span>
+</code></dt>
+<dd>
+<div class="desc"><p>戻るボタンがクリックされたときの処理</p>
+<p>メニュー画面に戻る</p></div>
+</dd>
+<dt id="sichiribe.gui.views.replay_setting_view.ReplaySettingWindow.display"><code class="name flex">
+<span>def <span class="ident">display</span></span>(<span>self) ‑> None</span>
+</code></dt>
+<dd>
+<div class="desc"><p>ウィジェットを表示時の処理</p>
+<p>画面表示時に設定ファイルからパラメータを読み込んでUIに反映する</p></div>
+</dd>
+<dt id="sichiribe.gui.views.replay_setting_view.ReplaySettingWindow.get_settings_from_ui"><code class="name flex">
+<span>def <span class="ident">get_settings_from_ui</span></span>(<span>self) ‑> None</span>
+</code></dt>
+<dd>
+<div class="desc"><p>UIから設定値を取得してデータストアに保存する</p></div>
+</dd>
+<dt id="sichiribe.gui.views.replay_setting_view.ReplaySettingWindow.initUI"><code class="name flex">
+<span>def <span class="ident">initUI</span></span>(<span>self)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>ウィジェットのUIを初期化する</p></div>
+</dd>
+<dt id="sichiribe.gui.views.replay_setting_view.ReplaySettingWindow.load_setting"><code class="name flex">
+<span>def <span class="ident">load_setting</span></span>(<span>self) ‑> None</span>
+</code></dt>
+<dd>
+<div class="desc"><p>設定ファイルからパラメータを読み込んで実行する</p>
+<ul>
+<li>構成ファイルとして、設定ファイル(*.json)を指定する</li>
+<li>構成ファイルの click_points に 4 つの座標が含まれている場合、カメラフィードと領域選択画面をスキップして実行する</li>
+</ul></div>
+</dd>
+<dt id="sichiribe.gui.views.replay_setting_view.ReplaySettingWindow.next"><code class="name flex">
+<span>def <span class="ident">next</span></span>(<span>self) ‑> None</span>
+</code></dt>
+<dd>
+<div class="desc"><p>次へボタンがクリックされたときの処理</p></div>
+</dd>
+<dt id="sichiribe.gui.views.replay_setting_view.ReplaySettingWindow.select_file"><code class="name flex">
+<span>def <span class="ident">select_file</span></span>(<span>self) ‑> None</span>
+</code></dt>
+<dd>
+<div class="desc"><p>ファイル選択ダイアログを表示して動画ファイルを選択する</p></div>
+</dd>
+<dt id="sichiribe.gui.views.replay_setting_view.ReplaySettingWindow.set_ui_from_settings"><code class="name flex">
+<span>def <span class="ident">set_ui_from_settings</span></span>(<span>self) ‑> None</span>
+</code></dt>
+<dd>
+<div class="desc"><p>設定ファイルからパラメータを読み込んでUIに反映する</p></div>
+</dd>
+</dl>
+</dd>
+</dl>
 </section>
 </article>
 <nav id="sidebar">
@@ -43,6 +346,24 @@ hljs.highlightAll();
 <li><h3>Super-module</h3>
 <ul>
 <li><code><a title="sichiribe.gui.views" href="index.html">sichiribe.gui.views</a></code></li>
+</ul>
+</li>
+<li><h3><a href="#header-classes">Classes</a></h3>
+<ul>
+<li>
+<h4><code><a title="sichiribe.gui.views.replay_setting_view.ReplaySettingWindow" href="#sichiribe.gui.views.replay_setting_view.ReplaySettingWindow">ReplaySettingWindow</a></code></h4>
+<ul class="">
+<li><code><a title="sichiribe.gui.views.replay_setting_view.ReplaySettingWindow.back" href="#sichiribe.gui.views.replay_setting_view.ReplaySettingWindow.back">back</a></code></li>
+<li><code><a title="sichiribe.gui.views.replay_setting_view.ReplaySettingWindow.display" href="#sichiribe.gui.views.replay_setting_view.ReplaySettingWindow.display">display</a></code></li>
+<li><code><a title="sichiribe.gui.views.replay_setting_view.ReplaySettingWindow.get_settings_from_ui" href="#sichiribe.gui.views.replay_setting_view.ReplaySettingWindow.get_settings_from_ui">get_settings_from_ui</a></code></li>
+<li><code><a title="sichiribe.gui.views.replay_setting_view.ReplaySettingWindow.initUI" href="#sichiribe.gui.views.replay_setting_view.ReplaySettingWindow.initUI">initUI</a></code></li>
+<li><code><a title="sichiribe.gui.views.replay_setting_view.ReplaySettingWindow.load_setting" href="#sichiribe.gui.views.replay_setting_view.ReplaySettingWindow.load_setting">load_setting</a></code></li>
+<li><code><a title="sichiribe.gui.views.replay_setting_view.ReplaySettingWindow.next" href="#sichiribe.gui.views.replay_setting_view.ReplaySettingWindow.next">next</a></code></li>
+<li><code><a title="sichiribe.gui.views.replay_setting_view.ReplaySettingWindow.select_file" href="#sichiribe.gui.views.replay_setting_view.ReplaySettingWindow.select_file">select_file</a></code></li>
+<li><code><a title="sichiribe.gui.views.replay_setting_view.ReplaySettingWindow.set_ui_from_settings" href="#sichiribe.gui.views.replay_setting_view.ReplaySettingWindow.set_ui_from_settings">set_ui_from_settings</a></code></li>
+<li><code><a title="sichiribe.gui.views.replay_setting_view.ReplaySettingWindow.staticMetaObject" href="#sichiribe.gui.views.replay_setting_view.ReplaySettingWindow.staticMetaObject">staticMetaObject</a></code></li>
+</ul>
+</li>
 </ul>
 </li>
 </ul>

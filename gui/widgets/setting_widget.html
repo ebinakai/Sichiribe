@@ -33,6 +33,129 @@ hljs.highlightAll();
 <section>
 </section>
 <section>
+<h2 class="section-title" id="header-classes">Classes</h2>
+<dl>
+<dt id="sichiribe.gui.widgets.setting_widget.SettingWidget"><code class="flex name class">
+<span>class <span class="ident">SettingWidget</span></span>
+</code></dt>
+<dd>
+<div class="desc"><p>設定画面の基底クラス</p>
+<h2 id="methods">Methods</h2>
+<p>get_settings_from_ui: UIから設定を取得する
+set_ui_from_settings: 設定からUIを設定する</p>
+<p><strong>init</strong>(self, parent: Optional[PySide6.QtWidgets.QWidget] = None, f: PySide6.QtCore.Qt.WindowType = Default(Qt.WindowFlags)) -&gt; None</p>
+<p>Initialize self.
+See help(type(self)) for accurate signature.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class SettingWidget(CustomQWidget):
+    &#34;&#34;&#34;
+    設定画面の基底クラス
+
+    Methods:
+        get_settings_from_ui: UIから設定を取得する
+        set_ui_from_settings: 設定からUIを設定する
+    &#34;&#34;&#34;
+
+    def __init__(self) -&gt; None:
+        super().__init__()
+        self.settings_manager: SettingsManager
+        self.logger: Logger
+
+    def display(self):
+        &#34;&#34;&#34;
+        画面表示前に設定を読み込み、UIに反映する
+        &#34;&#34;&#34;
+        try:
+            settings = self.settings_manager.load_default()
+            if self.settings_manager.validate(settings):
+                self.data_store.set_all(settings)
+                out_dir = self.data_store.get(&#34;out_dir&#34;)
+                out_dir_parent = Path(out_dir).resolve().parent
+                self.data_store.set(&#34;out_dir&#34;, str(out_dir_parent))
+                self.set_ui_from_settings()
+        except Exception:
+            self.logger.info(f&#34;Failed to load default setting file&#34;)
+
+    def save_settings(self) -&gt; None:
+        &#34;&#34;&#34;画面間共有データストアから設定を保存する&#34;&#34;&#34;
+        try:
+            self.settings_manager.save(self.data_store.get_all())
+        except Exception:
+            self.logger.info(f&#34;Failed to save settings file&#34;)
+
+    def get_settings_from_ui(self) -&gt; None:
+        &#34;&#34;&#34;UIから設定値を取得する
+
+        Raises:
+            NotImplementedError: サブクラスで実装されていない場合
+        &#34;&#34;&#34;
+        raise NotImplementedError(&#34;get_settings_from_ui() is not implemented&#34;)
+
+    def set_ui_from_settings(self) -&gt; None:
+        &#34;&#34;&#34;設定値をUIに反映する
+
+        Raises:
+            NotImplementedError: サブクラスで実装されていない場合
+        &#34;&#34;&#34;
+        raise NotImplementedError(&#34;set_ui_from_settings() is not implemented&#34;)</code></pre>
+</details>
+<h3>Ancestors</h3>
+<ul class="hlist">
+<li>gui.widgets.custom_qwidget.CustomQWidget</li>
+<li>PySide6.QtWidgets.QWidget</li>
+<li>PySide6.QtCore.QObject</li>
+<li>PySide6.QtGui.QPaintDevice</li>
+<li>Shiboken.Object</li>
+</ul>
+<h3>Class variables</h3>
+<dl>
+<dt id="sichiribe.gui.widgets.setting_widget.SettingWidget.staticMetaObject"><code class="name">var <span class="ident">staticMetaObject</span></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+</dl>
+<h3>Methods</h3>
+<dl>
+<dt id="sichiribe.gui.widgets.setting_widget.SettingWidget.display"><code class="name flex">
+<span>def <span class="ident">display</span></span>(<span>self)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>画面表示前に設定を読み込み、UIに反映する</p></div>
+</dd>
+<dt id="sichiribe.gui.widgets.setting_widget.SettingWidget.get_settings_from_ui"><code class="name flex">
+<span>def <span class="ident">get_settings_from_ui</span></span>(<span>self) ‑> None</span>
+</code></dt>
+<dd>
+<div class="desc"><p>UIから設定値を取得する</p>
+<h2 id="raises">Raises</h2>
+<dl>
+<dt><code>NotImplementedError</code></dt>
+<dd>サブクラスで実装されていない場合</dd>
+</dl></div>
+</dd>
+<dt id="sichiribe.gui.widgets.setting_widget.SettingWidget.save_settings"><code class="name flex">
+<span>def <span class="ident">save_settings</span></span>(<span>self) ‑> None</span>
+</code></dt>
+<dd>
+<div class="desc"><p>画面間共有データストアから設定を保存する</p></div>
+</dd>
+<dt id="sichiribe.gui.widgets.setting_widget.SettingWidget.set_ui_from_settings"><code class="name flex">
+<span>def <span class="ident">set_ui_from_settings</span></span>(<span>self) ‑> None</span>
+</code></dt>
+<dd>
+<div class="desc"><p>設定値をUIに反映する</p>
+<h2 id="raises">Raises</h2>
+<dl>
+<dt><code>NotImplementedError</code></dt>
+<dd>サブクラスで実装されていない場合</dd>
+</dl></div>
+</dd>
+</dl>
+</dd>
+</dl>
 </section>
 </article>
 <nav id="sidebar">
@@ -43,6 +166,20 @@ hljs.highlightAll();
 <li><h3>Super-module</h3>
 <ul>
 <li><code><a title="sichiribe.gui.widgets" href="index.html">sichiribe.gui.widgets</a></code></li>
+</ul>
+</li>
+<li><h3><a href="#header-classes">Classes</a></h3>
+<ul>
+<li>
+<h4><code><a title="sichiribe.gui.widgets.setting_widget.SettingWidget" href="#sichiribe.gui.widgets.setting_widget.SettingWidget">SettingWidget</a></code></h4>
+<ul class="">
+<li><code><a title="sichiribe.gui.widgets.setting_widget.SettingWidget.display" href="#sichiribe.gui.widgets.setting_widget.SettingWidget.display">display</a></code></li>
+<li><code><a title="sichiribe.gui.widgets.setting_widget.SettingWidget.get_settings_from_ui" href="#sichiribe.gui.widgets.setting_widget.SettingWidget.get_settings_from_ui">get_settings_from_ui</a></code></li>
+<li><code><a title="sichiribe.gui.widgets.setting_widget.SettingWidget.save_settings" href="#sichiribe.gui.widgets.setting_widget.SettingWidget.save_settings">save_settings</a></code></li>
+<li><code><a title="sichiribe.gui.widgets.setting_widget.SettingWidget.set_ui_from_settings" href="#sichiribe.gui.widgets.setting_widget.SettingWidget.set_ui_from_settings">set_ui_from_settings</a></code></li>
+<li><code><a title="sichiribe.gui.widgets.setting_widget.SettingWidget.staticMetaObject" href="#sichiribe.gui.widgets.setting_widget.SettingWidget.staticMetaObject">staticMetaObject</a></code></li>
+</ul>
+</li>
 </ul>
 </li>
 </ul>

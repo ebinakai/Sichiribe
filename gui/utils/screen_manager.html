@@ -33,6 +33,284 @@ hljs.highlightAll();
 <section>
 </section>
 <section>
+<h2 class="section-title" id="header-classes">Classes</h2>
+<dl>
+<dt id="sichiribe.gui.utils.screen_manager.ScreenInfo"><code class="flex name class">
+<span>class <span class="ident">ScreenInfo</span></span>
+<span>(</span><span>widget: gui.widgets.custom_qwidget.CustomQWidget, title: str)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>画面情報を保持するデータクラス</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">@dataclass
+class ScreenInfo:
+    &#34;&#34;&#34;
+    画面情報を保持するデータクラス
+    &#34;&#34;&#34;
+
+    widget: CustomQWidget
+    title: str</code></pre>
+</details>
+<h3>Class variables</h3>
+<dl>
+<dt id="sichiribe.gui.utils.screen_manager.ScreenInfo.title"><code class="name">var <span class="ident">title</span> : str</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="sichiribe.gui.utils.screen_manager.ScreenInfo.widget"><code class="name">var <span class="ident">widget</span> : gui.widgets.custom_qwidget.CustomQWidget</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+</dl>
+</dd>
+<dt id="sichiribe.gui.utils.screen_manager.ScreenManager"><code class="flex name class">
+<span>class <span class="ident">ScreenManager</span></span>
+<span>(</span><span>stacked_widget: PySide6.QtWidgets.QStackedWidget,<br>main_window: PySide6.QtWidgets.QMainWindow)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>画面の管理を行うクラス</p>
+<h2 id="methods">Methods</h2>
+<p>add_screen: 画面を追加する
+show_screen: 画面を表示する
+get_screen: 画面を取得する
+check_if_dark_mode: ダークモードかどうかを判定する
+resize_defualt: 画面のデフォルトサイズにリサイズする
+save_screen_size: 画面サイズを保存する
+restore_screen_size: 画面サイズを復元する
+popup: ポップアップメッセージボックスを表示する
+quit: アプリケーションを終了する</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class ScreenManager:
+    &#34;&#34;&#34;
+    画面の管理を行うクラス
+
+    Methods:
+        add_screen: 画面を追加する
+        show_screen: 画面を表示する
+        get_screen: 画面を取得する
+        check_if_dark_mode: ダークモードかどうかを判定する
+        resize_defualt: 画面のデフォルトサイズにリサイズする
+        save_screen_size: 画面サイズを保存する
+        restore_screen_size: 画面サイズを復元する
+        popup: ポップアップメッセージボックスを表示する
+        quit: アプリケーションを終了する
+    &#34;&#34;&#34;
+
+    def __init__(self, stacked_widget: QStackedWidget, main_window: QMainWindow):
+        self.stacked_widget = stacked_widget
+        self.main_window = main_window
+        self.logger = logging.getLogger(&#34;__main__&#34;).getChild(__name__)
+        self.screens: Dict[str, ScreenInfo] = {}
+        self.window_pos: Optional[QPoint] = None
+        self.window_size: Optional[QSize] = None
+
+    def add_screen(self, name: str, widget: CustomQWidget, title: str) -&gt; None:
+        &#34;&#34;&#34;
+        Args:
+            name (str): 画面呼び出し時の名前
+            widget (CustomQWidget): 画面のウィジェットオブジェクト
+            title (str): 画面のタイトル
+
+        Returns:
+            None
+        &#34;&#34;&#34;
+        self.screens[name] = ScreenInfo(widget=widget, title=title)
+        self.stacked_widget.addWidget(widget)
+
+    def show_screen(self, name: str) -&gt; None:
+        &#34;&#34;&#34;
+        Args:
+            name (str): 画面の名前
+        &#34;&#34;&#34;
+        if name in self.screens:
+            widget = self.screens[name].widget
+            widget.display()
+            self.main_window.setWindowTitle(f&#34;Sichiribe {self.screens[name].title}&#34;)
+            self.stacked_widget.setCurrentWidget(widget)
+            self.main_window.setFocus()
+        else:
+            raise ValueError(f&#34;Screen &#39;{name}&#39; not found&#34;)
+
+    def get_screen(self, name: str) -&gt; CustomQWidget:
+        &#34;&#34;&#34;
+        Args:
+            name (str): 画面の名前
+
+        Returns:
+            CustomQWidget: 画面のウィジェットオブジェクト
+        &#34;&#34;&#34;
+        if name in self.screens:
+            return self.screens[name].widget
+        else:
+            raise ValueError(f&#34;Screen &#39;{name}&#39; not found&#34;)
+
+    def check_if_dark_mode(self) -&gt; bool:
+        &#34;&#34;&#34;
+        画面の平均色が暗いかどうかを判定する
+
+        Returns:
+            bool: ダークモードかどうか
+        &#34;&#34;&#34;
+        palette = QApplication.palette()
+        return palette.color(QPalette.ColorRole.Window).value() &lt; 128
+
+    def resize_defualt(self) -&gt; None:
+        self.main_window.resize(640, 480)
+
+    def save_screen_size(self) -&gt; Tuple[QPoint, QSize]:
+        &#34;&#34;&#34;
+        Returns:
+            Tuple[QPoint, QSize]: 画面の位置とサイズ
+        &#34;&#34;&#34;
+        self.window_pos = self.main_window.frameGeometry().topLeft()
+        self.window_size = self.main_window.size()
+        return self.window_pos, self.window_size
+
+    def restore_screen_size(self) -&gt; None:
+        &#34;&#34;&#34;
+        保存された画面の位置とサイズを復元する
+        リサイズ後は、保存された位置とサイズはクリアされる
+        &#34;&#34;&#34;
+        QApplication.processEvents()
+        if self.window_pos is not None and self.window_size is not None:
+            self.logger.info(&#34;Screen geometry restoring...&#34;)
+
+            # 現在の画面内のオブジェクトが処理を終えるまで10ms待つ
+            loop = QEventLoop()
+            QTimer.singleShot(10, loop.quit)
+            loop.exec()
+
+            self.main_window.move(self.window_pos)
+            self.main_window.resize(self.window_size)
+            self.window_pos = None
+            self.window_size = None
+
+        else:
+            self.logger.error(&#34;No screen size saved&#34;)
+
+    def popup(self, message: str) -&gt; None:
+        &#34;&#34;&#34;
+        画面にポップアップメッセージボックスを表示する
+        同期処理のため、メッセージボックスが閉じられるまで処理がブロックされる
+
+        Args:
+            message (str): 表示内容
+        &#34;&#34;&#34;
+        self.logger.debug(&#34;Popup message: %s&#34; % message)
+
+        msg_box = QMessageBox(self.main_window)
+        msg_box.setText(message)
+        msg_box.setStandardButtons(QMessageBox.StandardButton.Ok)
+        msg_box.show()
+
+    def quit(self) -&gt; None:
+        self.logger.info(&#34;Quitting application&#34;)
+        QApplication.quit()</code></pre>
+</details>
+<h3>Methods</h3>
+<dl>
+<dt id="sichiribe.gui.utils.screen_manager.ScreenManager.add_screen"><code class="name flex">
+<span>def <span class="ident">add_screen</span></span>(<span>self, name: str, widget: gui.widgets.custom_qwidget.CustomQWidget, title: str) ‑> None</span>
+</code></dt>
+<dd>
+<div class="desc"><h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>name</code></strong> :&ensp;<code>str</code></dt>
+<dd>画面呼び出し時の名前</dd>
+<dt><strong><code>widget</code></strong> :&ensp;<code>CustomQWidget</code></dt>
+<dd>画面のウィジェットオブジェクト</dd>
+<dt><strong><code>title</code></strong> :&ensp;<code>str</code></dt>
+<dd>画面のタイトル</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<p>None</p></div>
+</dd>
+<dt id="sichiribe.gui.utils.screen_manager.ScreenManager.check_if_dark_mode"><code class="name flex">
+<span>def <span class="ident">check_if_dark_mode</span></span>(<span>self) ‑> bool</span>
+</code></dt>
+<dd>
+<div class="desc"><p>画面の平均色が暗いかどうかを判定する</p>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>bool</code></dt>
+<dd>ダークモードかどうか</dd>
+</dl></div>
+</dd>
+<dt id="sichiribe.gui.utils.screen_manager.ScreenManager.get_screen"><code class="name flex">
+<span>def <span class="ident">get_screen</span></span>(<span>self, name: str) ‑> gui.widgets.custom_qwidget.CustomQWidget</span>
+</code></dt>
+<dd>
+<div class="desc"><h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>name</code></strong> :&ensp;<code>str</code></dt>
+<dd>画面の名前</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>CustomQWidget</code></dt>
+<dd>画面のウィジェットオブジェクト</dd>
+</dl></div>
+</dd>
+<dt id="sichiribe.gui.utils.screen_manager.ScreenManager.popup"><code class="name flex">
+<span>def <span class="ident">popup</span></span>(<span>self, message: str) ‑> None</span>
+</code></dt>
+<dd>
+<div class="desc"><p>画面にポップアップメッセージボックスを表示する
+同期処理のため、メッセージボックスが閉じられるまで処理がブロックされる</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>message</code></strong> :&ensp;<code>str</code></dt>
+<dd>表示内容</dd>
+</dl></div>
+</dd>
+<dt id="sichiribe.gui.utils.screen_manager.ScreenManager.quit"><code class="name flex">
+<span>def <span class="ident">quit</span></span>(<span>self) ‑> None</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="sichiribe.gui.utils.screen_manager.ScreenManager.resize_defualt"><code class="name flex">
+<span>def <span class="ident">resize_defualt</span></span>(<span>self) ‑> None</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="sichiribe.gui.utils.screen_manager.ScreenManager.restore_screen_size"><code class="name flex">
+<span>def <span class="ident">restore_screen_size</span></span>(<span>self) ‑> None</span>
+</code></dt>
+<dd>
+<div class="desc"><p>保存された画面の位置とサイズを復元する
+リサイズ後は、保存された位置とサイズはクリアされる</p></div>
+</dd>
+<dt id="sichiribe.gui.utils.screen_manager.ScreenManager.save_screen_size"><code class="name flex">
+<span>def <span class="ident">save_screen_size</span></span>(<span>self) ‑> Tuple[PySide6.QtCore.QPoint, PySide6.QtCore.QSize]</span>
+</code></dt>
+<dd>
+<div class="desc"><h2 id="returns">Returns</h2>
+<dl>
+<dt><code>Tuple[QPoint, QSize]</code></dt>
+<dd>画面の位置とサイズ</dd>
+</dl></div>
+</dd>
+<dt id="sichiribe.gui.utils.screen_manager.ScreenManager.show_screen"><code class="name flex">
+<span>def <span class="ident">show_screen</span></span>(<span>self, name: str) ‑> None</span>
+</code></dt>
+<dd>
+<div class="desc"><h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>name</code></strong> :&ensp;<code>str</code></dt>
+<dd>画面の名前</dd>
+</dl></div>
+</dd>
+</dl>
+</dd>
+</dl>
 </section>
 </article>
 <nav id="sidebar">
@@ -43,6 +321,31 @@ hljs.highlightAll();
 <li><h3>Super-module</h3>
 <ul>
 <li><code><a title="sichiribe.gui.utils" href="index.html">sichiribe.gui.utils</a></code></li>
+</ul>
+</li>
+<li><h3><a href="#header-classes">Classes</a></h3>
+<ul>
+<li>
+<h4><code><a title="sichiribe.gui.utils.screen_manager.ScreenInfo" href="#sichiribe.gui.utils.screen_manager.ScreenInfo">ScreenInfo</a></code></h4>
+<ul class="">
+<li><code><a title="sichiribe.gui.utils.screen_manager.ScreenInfo.title" href="#sichiribe.gui.utils.screen_manager.ScreenInfo.title">title</a></code></li>
+<li><code><a title="sichiribe.gui.utils.screen_manager.ScreenInfo.widget" href="#sichiribe.gui.utils.screen_manager.ScreenInfo.widget">widget</a></code></li>
+</ul>
+</li>
+<li>
+<h4><code><a title="sichiribe.gui.utils.screen_manager.ScreenManager" href="#sichiribe.gui.utils.screen_manager.ScreenManager">ScreenManager</a></code></h4>
+<ul class="two-column">
+<li><code><a title="sichiribe.gui.utils.screen_manager.ScreenManager.add_screen" href="#sichiribe.gui.utils.screen_manager.ScreenManager.add_screen">add_screen</a></code></li>
+<li><code><a title="sichiribe.gui.utils.screen_manager.ScreenManager.check_if_dark_mode" href="#sichiribe.gui.utils.screen_manager.ScreenManager.check_if_dark_mode">check_if_dark_mode</a></code></li>
+<li><code><a title="sichiribe.gui.utils.screen_manager.ScreenManager.get_screen" href="#sichiribe.gui.utils.screen_manager.ScreenManager.get_screen">get_screen</a></code></li>
+<li><code><a title="sichiribe.gui.utils.screen_manager.ScreenManager.popup" href="#sichiribe.gui.utils.screen_manager.ScreenManager.popup">popup</a></code></li>
+<li><code><a title="sichiribe.gui.utils.screen_manager.ScreenManager.quit" href="#sichiribe.gui.utils.screen_manager.ScreenManager.quit">quit</a></code></li>
+<li><code><a title="sichiribe.gui.utils.screen_manager.ScreenManager.resize_defualt" href="#sichiribe.gui.utils.screen_manager.ScreenManager.resize_defualt">resize_defualt</a></code></li>
+<li><code><a title="sichiribe.gui.utils.screen_manager.ScreenManager.restore_screen_size" href="#sichiribe.gui.utils.screen_manager.ScreenManager.restore_screen_size">restore_screen_size</a></code></li>
+<li><code><a title="sichiribe.gui.utils.screen_manager.ScreenManager.save_screen_size" href="#sichiribe.gui.utils.screen_manager.ScreenManager.save_screen_size">save_screen_size</a></code></li>
+<li><code><a title="sichiribe.gui.utils.screen_manager.ScreenManager.show_screen" href="#sichiribe.gui.utils.screen_manager.ScreenManager.show_screen">show_screen</a></code></li>
+</ul>
+</li>
 </ul>
 </li>
 </ul>

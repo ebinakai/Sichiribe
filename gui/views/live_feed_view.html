@@ -33,6 +33,273 @@ hljs.highlightAll();
 <section>
 </section>
 <section>
+<h2 class="section-title" id="header-classes">Classes</h2>
+<dl>
+<dt id="sichiribe.gui.views.live_feed_view.LiveFeedWindow"><code class="flex name class">
+<span>class <span class="ident">LiveFeedWindow</span></span>
+<span>(</span><span>screen_manager: gui.utils.screen_manager.ScreenManager)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>カメラの画角を確認するカメラフィード画面を表示するViewクラス</p>
+<ol>
+<li>カメラフィードを表示</li>
+<li>戻るボタンを押すと、カメラフィードを停止し、前の画面に戻る</li>
+<li>次へボタンを押すと、カメラフィードを停止し、7セグメント領域選択画面に遷移する</li>
+</ol>
+<p><strong>init</strong>(self, parent: Optional[PySide6.QtWidgets.QWidget] = None, f: PySide6.QtCore.Qt.WindowType = Default(Qt.WindowFlags)) -&gt; None</p>
+<p>Initialize self.
+See help(type(self)) for accurate signature.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class LiveFeedWindow(CustomQWidget):
+    &#34;&#34;&#34;カメラの画角を確認するカメラフィード画面を表示するViewクラス
+
+    1. カメラフィードを表示
+    2. 戻るボタンを押すと、カメラフィードを停止し、前の画面に戻る
+    3. 次へボタンを押すと、カメラフィードを停止し、7セグメント領域選択画面に遷移する
+    &#34;&#34;&#34;
+
+    def __init__(self, screen_manager: ScreenManager) -&gt; None:
+        self.logger = logging.getLogger(&#34;__main__&#34;).getChild(__name__)
+        self.screen_manager = screen_manager
+        self.results: List[int]
+        self.failed_rates: List[float]
+
+        super().__init__()
+        screen_manager.add_screen(&#34;live_feed&#34;, self, &#34;カメラフィード&#34;)
+
+    def initUI(self):
+        &#34;&#34;&#34;UIの初期化&#34;&#34;&#34;
+        main_layout = QVBoxLayout()
+        header_layout = QVBoxLayout()
+        feed_layout = QVBoxLayout()
+        footer_layout = QHBoxLayout()
+        self.setLayout(main_layout)
+
+        header_layout.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        feed_layout.setAlignment(Qt.AlignmentFlag.AlignCenter)
+
+        self.header_description = QLabel(&#34;画角を調整してください&#34;)
+        header_layout.addWidget(self.header_description)
+
+        self.feed_label = QLabel()
+        feed_layout.addWidget(self.feed_label)
+
+        self.back_button = QPushButton(&#34;戻る&#34;)
+        self.back_button.setFixedWidth(100)
+        self.back_button.clicked.connect(self.back)
+
+        self.next_button = QPushButton(&#34;次へ&#34;)
+        self.next_button.setFixedWidth(100)
+        self.next_button.setDefault(True)  # 強調表示されるデフォルトボタンに設定
+        self.next_button.setAutoDefault(True)
+        self.next_button.clicked.connect(self.next)
+
+        footer_layout.addWidget(self.back_button)
+        footer_layout.addStretch()
+        footer_layout.addWidget(self.next_button)
+
+        main_layout.addLayout(header_layout)
+        main_layout.addStretch()
+        main_layout.addLayout(feed_layout)
+        main_layout.addStretch()
+        main_layout.addLayout(footer_layout)
+
+    def trigger(self, action, *args):
+        &#34;&#34;&#34;アクションをトリガーする
+
+        Args:
+            action (str): アクション名
+            args: その他の引数
+        &#34;&#34;&#34;
+        if action == &#34;startup&#34;:
+            self.startup()
+        else:
+            raise ValueError(f&#34;Invalid action: {action}&#34;)
+
+    def back(self) -&gt; None:
+        &#34;&#34;&#34;戻るボタンがクリックされたときの処理&#34;&#34;&#34;
+        self.logger.debug(&#34;Back button clicked.&#34;)
+        if self.worker is not None:
+            self.worker.cancel()
+
+    def next(self) -&gt; None:
+        &#34;&#34;&#34;次へボタンがクリックされたときの処理&#34;&#34;&#34;
+        self.logger.debug(&#34;Next button clicked.&#34;)
+        if self.worker is not None:
+            self.worker.stop()  # ワーカーに停止を指示
+
+    def startup(self) -&gt; None:
+        &#34;&#34;&#34;カメラフィードを開始する&#34;&#34;&#34;
+        self.logger.info(&#34;Starting LiveFeedWindow.&#34;)
+        self.feed_label.setText(&#34;読込中...&#34;)
+        self.screen_manager.show_screen(&#34;live_feed&#34;)
+        self.logger.info(&#34;Capture Feed starting...&#34;)
+
+        # 初期化
+        self.results = []
+        self.failed_rates = []
+        p_, s_ = self.screen_manager.save_screen_size()
+
+        # 表示画像サイズを計算 (できるだけ小さな画像で処理)
+        window_rect = self.geometry()
+        self.target_width = window_rect.width() * 0.8
+        self.target_height = window_rect.height() * 0.8
+        self.logger.debug(
+            &#34;window width: %d window height: %d&#34;
+            % (window_rect.width(), window_rect.height())
+        )
+
+        self.worker = LiveFeedWorker(self.target_width, self.target_height)
+        self.worker.cap_size.connect(self.recieve_cap_size)
+        self.worker.progress.connect(self.show_feed)
+        self.worker.end.connect(self.feed_finished)
+        self.worker.cancelled.connect(self.feed_cancelled)
+        self.worker.error.connect(self.feed_error)
+        self.worker.start()
+        self.logger.info(&#34;Feed started.&#34;)
+
+    def recieve_cap_size(self, cap_size: List[int]) -&gt; None:
+        &#34;&#34;&#34;ワーカーからキャプチャサイズを受け取る&#34;&#34;&#34;
+        self.data_store.set(&#34;cap_size&#34;, cap_size)
+        self.logger.debug(&#34;Capture size: %d x %d&#34; % (cap_size[0], cap_size[1]))
+
+    def show_feed(self, frame: np.ndarray) -&gt; None:
+        &#34;&#34;&#34;フィードをラベルに表示する&#34;&#34;&#34;
+        frame, _ = resize_image(frame, self.target_width, self.target_height)
+        qimage = convert_cv_to_qimage(frame)
+        self.feed_label.setPixmap(QPixmap(qimage))
+
+    def feed_finished(self, first_frame: np.ndarray) -&gt; None:
+        &#34;&#34;&#34;フィードが終了したときの処理&#34;&#34;&#34;
+        self.logger.info(&#34;Feed finished.&#34;)
+        self.data_store.set(&#34;first_frame&#34;, first_frame)
+        self.clear_env()
+        QTimer.singleShot(
+            10,
+            lambda: self.screen_manager.get_screen(&#34;region_select&#34;).trigger(
+                &#34;startup&#34;, &#34;live_feed&#34;
+            ),
+        )
+
+    def feed_cancelled(self) -&gt; None:
+        &#34;&#34;&#34;フィードがキャンセルされたときの処理&#34;&#34;&#34;
+        self.clear_env()
+        QTimer.singleShot(1, lambda: self.screen_manager.show_screen(&#34;live_setting&#34;))
+        self.logger.info(&#34;Feed cancelled.&#34;)
+
+    def feed_error(self) -&gt; None:
+        &#34;&#34;&#34;フィードでエラーが発生したときの処理
+
+        設定画面に戻る
+        &#34;&#34;&#34;
+        self.clear_env()
+        self.screen_manager.popup(&#34;カメラにアクセスできませんでした&#34;)
+        QTimer.singleShot(1, lambda: self.screen_manager.show_screen(&#34;live_setting&#34;))
+        self.logger.error(&#34;Feed missing frame.&#34;)
+
+    def clear_env(self) -&gt; None:
+        &#34;&#34;&#34;環境をクリアする&#34;&#34;&#34;
+        self.feed_label.clear()
+        self.logger.info(&#34;Environment cleared.&#34;)
+        self.screen_manager.restore_screen_size()</code></pre>
+</details>
+<h3>Ancestors</h3>
+<ul class="hlist">
+<li>gui.widgets.custom_qwidget.CustomQWidget</li>
+<li>PySide6.QtWidgets.QWidget</li>
+<li>PySide6.QtCore.QObject</li>
+<li>PySide6.QtGui.QPaintDevice</li>
+<li>Shiboken.Object</li>
+</ul>
+<h3>Class variables</h3>
+<dl>
+<dt id="sichiribe.gui.views.live_feed_view.LiveFeedWindow.staticMetaObject"><code class="name">var <span class="ident">staticMetaObject</span></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+</dl>
+<h3>Methods</h3>
+<dl>
+<dt id="sichiribe.gui.views.live_feed_view.LiveFeedWindow.back"><code class="name flex">
+<span>def <span class="ident">back</span></span>(<span>self) ‑> None</span>
+</code></dt>
+<dd>
+<div class="desc"><p>戻るボタンがクリックされたときの処理</p></div>
+</dd>
+<dt id="sichiribe.gui.views.live_feed_view.LiveFeedWindow.clear_env"><code class="name flex">
+<span>def <span class="ident">clear_env</span></span>(<span>self) ‑> None</span>
+</code></dt>
+<dd>
+<div class="desc"><p>環境をクリアする</p></div>
+</dd>
+<dt id="sichiribe.gui.views.live_feed_view.LiveFeedWindow.feed_cancelled"><code class="name flex">
+<span>def <span class="ident">feed_cancelled</span></span>(<span>self) ‑> None</span>
+</code></dt>
+<dd>
+<div class="desc"><p>フィードがキャンセルされたときの処理</p></div>
+</dd>
+<dt id="sichiribe.gui.views.live_feed_view.LiveFeedWindow.feed_error"><code class="name flex">
+<span>def <span class="ident">feed_error</span></span>(<span>self) ‑> None</span>
+</code></dt>
+<dd>
+<div class="desc"><p>フィードでエラーが発生したときの処理</p>
+<p>設定画面に戻る</p></div>
+</dd>
+<dt id="sichiribe.gui.views.live_feed_view.LiveFeedWindow.feed_finished"><code class="name flex">
+<span>def <span class="ident">feed_finished</span></span>(<span>self, first_frame: numpy.ndarray) ‑> None</span>
+</code></dt>
+<dd>
+<div class="desc"><p>フィードが終了したときの処理</p></div>
+</dd>
+<dt id="sichiribe.gui.views.live_feed_view.LiveFeedWindow.initUI"><code class="name flex">
+<span>def <span class="ident">initUI</span></span>(<span>self)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>UIの初期化</p></div>
+</dd>
+<dt id="sichiribe.gui.views.live_feed_view.LiveFeedWindow.next"><code class="name flex">
+<span>def <span class="ident">next</span></span>(<span>self) ‑> None</span>
+</code></dt>
+<dd>
+<div class="desc"><p>次へボタンがクリックされたときの処理</p></div>
+</dd>
+<dt id="sichiribe.gui.views.live_feed_view.LiveFeedWindow.recieve_cap_size"><code class="name flex">
+<span>def <span class="ident">recieve_cap_size</span></span>(<span>self, cap_size: List[int]) ‑> None</span>
+</code></dt>
+<dd>
+<div class="desc"><p>ワーカーからキャプチャサイズを受け取る</p></div>
+</dd>
+<dt id="sichiribe.gui.views.live_feed_view.LiveFeedWindow.show_feed"><code class="name flex">
+<span>def <span class="ident">show_feed</span></span>(<span>self, frame: numpy.ndarray) ‑> None</span>
+</code></dt>
+<dd>
+<div class="desc"><p>フィードをラベルに表示する</p></div>
+</dd>
+<dt id="sichiribe.gui.views.live_feed_view.LiveFeedWindow.startup"><code class="name flex">
+<span>def <span class="ident">startup</span></span>(<span>self) ‑> None</span>
+</code></dt>
+<dd>
+<div class="desc"><p>カメラフィードを開始する</p></div>
+</dd>
+<dt id="sichiribe.gui.views.live_feed_view.LiveFeedWindow.trigger"><code class="name flex">
+<span>def <span class="ident">trigger</span></span>(<span>self, action, *args)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>アクションをトリガーする</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>action</code></strong> :&ensp;<code>str</code></dt>
+<dd>アクション名</dd>
+<dt><strong><code>args</code></strong></dt>
+<dd>その他の引数</dd>
+</dl></div>
+</dd>
+</dl>
+</dd>
+</dl>
 </section>
 </article>
 <nav id="sidebar">
@@ -43,6 +310,27 @@ hljs.highlightAll();
 <li><h3>Super-module</h3>
 <ul>
 <li><code><a title="sichiribe.gui.views" href="index.html">sichiribe.gui.views</a></code></li>
+</ul>
+</li>
+<li><h3><a href="#header-classes">Classes</a></h3>
+<ul>
+<li>
+<h4><code><a title="sichiribe.gui.views.live_feed_view.LiveFeedWindow" href="#sichiribe.gui.views.live_feed_view.LiveFeedWindow">LiveFeedWindow</a></code></h4>
+<ul class="two-column">
+<li><code><a title="sichiribe.gui.views.live_feed_view.LiveFeedWindow.back" href="#sichiribe.gui.views.live_feed_view.LiveFeedWindow.back">back</a></code></li>
+<li><code><a title="sichiribe.gui.views.live_feed_view.LiveFeedWindow.clear_env" href="#sichiribe.gui.views.live_feed_view.LiveFeedWindow.clear_env">clear_env</a></code></li>
+<li><code><a title="sichiribe.gui.views.live_feed_view.LiveFeedWindow.feed_cancelled" href="#sichiribe.gui.views.live_feed_view.LiveFeedWindow.feed_cancelled">feed_cancelled</a></code></li>
+<li><code><a title="sichiribe.gui.views.live_feed_view.LiveFeedWindow.feed_error" href="#sichiribe.gui.views.live_feed_view.LiveFeedWindow.feed_error">feed_error</a></code></li>
+<li><code><a title="sichiribe.gui.views.live_feed_view.LiveFeedWindow.feed_finished" href="#sichiribe.gui.views.live_feed_view.LiveFeedWindow.feed_finished">feed_finished</a></code></li>
+<li><code><a title="sichiribe.gui.views.live_feed_view.LiveFeedWindow.initUI" href="#sichiribe.gui.views.live_feed_view.LiveFeedWindow.initUI">initUI</a></code></li>
+<li><code><a title="sichiribe.gui.views.live_feed_view.LiveFeedWindow.next" href="#sichiribe.gui.views.live_feed_view.LiveFeedWindow.next">next</a></code></li>
+<li><code><a title="sichiribe.gui.views.live_feed_view.LiveFeedWindow.recieve_cap_size" href="#sichiribe.gui.views.live_feed_view.LiveFeedWindow.recieve_cap_size">recieve_cap_size</a></code></li>
+<li><code><a title="sichiribe.gui.views.live_feed_view.LiveFeedWindow.show_feed" href="#sichiribe.gui.views.live_feed_view.LiveFeedWindow.show_feed">show_feed</a></code></li>
+<li><code><a title="sichiribe.gui.views.live_feed_view.LiveFeedWindow.startup" href="#sichiribe.gui.views.live_feed_view.LiveFeedWindow.startup">startup</a></code></li>
+<li><code><a title="sichiribe.gui.views.live_feed_view.LiveFeedWindow.staticMetaObject" href="#sichiribe.gui.views.live_feed_view.LiveFeedWindow.staticMetaObject">staticMetaObject</a></code></li>
+<li><code><a title="sichiribe.gui.views.live_feed_view.LiveFeedWindow.trigger" href="#sichiribe.gui.views.live_feed_view.LiveFeedWindow.trigger">trigger</a></code></li>
+</ul>
+</li>
 </ul>
 </li>
 </ul>

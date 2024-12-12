@@ -33,6 +33,208 @@ hljs.highlightAll();
 <section>
 </section>
 <section>
+<h2 class="section-title" id="header-classes">Classes</h2>
+<dl>
+<dt id="sichiribe.gui.widgets.mpl_canvas_widget.MplCanvas"><code class="flex name class">
+<span>class <span class="ident">MplCanvas</span></span>
+<span>(</span><span>figure: matplotlib.figure.Figure | None = None)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>matplotlibのFigureを表示するためのカスタムウィジェット</p>
+<p>matplotlibのバックエンドをQt5Aggに設定することでQtとの連携を行う</p>
+<p><strong>init</strong>(self, parent: Optional[PySide6.QtWidgets.QWidget] = None, f: PySide6.QtCore.Qt.WindowType = Default(Qt.WindowFlags)) -&gt; None</p>
+<p>Initialize self.
+See help(type(self)) for accurate signature.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class MplCanvas(FigureCanvasQTAgg):
+    &#34;&#34;&#34;matplotlibのFigureを表示するためのカスタムウィジェット
+
+    matplotlibのバックエンドをQt5Aggに設定することでQtとの連携を行う
+    &#34;&#34;&#34;
+
+    def __init__(self, figure: Optional[Figure] = None) -&gt; None:
+        # figure が渡されていない場合、空の Figure を作成
+        if figure is None:
+            figure = Figure()
+        super(MplCanvas, self).__init__(figure)
+        self.figure = figure
+        self.axes1 = self.figure.add_subplot(111)
+        self.axes2 = self.axes1.twinx()
+        self.logger = logging.getLogger(&#34;__main__&#34;).getChild(__name__)
+        self.clear()
+
+    def clear(self) -&gt; None:
+        &#34;&#34;&#34;グラフをクリアする&#34;&#34;&#34;
+        self.axes1.clear()
+        self.axes2.clear()
+        self.draw()
+
+    def gen_graph(
+        self,
+        title: str,
+        xlabel: str,
+        ylabel1: str,
+        ylabel2: str,
+        dark_theme: bool = False,
+    ) -&gt; None:
+        &#34;&#34;&#34;グラフの初期化
+
+        Args:
+            title (str): グラフタイトル
+            xlabel (str): 時間軸のラベル
+            ylabel1 (str): 左側のy軸のラベル
+            ylabel2 (str): 右側のy軸のラベル
+            dark_theme (bool, optional): ダークモードを適用するかどうか
+        &#34;&#34;&#34;
+        if dark_theme:
+            plt.style.use(&#34;dark_background&#34;)
+            title_color = &#34;white&#34;
+            label_color = &#34;white&#34;
+            bg_color = &#34;#323232&#34;
+            plt_color = &#34;black&#34;
+        else:
+            title_color = &#34;black&#34;
+            label_color = &#34;black&#34;
+            bg_color = &#34;#ECECEC&#34;
+            plt_color = &#34;white&#34;
+
+        self.figure.set_facecolor(bg_color)
+        self.axes1.set_facecolor(plt_color)
+        self.axes2.set_facecolor(plt_color)
+
+        self.axes1.set_xlabel(xlabel, color=label_color)
+        self.axes1.set_ylabel(ylabel1, color=label_color)
+        self.axes2.set_ylabel(ylabel2, color=label_color, rotation=270, labelpad=15)
+        self.axes2.yaxis.set_label_position(&#34;right&#34;)
+
+        self.axes1.tick_params(pad=10, color=label_color, labelcolor=label_color)
+        self.axes2.tick_params(pad=10, color=label_color, labelcolor=label_color)
+
+        (self.line1,) = self.axes1.plot(
+            [], [], marker=&#34;o&#34;, color=&#34;royalblue&#34;, label=ylabel1
+        )
+        (self.line2,) = self.axes2.plot(
+            [], [], marker=&#34;s&#34;, color=&#34;tomato&#34;, label=ylabel2
+        )
+
+        self.axes1.set_title(title, color=title_color)
+        self.axes1.set_ylim(-0.1, 1.1)
+
+        lines = [self.line1, self.line2]
+        self.axes1.legend(
+            lines, [cast(str, line.get_label()) for line in lines], loc=&#34;upper left&#34;
+        )
+
+        self.draw()
+
+    def update_existing_plot(
+        self,
+        x_val: List[str],
+        y_val1: Union[List[int], List[float]],
+        y_val2: Union[List[int], List[float]],
+    ) -&gt; None:
+        &#34;&#34;&#34;既存のプロットを更新する
+
+        Args:
+            x_val (List[str]): 時間軸の値
+            y_val1 (Union[List[int], List[float]]): 左側のy軸の値
+            y_val2 (Union[List[int], List[float]]): 右側のy軸の値
+        &#34;&#34;&#34;
+        # 時間データを数値に変換
+        x_val_datetime = [datetime.strptime(t, &#34;%H:%M:%S&#34;) for t in x_val]
+        x_val_num = mdates.date2num(x_val_datetime)
+
+        self.line1.set_data(x_val_num, y_val1)
+        self.line2.set_data(x_val_num, y_val2)
+
+        self.axes1.xaxis.set_major_formatter(mdates.DateFormatter(&#34;%H:%M:%S&#34;))
+
+        # x軸の範囲設定
+        if len(x_val_num) &gt; 1:
+            x_min, x_max = x_val_num[0], x_val_num[-1]
+            x_margin = (x_max - x_min) * 0.05  # データの5%を余裕として設定
+            self.axes1.set_xlim(x_min - x_margin, x_max + x_margin)
+
+        self.axes2.relim()
+        self.axes2.autoscale_view()
+
+        # 表示するラベルの数を制限
+        max_labels = 5
+        step = max(1, len(x_val) // max_labels)
+        ticks = x_val_num[::step]
+        labels = [x_val[i] for i in range(0, len(x_val), step)]
+        self.axes1.set_xticks(ticks)
+        self.axes1.set_xticklabels(labels)
+
+        self.figure.tight_layout()
+        self.draw()</code></pre>
+</details>
+<h3>Ancestors</h3>
+<ul class="hlist">
+<li>matplotlib.backends.backend_qtagg.FigureCanvasQTAgg</li>
+<li>matplotlib.backends.backend_agg.FigureCanvasAgg</li>
+<li>matplotlib.backends.backend_qt.FigureCanvasQT</li>
+<li>matplotlib.backend_bases.FigureCanvasBase</li>
+<li>PySide6.QtWidgets.QWidget</li>
+<li>PySide6.QtCore.QObject</li>
+<li>PySide6.QtGui.QPaintDevice</li>
+<li>Shiboken.Object</li>
+</ul>
+<h3>Class variables</h3>
+<dl>
+<dt id="sichiribe.gui.widgets.mpl_canvas_widget.MplCanvas.staticMetaObject"><code class="name">var <span class="ident">staticMetaObject</span></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+</dl>
+<h3>Methods</h3>
+<dl>
+<dt id="sichiribe.gui.widgets.mpl_canvas_widget.MplCanvas.clear"><code class="name flex">
+<span>def <span class="ident">clear</span></span>(<span>self) ‑> None</span>
+</code></dt>
+<dd>
+<div class="desc"><p>グラフをクリアする</p></div>
+</dd>
+<dt id="sichiribe.gui.widgets.mpl_canvas_widget.MplCanvas.gen_graph"><code class="name flex">
+<span>def <span class="ident">gen_graph</span></span>(<span>self, title: str, xlabel: str, ylabel1: str, ylabel2: str, dark_theme: bool = False) ‑> None</span>
+</code></dt>
+<dd>
+<div class="desc"><p>グラフの初期化</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>title</code></strong> :&ensp;<code>str</code></dt>
+<dd>グラフタイトル</dd>
+<dt><strong><code>xlabel</code></strong> :&ensp;<code>str</code></dt>
+<dd>時間軸のラベル</dd>
+<dt><strong><code>ylabel1</code></strong> :&ensp;<code>str</code></dt>
+<dd>左側のy軸のラベル</dd>
+<dt><strong><code>ylabel2</code></strong> :&ensp;<code>str</code></dt>
+<dd>右側のy軸のラベル</dd>
+<dt><strong><code>dark_theme</code></strong> :&ensp;<code>bool</code>, optional</dt>
+<dd>ダークモードを適用するかどうか</dd>
+</dl></div>
+</dd>
+<dt id="sichiribe.gui.widgets.mpl_canvas_widget.MplCanvas.update_existing_plot"><code class="name flex">
+<span>def <span class="ident">update_existing_plot</span></span>(<span>self,<br>x_val: List[str],<br>y_val1: List[int] | List[float],<br>y_val2: List[int] | List[float]) ‑> None</span>
+</code></dt>
+<dd>
+<div class="desc"><p>既存のプロットを更新する</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>x_val</code></strong> :&ensp;<code>List[str]</code></dt>
+<dd>時間軸の値</dd>
+<dt><strong><code>y_val1</code></strong> :&ensp;<code>Union[List[int], List[float]]</code></dt>
+<dd>左側のy軸の値</dd>
+<dt><strong><code>y_val2</code></strong> :&ensp;<code>Union[List[int], List[float]]</code></dt>
+<dd>右側のy軸の値</dd>
+</dl></div>
+</dd>
+</dl>
+</dd>
+</dl>
 </section>
 </article>
 <nav id="sidebar">
@@ -43,6 +245,19 @@ hljs.highlightAll();
 <li><h3>Super-module</h3>
 <ul>
 <li><code><a title="sichiribe.gui.widgets" href="index.html">sichiribe.gui.widgets</a></code></li>
+</ul>
+</li>
+<li><h3><a href="#header-classes">Classes</a></h3>
+<ul>
+<li>
+<h4><code><a title="sichiribe.gui.widgets.mpl_canvas_widget.MplCanvas" href="#sichiribe.gui.widgets.mpl_canvas_widget.MplCanvas">MplCanvas</a></code></h4>
+<ul class="">
+<li><code><a title="sichiribe.gui.widgets.mpl_canvas_widget.MplCanvas.clear" href="#sichiribe.gui.widgets.mpl_canvas_widget.MplCanvas.clear">clear</a></code></li>
+<li><code><a title="sichiribe.gui.widgets.mpl_canvas_widget.MplCanvas.gen_graph" href="#sichiribe.gui.widgets.mpl_canvas_widget.MplCanvas.gen_graph">gen_graph</a></code></li>
+<li><code><a title="sichiribe.gui.widgets.mpl_canvas_widget.MplCanvas.staticMetaObject" href="#sichiribe.gui.widgets.mpl_canvas_widget.MplCanvas.staticMetaObject">staticMetaObject</a></code></li>
+<li><code><a title="sichiribe.gui.widgets.mpl_canvas_widget.MplCanvas.update_existing_plot" href="#sichiribe.gui.widgets.mpl_canvas_widget.MplCanvas.update_existing_plot">update_existing_plot</a></code></li>
+</ul>
+</li>
 </ul>
 </li>
 </ul>

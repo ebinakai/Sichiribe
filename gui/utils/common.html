@@ -31,6 +31,72 @@ hljs.highlightAll();
 <section>
 </section>
 <section>
+<h2 class="section-title" id="header-functions">Functions</h2>
+<dl>
+<dt id="sichiribe.gui.utils.common.center_window"><code class="name flex">
+<span>def <span class="ident">center_window</span></span>(<span>window: PySide6.QtWidgets.QWidget) ‑> None</span>
+</code></dt>
+<dd>
+<div class="desc"><p>ウィンドウを画面の中央に配置する</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>window</code></strong> :&ensp;<code>QWidget</code></dt>
+<dd>対象ウィンドウ</dd>
+</dl></div>
+</dd>
+<dt id="sichiribe.gui.utils.common.convert_cv_to_qimage"><code class="name flex">
+<span>def <span class="ident">convert_cv_to_qimage</span></span>(<span>cv_img: numpy.ndarray) ‑> PySide6.QtGui.QImage</span>
+</code></dt>
+<dd>
+<div class="desc"><p>OpenCV の画像を QImage に変換する</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>cv_img</code></strong> :&ensp;<code>np.ndarray</code></dt>
+<dd>OpenCV の画像</dd>
+</dl>
+<h2 id="raises">Raises</h2>
+<dl>
+<dt><code>ValueError</code></dt>
+<dd>BGR または RGBA 以外の画像が入力された場合</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>QImage</code></dt>
+<dd>変換後の QImage</dd>
+</dl></div>
+</dd>
+<dt id="sichiribe.gui.utils.common.get_user_data_dir"><code class="name flex">
+<span>def <span class="ident">get_user_data_dir</span></span>(<span>) ‑> str</span>
+</code></dt>
+<dd>
+<div class="desc"><p>ユーザーデータディレクトリを取得する</p>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>str</code></dt>
+<dd>ユーザーデータディレクトリのパス</dd>
+</dl></div>
+</dd>
+<dt id="sichiribe.gui.utils.common.resize_image"><code class="name flex">
+<span>def <span class="ident">resize_image</span></span>(<span>image: numpy.ndarray, target_width: float, target_height: float) ‑> tuple[numpy.ndarray, float]</span>
+</code></dt>
+<dd>
+<div class="desc"><p>画像を指定したサイズにアスペクト比を維持してリサイズする</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>image</code></strong> :&ensp;<code>np.ndarray</code></dt>
+<dd>入力画像</dd>
+<dt><strong><code>target_width</code></strong> :&ensp;<code>float</code></dt>
+<dd>ターゲットの幅</dd>
+<dt><strong><code>target_height</code></strong> :&ensp;<code>float</code></dt>
+<dd>ターゲットの高さ</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>tuple[np.ndarray, float]</code></dt>
+<dd>リサイズ後の画像とリサイズスケール</dd>
+</dl></div>
+</dd>
+</dl>
 </section>
 <section>
 </section>
@@ -43,6 +109,14 @@ hljs.highlightAll();
 <li><h3>Super-module</h3>
 <ul>
 <li><code><a title="sichiribe.gui.utils" href="index.html">sichiribe.gui.utils</a></code></li>
+</ul>
+</li>
+<li><h3><a href="#header-functions">Functions</a></h3>
+<ul class="">
+<li><code><a title="sichiribe.gui.utils.common.center_window" href="#sichiribe.gui.utils.common.center_window">center_window</a></code></li>
+<li><code><a title="sichiribe.gui.utils.common.convert_cv_to_qimage" href="#sichiribe.gui.utils.common.convert_cv_to_qimage">convert_cv_to_qimage</a></code></li>
+<li><code><a title="sichiribe.gui.utils.common.get_user_data_dir" href="#sichiribe.gui.utils.common.get_user_data_dir">get_user_data_dir</a></code></li>
+<li><code><a title="sichiribe.gui.utils.common.resize_image" href="#sichiribe.gui.utils.common.resize_image">resize_image</a></code></li>
 </ul>
 </li>
 </ul>

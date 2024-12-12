@@ -33,6 +33,90 @@ hljs.highlightAll();
 <section>
 </section>
 <section>
+<h2 class="section-title" id="header-classes">Classes</h2>
+<dl>
+<dt id="sichiribe.gui.widgets.clickable_label.ClickableLabel"><code class="flex name class">
+<span>class <span class="ident">ClickableLabel</span></span>
+<span>(</span><span>parent=None, handle_event=&lt;function ClickableLabel.&lt;lambda&gt;&gt;)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>マウスイベントに対応できるラベルクラス</p>
+<p>マウスクリックとドラッグ時にイベントが発火する</p>
+<p><strong>init</strong>(self, parent: Optional[PySide6.QtWidgets.QWidget] = None, f: PySide6.QtCore.Qt.WindowType = Default(Qt.WindowFlags)) -&gt; None
+<strong>init</strong>(self, text: str, parent: Optional[PySide6.QtWidgets.QWidget] = None, f: PySide6.QtCore.Qt.WindowType = Default(Qt.WindowFlags)) -&gt; None</p>
+<p>Initialize self.
+See help(type(self)) for accurate signature.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class ClickableLabel(QLabel):
+    &#34;&#34;&#34;マウスイベントに対応できるラベルクラス
+
+    マウスクリックとドラッグ時にイベントが発火する
+    &#34;&#34;&#34;
+
+    # コールバック関数はマウスイベント内で呼び出され、イベントが引き継がれる
+    def __init__(self, parent=None, handle_event=lambda x: x) -&gt; None:
+        super().__init__(parent)
+        self.handle_event = handle_event
+        self.drawing = False
+
+    def mousePressEvent(self, event: QMouseEvent) -&gt; None:
+        if event.button() == Qt.MouseButton.LeftButton:
+            self.drawing = True
+            self.last_point = event.position().toPoint()
+            self.handle_event(event)
+
+    def mouseMoveEvent(self, event: QMouseEvent) -&gt; None:
+        if self.drawing:
+            current_point = event.position().toPoint()
+            self.handle_event(event)
+            self.last_point = current_point
+
+    def mouseReleaseEvent(self, event: QMouseEvent) -&gt; None:
+        if event.button() == Qt.MouseButton.LeftButton:
+            self.drawing = False</code></pre>
+</details>
+<h3>Ancestors</h3>
+<ul class="hlist">
+<li>PySide6.QtWidgets.QLabel</li>
+<li>PySide6.QtWidgets.QFrame</li>
+<li>PySide6.QtWidgets.QWidget</li>
+<li>PySide6.QtCore.QObject</li>
+<li>PySide6.QtGui.QPaintDevice</li>
+<li>Shiboken.Object</li>
+</ul>
+<h3>Class variables</h3>
+<dl>
+<dt id="sichiribe.gui.widgets.clickable_label.ClickableLabel.staticMetaObject"><code class="name">var <span class="ident">staticMetaObject</span></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+</dl>
+<h3>Methods</h3>
+<dl>
+<dt id="sichiribe.gui.widgets.clickable_label.ClickableLabel.mouseMoveEvent"><code class="name flex">
+<span>def <span class="ident">mouseMoveEvent</span></span>(<span>self, event: PySide6.QtGui.QMouseEvent) ‑> None</span>
+</code></dt>
+<dd>
+<div class="desc"><p>mouseMoveEvent(self, ev: PySide6.QtGui.QMouseEvent) -&gt; None</p></div>
+</dd>
+<dt id="sichiribe.gui.widgets.clickable_label.ClickableLabel.mousePressEvent"><code class="name flex">
+<span>def <span class="ident">mousePressEvent</span></span>(<span>self, event: PySide6.QtGui.QMouseEvent) ‑> None</span>
+</code></dt>
+<dd>
+<div class="desc"><p>mousePressEvent(self, ev: PySide6.QtGui.QMouseEvent) -&gt; None</p></div>
+</dd>
+<dt id="sichiribe.gui.widgets.clickable_label.ClickableLabel.mouseReleaseEvent"><code class="name flex">
+<span>def <span class="ident">mouseReleaseEvent</span></span>(<span>self, event: PySide6.QtGui.QMouseEvent) ‑> None</span>
+</code></dt>
+<dd>
+<div class="desc"><p>mouseReleaseEvent(self, ev: PySide6.QtGui.QMouseEvent) -&gt; None</p></div>
+</dd>
+</dl>
+</dd>
+</dl>
 </section>
 </article>
 <nav id="sidebar">
@@ -43,6 +127,19 @@ hljs.highlightAll();
 <li><h3>Super-module</h3>
 <ul>
 <li><code><a title="sichiribe.gui.widgets" href="index.html">sichiribe.gui.widgets</a></code></li>
+</ul>
+</li>
+<li><h3><a href="#header-classes">Classes</a></h3>
+<ul>
+<li>
+<h4><code><a title="sichiribe.gui.widgets.clickable_label.ClickableLabel" href="#sichiribe.gui.widgets.clickable_label.ClickableLabel">ClickableLabel</a></code></h4>
+<ul class="">
+<li><code><a title="sichiribe.gui.widgets.clickable_label.ClickableLabel.mouseMoveEvent" href="#sichiribe.gui.widgets.clickable_label.ClickableLabel.mouseMoveEvent">mouseMoveEvent</a></code></li>
+<li><code><a title="sichiribe.gui.widgets.clickable_label.ClickableLabel.mousePressEvent" href="#sichiribe.gui.widgets.clickable_label.ClickableLabel.mousePressEvent">mousePressEvent</a></code></li>
+<li><code><a title="sichiribe.gui.widgets.clickable_label.ClickableLabel.mouseReleaseEvent" href="#sichiribe.gui.widgets.clickable_label.ClickableLabel.mouseReleaseEvent">mouseReleaseEvent</a></code></li>
+<li><code><a title="sichiribe.gui.widgets.clickable_label.ClickableLabel.staticMetaObject" href="#sichiribe.gui.widgets.clickable_label.ClickableLabel.staticMetaObject">staticMetaObject</a></code></li>
+</ul>
+</li>
 </ul>
 </li>
 </ul>

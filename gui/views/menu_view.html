@@ -33,6 +33,116 @@ hljs.highlightAll();
 <section>
 </section>
 <section>
+<h2 class="section-title" id="header-classes">Classes</h2>
+<dl>
+<dt id="sichiribe.gui.views.menu_view.MenuWindow"><code class="flex name class">
+<span>class <span class="ident">MenuWindow</span></span>
+<span>(</span><span>screen_manager: gui.utils.screen_manager.ScreenManager)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>アプリケーション起動後に表示されるメニュー画面のViewクラス</p>
+<ol>
+<li>リアルタイム処理とファイル読み込み処理の選択ができる</li>
+<li>処理が終わった場合はこの画面に戻って来る</li>
+</ol>
+<p><strong>init</strong>(self, parent: Optional[PySide6.QtWidgets.QWidget] = None, f: PySide6.QtCore.Qt.WindowType = Default(Qt.WindowFlags)) -&gt; None</p>
+<p>Initialize self.
+See help(type(self)) for accurate signature.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class MenuWindow(CustomQWidget):
+    &#34;&#34;&#34;
+    アプリケーション起動後に表示されるメニュー画面のViewクラス
+
+    1. リアルタイム処理とファイル読み込み処理の選択ができる
+    2. 処理が終わった場合はこの画面に戻って来る
+    &#34;&#34;&#34;
+
+    def __init__(self, screen_manager: ScreenManager) -&gt; None:
+        self.logger = logging.getLogger(&#34;__main__&#34;).getChild(__name__)
+        self.screen_manager = screen_manager
+
+        super().__init__()
+        screen_manager.add_screen(&#34;menu&#34;, self, &#34;&#34;)
+
+    def initUI(self):
+        &#34;&#34;&#34;UIの初期化&#34;&#34;&#34;
+        main_layout = QVBoxLayout()
+        button_layout = QVBoxLayout()
+        footer_layout = QHBoxLayout()
+        self.setLayout(main_layout)
+
+        button_layout.setAlignment(Qt.AlignmentFlag.AlignCenter)
+
+        self.live_button = QPushButton(&#34;ライブカム&#34;)
+        self.live_button.setFixedHeight(50)
+        self.live_button.setFixedWidth(200)
+        self.live_button.clicked.connect(
+            lambda: self.screen_manager.show_screen(&#34;live_setting&#34;)
+        )
+        button_layout.addWidget(self.live_button)
+
+        self.replay_button = QPushButton(&#34;ファイル読み込み&#34;)
+        self.replay_button.setFixedHeight(50)
+        self.replay_button.setFixedWidth(200)
+        self.replay_button.clicked.connect(
+            lambda: self.screen_manager.show_screen(&#34;replay_setting&#34;)
+        )
+        button_layout.addWidget(self.replay_button)
+
+        self.quit_button = QPushButton(&#34;終了&#34;)
+        self.quit_button.setFixedWidth(100)
+        self.quit_button.clicked.connect(lambda: self.screen_manager.quit())
+        footer_layout.addWidget(self.quit_button)
+        footer_layout.addStretch()
+
+        main_layout.addStretch()
+        main_layout.addLayout(button_layout)
+        main_layout.addStretch()
+        main_layout.addLayout(footer_layout)
+
+    def display(self):
+        &#34;&#34;&#34;画面表示時の処理
+
+        画面間共有データストアをクリアする
+        &#34;&#34;&#34;
+        self.data_store.clear()</code></pre>
+</details>
+<h3>Ancestors</h3>
+<ul class="hlist">
+<li>gui.widgets.custom_qwidget.CustomQWidget</li>
+<li>PySide6.QtWidgets.QWidget</li>
+<li>PySide6.QtCore.QObject</li>
+<li>PySide6.QtGui.QPaintDevice</li>
+<li>Shiboken.Object</li>
+</ul>
+<h3>Class variables</h3>
+<dl>
+<dt id="sichiribe.gui.views.menu_view.MenuWindow.staticMetaObject"><code class="name">var <span class="ident">staticMetaObject</span></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+</dl>
+<h3>Methods</h3>
+<dl>
+<dt id="sichiribe.gui.views.menu_view.MenuWindow.display"><code class="name flex">
+<span>def <span class="ident">display</span></span>(<span>self)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>画面表示時の処理</p>
+<p>画面間共有データストアをクリアする</p></div>
+</dd>
+<dt id="sichiribe.gui.views.menu_view.MenuWindow.initUI"><code class="name flex">
+<span>def <span class="ident">initUI</span></span>(<span>self)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>UIの初期化</p></div>
+</dd>
+</dl>
+</dd>
+</dl>
 </section>
 </article>
 <nav id="sidebar">
@@ -43,6 +153,18 @@ hljs.highlightAll();
 <li><h3>Super-module</h3>
 <ul>
 <li><code><a title="sichiribe.gui.views" href="index.html">sichiribe.gui.views</a></code></li>
+</ul>
+</li>
+<li><h3><a href="#header-classes">Classes</a></h3>
+<ul>
+<li>
+<h4><code><a title="sichiribe.gui.views.menu_view.MenuWindow" href="#sichiribe.gui.views.menu_view.MenuWindow">MenuWindow</a></code></h4>
+<ul class="">
+<li><code><a title="sichiribe.gui.views.menu_view.MenuWindow.display" href="#sichiribe.gui.views.menu_view.MenuWindow.display">display</a></code></li>
+<li><code><a title="sichiribe.gui.views.menu_view.MenuWindow.initUI" href="#sichiribe.gui.views.menu_view.MenuWindow.initUI">initUI</a></code></li>
+<li><code><a title="sichiribe.gui.views.menu_view.MenuWindow.staticMetaObject" href="#sichiribe.gui.views.menu_view.MenuWindow.staticMetaObject">staticMetaObject</a></code></li>
+</ul>
+</li>
 </ul>
 </li>
 </ul>

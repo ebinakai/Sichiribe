@@ -33,6 +33,64 @@ hljs.highlightAll();
 <section>
 </section>
 <section>
+<h2 class="section-title" id="header-classes">Classes</h2>
+<dl>
+<dt id="sichiribe.gui.views.main_view.MainWindow"><code class="flex name class">
+<span>class <span class="ident">MainWindow</span></span>
+</code></dt>
+<dd>
+<div class="desc"><p>メインウィンドウのViewクラス</p>
+<ol>
+<li>スタックウィジェットを使い、このウィジェット内に各画面を表示する</li>
+<li>画面遷移は、gui/utils/screen_manager にて定義されたスクリーンマネージャーを使用して行う</li>
+<li>画面の定義は、gui/views/* にある各画面のクラスを使う</li>
+<li>画面のルーティングは、gui/utils/router.py にて行う</li>
+</ol>
+<p><strong>init</strong>(self, parent: Optional[PySide6.QtWidgets.QWidget] = None, flags: PySide6.QtCore.Qt.WindowType = Default(Qt.WindowFlags)) -&gt; None</p>
+<p>Initialize self.
+See help(type(self)) for accurate signature.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class MainWindow(QMainWindow):
+    &#34;&#34;&#34;
+    メインウィンドウのViewクラス
+
+    1. スタックウィジェットを使い、このウィジェット内に各画面を表示する
+    2. 画面遷移は、gui/utils/screen_manager にて定義されたスクリーンマネージャーを使用して行う
+    3. 画面の定義は、gui/views/* にある各画面のクラスを使う
+    4. 画面のルーティングは、gui/utils/router.py にて行う
+    &#34;&#34;&#34;
+
+    def __init__(self) -&gt; None:
+        super().__init__()
+
+        stacked_widget = QStackedWidget()
+        self.setCentralWidget(stacked_widget)
+
+        screen_manager = init_screen_manager(stacked_widget, self)
+        screen_manager.resize_defualt()
+        screen_manager.show_screen(&#34;menu&#34;)
+        center_window(self)</code></pre>
+</details>
+<h3>Ancestors</h3>
+<ul class="hlist">
+<li>PySide6.QtWidgets.QMainWindow</li>
+<li>PySide6.QtWidgets.QWidget</li>
+<li>PySide6.QtCore.QObject</li>
+<li>PySide6.QtGui.QPaintDevice</li>
+<li>Shiboken.Object</li>
+</ul>
+<h3>Class variables</h3>
+<dl>
+<dt id="sichiribe.gui.views.main_view.MainWindow.staticMetaObject"><code class="name">var <span class="ident">staticMetaObject</span></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+</dl>
+</dd>
+</dl>
 </section>
 </article>
 <nav id="sidebar">
@@ -43,6 +101,16 @@ hljs.highlightAll();
 <li><h3>Super-module</h3>
 <ul>
 <li><code><a title="sichiribe.gui.views" href="index.html">sichiribe.gui.views</a></code></li>
+</ul>
+</li>
+<li><h3><a href="#header-classes">Classes</a></h3>
+<ul>
+<li>
+<h4><code><a title="sichiribe.gui.views.main_view.MainWindow" href="#sichiribe.gui.views.main_view.MainWindow">MainWindow</a></code></h4>
+<ul class="">
+<li><code><a title="sichiribe.gui.views.main_view.MainWindow.staticMetaObject" href="#sichiribe.gui.views.main_view.MainWindow.staticMetaObject">staticMetaObject</a></code></li>
+</ul>
+</li>
 </ul>
 </li>
 </ul>

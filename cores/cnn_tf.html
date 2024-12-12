@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1">
 <meta name="generator" content="pdoc3 0.11.3">
 <title>sichiribe.cores.cnn_tf API documentation</title>
-<meta name="description" content="">
+<meta name="description" content="CNN Implementation using TensorFlow …">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/13.0.0/sanitize.min.css" integrity="sha512-y1dtMcuvtTMJc1yPgEqF0ZjQbhnc/bFhyvIyVNb9Zk5mIGtqVaAB1Ttl28su8AvFMOY0EwRbAe+HCLqj6W7/KA==" crossorigin>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/13.0.0/typography.min.css" integrity="sha512-Y1DYSb995BAfxobCkKepB1BqJJTPrOp3zPL74AWFugHHmmdcvO+C48WLrUOlhGMc0QG7AE3f7gmvvcrmX2fDoA==" crossorigin>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/default.min.css" crossorigin>
@@ -25,6 +25,13 @@ hljs.highlightAll();
 <h1 class="title">Module <code>sichiribe.cores.cnn_tf</code></h1>
 </header>
 <section id="section-intro">
+<p>CNN Implementation using TensorFlow</p>
+<p>Requirements:
+- tensorflow</p>
+<p>Alternative Implementations:
+- cnn_tflite.py (TFLite version)
+- cnn_onnx.py (ONNX version)</p>
+<p>Note: If TensorFlow is not installed, please install it or use an alternative implementation.</p>
 </section>
 <section>
 </section>
@@ -33,6 +40,93 @@ hljs.highlightAll();
 <section>
 </section>
 <section>
+<h2 class="section-title" id="header-classes">Classes</h2>
+<dl>
+<dt id="sichiribe.cores.cnn_tf.CNNTf"><code class="flex name class">
+<span>class <span class="ident">CNNTf</span></span>
+<span>(</span><span>num_digits: int, model_filename: str)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>TensorFlow形式の学習済みモデルを使用したCNNクラス</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class CNNTf(CNNCore):
+    &#34;&#34;&#34;TensorFlow形式の学習済みモデルを使用したCNNクラス&#34;&#34;&#34;
+
+    model: &#34;Model&#34;
+
+    def __init__(self, num_digits: int, model_filename: str) -&gt; None:
+        super().__init__(num_digits)
+        self.logger = logging.getLogger(&#34;__main__&#34;).getChild(__name__)
+
+        # 学習済みモデルの絶対パスを取得
+        model_path = ROOT / &#34;model&#34; / model_filename
+        self.model_path = model_path.resolve()
+        self.logger.debug(&#34;Load model path: %s&#34; % self.model_path)
+
+        if not self.model_path.exists():
+            raise FileNotFoundError(f&#34;Model file not found: {self.model_path}&#34;)
+
+        self.model = load_model(self.model_path)
+        self.logger.info(&#34;CNN Model loaded.&#34;)
+
+    def inference_7seg_classifier(self, image: np.ndarray) -&gt; List[int]:
+        &#34;&#34;&#34;画像から7セグメント数字を推論する
+
+        Args:
+            image (np.ndarray): 推論対象の画像
+
+        Returns:
+            List[int]: 各桁の推論結果
+        &#34;&#34;&#34;
+        # 各桁に分割
+        preprocessed_images = self.preprocess_image(image)
+
+        predictions = self.model.predict(
+            np.array(preprocessed_images), verbose=0
+        )  # verbose=0: ログ出力を抑制
+
+        # 各行に対して最大値のインデックスを取得
+        argmax_indices = predictions.argmax(axis=1)
+
+        return argmax_indices</code></pre>
+</details>
+<h3>Ancestors</h3>
+<ul class="hlist">
+<li>cores.cnn.CNNCore</li>
+<li>cores.detector.Detector</li>
+<li>abc.ABC</li>
+</ul>
+<h3>Class variables</h3>
+<dl>
+<dt id="sichiribe.cores.cnn_tf.CNNTf.model"><code class="name">var <span class="ident">model</span> : Model</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+</dl>
+<h3>Methods</h3>
+<dl>
+<dt id="sichiribe.cores.cnn_tf.CNNTf.inference_7seg_classifier"><code class="name flex">
+<span>def <span class="ident">inference_7seg_classifier</span></span>(<span>self, image: numpy.ndarray) ‑> List[int]</span>
+</code></dt>
+<dd>
+<div class="desc"><p>画像から7セグメント数字を推論する</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>image</code></strong> :&ensp;<code>np.ndarray</code></dt>
+<dd>推論対象の画像</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>List[int]</code></dt>
+<dd>各桁の推論結果</dd>
+</dl></div>
+</dd>
+</dl>
+</dd>
+</dl>
 </section>
 </article>
 <nav id="sidebar">
@@ -43,6 +137,17 @@ hljs.highlightAll();
 <li><h3>Super-module</h3>
 <ul>
 <li><code><a title="sichiribe.cores" href="index.html">sichiribe.cores</a></code></li>
+</ul>
+</li>
+<li><h3><a href="#header-classes">Classes</a></h3>
+<ul>
+<li>
+<h4><code><a title="sichiribe.cores.cnn_tf.CNNTf" href="#sichiribe.cores.cnn_tf.CNNTf">CNNTf</a></code></h4>
+<ul class="">
+<li><code><a title="sichiribe.cores.cnn_tf.CNNTf.inference_7seg_classifier" href="#sichiribe.cores.cnn_tf.CNNTf.inference_7seg_classifier">inference_7seg_classifier</a></code></li>
+<li><code><a title="sichiribe.cores.cnn_tf.CNNTf.model" href="#sichiribe.cores.cnn_tf.CNNTf.model">model</a></code></li>
+</ul>
+</li>
 </ul>
 </li>
 </ul>

@@ -33,6 +33,234 @@ hljs.highlightAll();
 <section>
 </section>
 <section>
+<h2 class="section-title" id="header-classes">Classes</h2>
+<dl>
+<dt id="sichiribe.gui.views.replay_threshold_view.ReplayThresholdWindow"><code class="flex name class">
+<span>class <span class="ident">ReplayThresholdWindow</span></span>
+<span>(</span><span>screen_manager: gui.utils.screen_manager.ScreenManager)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>動画解析のしきい値設定画面を表示するViewクラス</p>
+<p><strong>init</strong>(self, parent: Optional[PySide6.QtWidgets.QWidget] = None, f: PySide6.QtCore.Qt.WindowType = Default(Qt.WindowFlags)) -&gt; None</p>
+<p>Initialize self.
+See help(type(self)) for accurate signature.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class ReplayThresholdWindow(CustomQWidget):
+    &#34;&#34;&#34;動画解析のしきい値設定画面を表示するViewクラス&#34;&#34;&#34;
+
+    def __init__(self, screen_manager: ScreenManager) -&gt; None:
+        self.logger = logging.getLogger(&#34;__main__&#34;).getChild(__name__)
+        self.screen_manager = screen_manager
+        self.threshold: Optional[int]
+        self.dt = Detector(4)
+        self.first_frame: Optional[np.ndarray] = None
+
+        super().__init__()
+        screen_manager.add_screen(&#34;replay_threshold&#34;, self, &#34;二値化しきい値設定&#34;)
+
+    def initUI(self):
+        &#34;&#34;&#34;UIの初期化&#34;&#34;&#34;
+        main_layout = QVBoxLayout()
+        extracted_image_layout = QHBoxLayout()
+        form_layout = QFormLayout()
+        footer_layout = QHBoxLayout()
+        self.setLayout(main_layout)
+
+        extracted_image_layout.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        form_layout.setAlignment(Qt.AlignmentFlag.AlignCenter)
+
+        self.extracted_label = QLabel()
+        self.extracted_label.setMinimumHeight(100)
+        extracted_image_layout.addWidget(self.extracted_label)
+
+        slider_layout = QHBoxLayout()
+        self.binarize_th = QSlider()
+        self.binarize_th.setValue(0)
+        self.binarize_th.setFixedWidth(200)
+        self.binarize_th.setRange(0, 255)
+        self.binarize_th.setOrientation(Qt.Orientation.Horizontal)
+        self.binarize_th.valueChanged.connect(self.update_binarize_th)
+        self.binarize_th_label = QLabel()
+        self.binarize_th_label.setText(&#34;自動設定&#34;)
+        slider_layout.addWidget(self.binarize_th)
+        slider_layout.addWidget(self.binarize_th_label)
+        form_layout.addRow(&#34;画像二値化しきい値：&#34;, slider_layout)
+
+        self.next_button = QPushButton(&#34;次へ&#34;)
+        self.next_button.setFixedWidth(100)
+        self.next_button.setDefault(True)  # 強調表示されるデフォルトボタンに設定
+        self.next_button.setAutoDefault(True)
+        self.next_button.clicked.connect(self.next)
+
+        footer_layout.addStretch()
+        footer_layout.addWidget(self.next_button)
+
+        main_layout.addStretch()
+        main_layout.addLayout(extracted_image_layout)
+        main_layout.addLayout(form_layout)
+        main_layout.addStretch()
+        main_layout.addLayout(footer_layout)
+
+    def trigger(self, action, *args):
+        &#34;&#34;&#34;アクションをトリガーする
+
+        Args:
+            action (str): アクション名
+
+        Raises:
+            ValueError: 無効なアクション名
+        &#34;&#34;&#34;
+        if action == &#34;startup&#34;:
+            self.startup()
+        else:
+            raise ValueError(&#34;Invalid action.&#34;)
+
+    def startup(self) -&gt; None:
+        &#34;&#34;&#34;各種初期化処理を行う&#34;&#34;&#34;
+        self.screen_manager.show_screen(&#34;replay_threshold&#34;)
+        self.fe = FrameEditor(self.data_store.get(&#34;num_digits&#34;))
+
+        p_, s_ = self.screen_manager.save_screen_size()
+
+        self.threshold = None
+        self.first_frame = self.fe.crop(
+            self.data_store.get(&#34;first_frame&#34;), self.data_store.get(&#34;click_points&#34;)
+        )
+        self.update_binarize_th(0)
+
+    def update_binarize_th(self, value: int) -&gt; None:
+        &#34;&#34;&#34;しきい値を更新する
+
+        Args:
+            value (int): しきい値
+        &#34;&#34;&#34;
+        self.threshold = None if value == 0 else value
+        binarize_th_str = &#34;自動設定&#34; if self.threshold is None else str(self.threshold)
+        self.binarize_th_label.setText(binarize_th_str)
+
+        if self.first_frame is None:
+            self.logger.error(&#34;Frame is lost.&#34;)
+            self.clear_env()
+            self.screen_manager.restore_screen_size()
+            self.screen_manager.show_screen(&#34;menu&#34;)
+            return
+
+        image_bin = self.dt.preprocess_binarization(self.first_frame, self.threshold)
+        self.display_extract_image(image_bin)
+
+    def display_extract_image(self, image: np.ndarray) -&gt; None:
+        &#34;&#34;&#34;画像を表示する
+
+        Args:
+            image (np.ndarray): 画像
+        &#34;&#34;&#34;
+        image = self.fe.draw_separation_lines(image)
+        q_image = convert_cv_to_qimage(image)
+        self.extracted_label.setPixmap(QPixmap.fromImage(q_image))
+
+    def next(self) -&gt; None:
+        &#34;&#34;&#34;次へボタンがクリックされたときの処理
+
+        しきい値をパラメータに保存し、次の画面に遷移する
+        &#34;&#34;&#34;
+        self.logger.info(&#34;Set threshold finished.&#34;)
+        self.data_store.set(&#34;threshold&#34;, self.threshold)
+        self.clear_env()
+        self.screen_manager.get_screen(&#34;replay_exe&#34;).trigger(&#34;continue&#34;)
+
+    def clear_env(self) -&gt; None:
+        &#34;&#34;&#34;環境をクリアする&#34;&#34;&#34;
+        self.extracted_label.clear()
+        self.binarize_th.setValue(0)
+        self.logger.info(&#34;Environment cleared.&#34;)
+        self.screen_manager.restore_screen_size()</code></pre>
+</details>
+<h3>Ancestors</h3>
+<ul class="hlist">
+<li>gui.widgets.custom_qwidget.CustomQWidget</li>
+<li>PySide6.QtWidgets.QWidget</li>
+<li>PySide6.QtCore.QObject</li>
+<li>PySide6.QtGui.QPaintDevice</li>
+<li>Shiboken.Object</li>
+</ul>
+<h3>Class variables</h3>
+<dl>
+<dt id="sichiribe.gui.views.replay_threshold_view.ReplayThresholdWindow.staticMetaObject"><code class="name">var <span class="ident">staticMetaObject</span></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+</dl>
+<h3>Methods</h3>
+<dl>
+<dt id="sichiribe.gui.views.replay_threshold_view.ReplayThresholdWindow.clear_env"><code class="name flex">
+<span>def <span class="ident">clear_env</span></span>(<span>self) ‑> None</span>
+</code></dt>
+<dd>
+<div class="desc"><p>環境をクリアする</p></div>
+</dd>
+<dt id="sichiribe.gui.views.replay_threshold_view.ReplayThresholdWindow.display_extract_image"><code class="name flex">
+<span>def <span class="ident">display_extract_image</span></span>(<span>self, image: numpy.ndarray) ‑> None</span>
+</code></dt>
+<dd>
+<div class="desc"><p>画像を表示する</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>image</code></strong> :&ensp;<code>np.ndarray</code></dt>
+<dd>画像</dd>
+</dl></div>
+</dd>
+<dt id="sichiribe.gui.views.replay_threshold_view.ReplayThresholdWindow.initUI"><code class="name flex">
+<span>def <span class="ident">initUI</span></span>(<span>self)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>UIの初期化</p></div>
+</dd>
+<dt id="sichiribe.gui.views.replay_threshold_view.ReplayThresholdWindow.next"><code class="name flex">
+<span>def <span class="ident">next</span></span>(<span>self) ‑> None</span>
+</code></dt>
+<dd>
+<div class="desc"><p>次へボタンがクリックされたときの処理</p>
+<p>しきい値をパラメータに保存し、次の画面に遷移する</p></div>
+</dd>
+<dt id="sichiribe.gui.views.replay_threshold_view.ReplayThresholdWindow.startup"><code class="name flex">
+<span>def <span class="ident">startup</span></span>(<span>self) ‑> None</span>
+</code></dt>
+<dd>
+<div class="desc"><p>各種初期化処理を行う</p></div>
+</dd>
+<dt id="sichiribe.gui.views.replay_threshold_view.ReplayThresholdWindow.trigger"><code class="name flex">
+<span>def <span class="ident">trigger</span></span>(<span>self, action, *args)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>アクションをトリガーする</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>action</code></strong> :&ensp;<code>str</code></dt>
+<dd>アクション名</dd>
+</dl>
+<h2 id="raises">Raises</h2>
+<dl>
+<dt><code>ValueError</code></dt>
+<dd>無効なアクション名</dd>
+</dl></div>
+</dd>
+<dt id="sichiribe.gui.views.replay_threshold_view.ReplayThresholdWindow.update_binarize_th"><code class="name flex">
+<span>def <span class="ident">update_binarize_th</span></span>(<span>self, value: int) ‑> None</span>
+</code></dt>
+<dd>
+<div class="desc"><p>しきい値を更新する</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>value</code></strong> :&ensp;<code>int</code></dt>
+<dd>しきい値</dd>
+</dl></div>
+</dd>
+</dl>
+</dd>
+</dl>
 </section>
 </article>
 <nav id="sidebar">
@@ -43,6 +271,23 @@ hljs.highlightAll();
 <li><h3>Super-module</h3>
 <ul>
 <li><code><a title="sichiribe.gui.views" href="index.html">sichiribe.gui.views</a></code></li>
+</ul>
+</li>
+<li><h3><a href="#header-classes">Classes</a></h3>
+<ul>
+<li>
+<h4><code><a title="sichiribe.gui.views.replay_threshold_view.ReplayThresholdWindow" href="#sichiribe.gui.views.replay_threshold_view.ReplayThresholdWindow">ReplayThresholdWindow</a></code></h4>
+<ul class="">
+<li><code><a title="sichiribe.gui.views.replay_threshold_view.ReplayThresholdWindow.clear_env" href="#sichiribe.gui.views.replay_threshold_view.ReplayThresholdWindow.clear_env">clear_env</a></code></li>
+<li><code><a title="sichiribe.gui.views.replay_threshold_view.ReplayThresholdWindow.display_extract_image" href="#sichiribe.gui.views.replay_threshold_view.ReplayThresholdWindow.display_extract_image">display_extract_image</a></code></li>
+<li><code><a title="sichiribe.gui.views.replay_threshold_view.ReplayThresholdWindow.initUI" href="#sichiribe.gui.views.replay_threshold_view.ReplayThresholdWindow.initUI">initUI</a></code></li>
+<li><code><a title="sichiribe.gui.views.replay_threshold_view.ReplayThresholdWindow.next" href="#sichiribe.gui.views.replay_threshold_view.ReplayThresholdWindow.next">next</a></code></li>
+<li><code><a title="sichiribe.gui.views.replay_threshold_view.ReplayThresholdWindow.startup" href="#sichiribe.gui.views.replay_threshold_view.ReplayThresholdWindow.startup">startup</a></code></li>
+<li><code><a title="sichiribe.gui.views.replay_threshold_view.ReplayThresholdWindow.staticMetaObject" href="#sichiribe.gui.views.replay_threshold_view.ReplayThresholdWindow.staticMetaObject">staticMetaObject</a></code></li>
+<li><code><a title="sichiribe.gui.views.replay_threshold_view.ReplayThresholdWindow.trigger" href="#sichiribe.gui.views.replay_threshold_view.ReplayThresholdWindow.trigger">trigger</a></code></li>
+<li><code><a title="sichiribe.gui.views.replay_threshold_view.ReplayThresholdWindow.update_binarize_th" href="#sichiribe.gui.views.replay_threshold_view.ReplayThresholdWindow.update_binarize_th">update_binarize_th</a></code></li>
+</ul>
+</li>
 </ul>
 </li>
 </ul>
