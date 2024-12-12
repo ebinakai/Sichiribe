@@ -62,6 +62,7 @@ jobs:
           macos-app-name: Sichiribe
           macos-app-icon: res/Sichiribe_icon.png
           macos-app-protected-resource: "NSCameraUsageDescription:Camera access"
+          mode: onefile
 
       - name: Build for ubuntu-latest, windows-latest
         if: ${{ matrix.os == 'ubuntu-latest' || matrix.os == 'windows-latest' }}
@@ -76,7 +77,7 @@ jobs:
             gui/images=gui/images
           linux-icon: res/Sichiribe_icon.png
           windows-icon-from-ico: res/Sichiribe_icon.png
-          mode: none
+          mode: onefile
 
       - name: Fix app bundle structure
         if: matrix.os == 'macos-latest'
