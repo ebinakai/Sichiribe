@@ -35,8 +35,9 @@ jobs:
         run: |
           mv train _train
           mv tests _tests
-          mkdir -p docs
-          pdoc --output-dir docs --html --force --skip-errors .
+          mkdir -p html
+          pdoc --output-dir html --html --force --skip-errors .
+          mv html/sichiribe docs
 
       - name: Deploy Documentation
         uses: peaceiris/actions-gh-pages@v3
