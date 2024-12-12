@@ -16,7 +16,6 @@ def window(qtbot):
     window.graph_timestamps = []
     window.fe = FrameEditor()
     qtbot.addWidget(window)
-    window.show()
     return window
 
 

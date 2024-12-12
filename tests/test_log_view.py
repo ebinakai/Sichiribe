@@ -6,7 +6,6 @@ from gui.views.log_view import LogWindow
 def window(qtbot, mock_screen_manager):
     window = LogWindow(mock_screen_manager)
     qtbot.addWidget(window)
-    window.show()
     return window
 
 

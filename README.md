@@ -8,7 +8,7 @@
    <p>7-Segment display Analyzer for JunLab 2024</p>
 
    <a href="https://github.com/ebinakai/Sichiribe/releases/">Releases</a> ･ 
-   <a href="#概要">Features</a> ･ 
+   <a href="https://github.com/EbinaKai/Sichiribe/wiki">Docs</a> ･ 
    <a href="#インストール">Installation</a> ･ 
    <a href="#参考資料">References</a> ･ 
    <a href="#ライセンス">License</a>

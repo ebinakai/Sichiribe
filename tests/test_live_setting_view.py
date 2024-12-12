@@ -10,7 +10,6 @@ import os
 def window(qtbot, mock_screen_manager):
     window = LiveSettingWindow(mock_screen_manager)
     qtbot.addWidget(window)
-    window.show()
     return window
 
 

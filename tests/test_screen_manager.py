@@ -10,7 +10,6 @@ def main_window(qtbot):
     stacked_widget = QStackedWidget()
     window.setCentralWidget(stacked_widget)
     qtbot.addWidget(window)
-    window.show()
     return window, stacked_widget
 
 

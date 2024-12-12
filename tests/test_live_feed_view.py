@@ -10,7 +10,6 @@ import numpy as np
 def window(qtbot, mock_screen_manager):
     window = LiveFeedWindow(mock_screen_manager)
     qtbot.addWidget(window)
-    window.show()
     return window
 
 

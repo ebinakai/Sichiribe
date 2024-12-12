@@ -7,7 +7,6 @@ from gui.views.menu_view import MenuWindow
 def window(qtbot, mock_screen_manager):
     window = MenuWindow(mock_screen_manager)
     qtbot.addWidget(window)
-    window.show()
     return window
 
 
