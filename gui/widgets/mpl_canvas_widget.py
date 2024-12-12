@@ -1,15 +1,3 @@
-"""
-matplotlibを使用してグラフを描画するためのカスタムウィジェット
-
-1. matplotlibのバックエンドをQt5Aggに設定することでQtとの連携を行う
-2. 以下のメソッドを提供する
-    - MplCanvas: matplotlibのFigureを表示するためのカスタムウィジェット
-    - gen_graph: グラフの初期化
-    - update_existing_plot: 既存のプロットを更新
-    - clear: グラフをクリア
-"""
-
-# Pillow と matplotlib のログを無効にする
 from datetime import datetime
 from matplotlib import dates as mdates
 from matplotlib import pyplot as plt
@@ -22,6 +10,10 @@ logging.getLogger("matplotlib").setLevel(logging.ERROR)
 
 
 class MplCanvas(FigureCanvasQTAgg):
+    """matplotlibのFigureを表示するためのカスタムウィジェット
+
+    matplotlibのバックエンドをQt5Aggに設定することでQtとの連携を行う
+    """
 
     def __init__(self, figure: Optional[Figure] = None) -> None:
         # figure が渡されていない場合、空の Figure を作成
@@ -35,6 +27,8 @@ class MplCanvas(FigureCanvasQTAgg):
         self.clear()
 
     def clear(self) -> None:
+        """グラフをクリアする
+        """
         self.axes1.clear()
         self.axes2.clear()
         self.draw()
@@ -47,6 +41,15 @@ class MplCanvas(FigureCanvasQTAgg):
         ylabel2: str,
         dark_theme: bool = False,
     ) -> None:
+        """グラフの初期化
+
+        Args:
+            title (str): グラフタイトル
+            xlabel (str): 時間軸のラベル
+            ylabel1 (str): 左側のy軸のラベル
+            ylabel2 (str): 右側のy軸のラベル
+            dark_theme (bool, optional): ダークモードを適用するかどうか
+        """
         if dark_theme:
             plt.style.use("dark_background")
             title_color = "white"
@@ -94,6 +97,13 @@ class MplCanvas(FigureCanvasQTAgg):
         y_val1: Union[List[int], List[float]],
         y_val2: Union[List[int], List[float]],
     ) -> None:
+        """既存のプロットを更新する
+        
+        Args:
+            x_val (List[str]): 時間軸の値
+            y_val1 (Union[List[int], List[float]]): 左側のy軸の値
+            y_val2 (Union[List[int], List[float]]): 右側のy軸の値
+        """
         # 時間データを数値に変換
         x_val_datetime = [datetime.strptime(t, "%H:%M:%S") for t in x_val]
         x_val_num = mdates.date2num(x_val_datetime)

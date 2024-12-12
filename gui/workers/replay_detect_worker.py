@@ -18,6 +18,14 @@ import numpy as np
 
 
 class DetectWorker(QThread):
+    """動画ファイル解析を行うワーカークラス
+    
+    Attributes:
+        progress: 推論結果を通知するシグナル
+        send_image: 画像を送信するシグナル
+        cancelled: キャンセルを通知するシグナル
+        model_not_found: モデルが見つからないことを通知するシグナル
+    """
     progress = Signal(int, float, str)
     send_image = Signal(np.ndarray)
     cancelled = Signal()
@@ -30,6 +38,13 @@ class DetectWorker(QThread):
         self._is_cancelled = False
 
     def run(self) -> None:
+        """スレッド処理を実行する
+
+        1. モデルのロード
+        2. 推論処理
+        3. UI への通知
+        4. 1-3 を動画フレーム数分繰り返す
+        """
         self.logger.info("DetectWorker started.")
 
         try:
@@ -62,5 +77,9 @@ class DetectWorker(QThread):
         return None
 
     def cancel(self) -> None:
+        """スレッド処理をキャンセルする
+        
+        このメソッドが呼ばれると、キャンセルフラグが立つ
+        """
         self.logger.info("DetectWorker terminating...")
         self._is_cancelled = True

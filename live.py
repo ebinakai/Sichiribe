@@ -1,6 +1,5 @@
 """
-リアルタイムで7セグメントディスプレイの数字を読み取る
-詳細については、https://github.com/EbinaKai/Sichiribe/wiki/How-to-use-CLI#execution-live を参照
+詳細については、[ドキュメント](https://github.com/EbinaKai/Sichiribe/wiki/How-to-use-CLI#execution-live) を参照
 """
 
 from cores.cnn import cnn_init
@@ -31,6 +30,11 @@ ROOT = FILE.parent
 
 
 def get_args() -> argparse.Namespace:
+    """コマンドライン引数を取得
+
+    Returns:
+        argparse.Namespace: コマンドライン引数
+    """
     export_formats = get_supported_formats()
 
     # 引数を取得
@@ -73,6 +77,23 @@ def get_args() -> argparse.Namespace:
 
 
 def main(settings: Dict[str, Any]) -> None:
+    """リアルタイムで7セグメントディスプレイの数字を読み取る
+
+    Args:
+        settings (Dict[str, Any]): 設定情報
+    
+    Notes:
+        処理の流れ:
+        
+        1. カメラフィードを表示
+        2. 画角を調整するためにクリックポイントを選択
+        3. サンプリングを開始
+        4. サンプリング時間が終了するまで以下の処理を繰り返す
+            - サンプリング間隔ごとにフレームを取得
+            - 7セグメントディスプレイの数字を読み取る
+            - 結果を保存
+        5. 結果をエクスポート
+    """
     out_dir = ROOT / "results" / get_now_str()
     if settings["save_frame"]:
         (out_dir / "frames").mkdir(parents=True, exist_ok=True)

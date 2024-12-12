@@ -1,7 +1,5 @@
 """
 GUIアプリケーションを起動するためのメインプログラム
-このスクリプトを実行することで、GUIアプリケーションが起動する
-詳細については、https://github.com/EbinaKai/Sichiribe/wiki/How-to-use-GUI-App を参照
 """
 
 from gui.views.main_view import MainWindow
@@ -16,12 +14,22 @@ SPLASH_SHOW_MS = 2000
 
 
 def setup_logging(debug_mode: bool) -> None:
+    """ログの設定
+
+    Args:
+        debug_mode (bool): デバッグモードかどうか
+    """
     formatter = "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
     level = logging.DEBUG if debug_mode else logging.INFO
     logging.basicConfig(level=level, format=formatter)
 
 
 def get_args() -> argparse.Namespace:
+    """コマンドライン引数の取得
+
+    Returns:
+        argparse.Namespace: コマンドライン引数
+    """
     parser = argparse.ArgumentParser(description="GUI Application")
     parser.add_argument(
         "--debug", action="store_true", help="デバッグモードを有効にする"
@@ -30,6 +38,8 @@ def get_args() -> argparse.Namespace:
 
 
 def main() -> None:
+    """GUIアプリケーションのエントリーポイント
+    """
     args = get_args()
     setup_logging(args.debug)
 

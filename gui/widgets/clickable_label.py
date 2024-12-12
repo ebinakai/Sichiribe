@@ -4,6 +4,10 @@ from PySide6.QtCore import Qt
 
 
 class ClickableLabel(QLabel):
+    """マウスイベントに対応できるラベルクラス
+    
+    マウスクリックとドラッグ時にイベントが発火する
+    """
     # コールバック関数はマウスイベント内で呼び出され、イベントが引き継がれる
     def __init__(self, parent=None, handle_event=lambda x: x) -> None:
         super().__init__(parent)

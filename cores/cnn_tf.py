@@ -19,6 +19,8 @@ ROOT = FILE.parent / ".."
 
 
 class CNNTf(CNNCore):
+    """TensorFlow形式の学習済みモデルを使用したCNNクラス
+    """
     model: "Model"
 
     def __init__(self, num_digits: int, model_filename: str) -> None:
@@ -37,6 +39,14 @@ class CNNTf(CNNCore):
         self.logger.info("CNN Model loaded.")
 
     def inference_7seg_classifier(self, image: np.ndarray) -> List[int]:
+        """画像から7セグメント数字を推論する
+
+        Args:
+            image (np.ndarray): 推論対象の画像
+            
+        Returns:
+            List[int]: 各桁の推論結果
+        """
         # 各桁に分割
         preprocessed_images = self.preprocess_image(image)
 

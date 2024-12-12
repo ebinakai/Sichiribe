@@ -1,0 +1,12 @@
+[tool.mypy]
+exclude = "^(env/|train/)$"
+explicit_package_bases = true
+
+[tool.mypy.overrides]
+# パッケージごとの設定をここに記載
+"onnxruntime.*".ignore_missing_imports = true
+"tensorflow.*".ignore_missing_imports = true
+"tflite_runtime.*".ignore_missing_imports = true
+
+[tool.pytest.ini_options]
+pythonpath = "."

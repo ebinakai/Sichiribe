@@ -1,7 +1,3 @@
-"""
-雑多な関数をまとめたモジュール
-"""
-
 from PySide6.QtGui import QImage
 from PySide6.QtWidgets import QApplication, QWidget
 import numpy as np
@@ -10,6 +6,18 @@ from platformdirs import user_data_dir
 
 
 def convert_cv_to_qimage(cv_img: np.ndarray) -> QImage:
+    """
+    OpenCV の画像を QImage に変換する
+
+    Args:
+        cv_img (np.ndarray): OpenCV の画像
+
+    Raises:
+        ValueError: BGR または RGBA 以外の画像が入力された場合
+
+    Returns:
+        QImage: 変換後の QImage
+    """
     height, width, channels = cv_img.shape
 
     # 画像が BGR 形式の場合
@@ -35,6 +43,18 @@ def convert_cv_to_qimage(cv_img: np.ndarray) -> QImage:
 def resize_image(
     image: np.ndarray, target_width: float, target_height: float
 ) -> tuple[np.ndarray, float]:
+    """
+    画像を指定したサイズにアスペクト比を維持してリサイズする
+    
+    Args:
+        image (np.ndarray): 入力画像
+        target_width (float): ターゲットの幅
+        target_height (float): ターゲットの高さ
+        
+    Returns:
+        tuple[np.ndarray, float]: リサイズ後の画像とリサイズスケール
+    
+    """
 
     height, width = image.shape[:2]
     resize_scale_width = float(target_width / width)
@@ -57,6 +77,12 @@ def resize_image(
 
 
 def center_window(window: QWidget) -> None:
+    """
+    ウィンドウを画面の中央に配置する
+    
+    Args:
+        window (QWidget): 対象ウィンドウ
+    """
     screen = QApplication.primaryScreen()
     screen_rect = screen.availableGeometry()
     window_rect = window.frameGeometry()
@@ -68,6 +94,12 @@ def center_window(window: QWidget) -> None:
 
 
 def get_user_data_dir() -> str:
+    """
+    ユーザーデータディレクトリを取得する
+    
+    Returns:
+        str: ユーザーデータディレクトリのパス
+    """
     appname = "Sichiribe"
     appauthor = "EbinaKai"
     return user_data_dir(appname, appauthor)

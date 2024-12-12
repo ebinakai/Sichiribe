@@ -1,18 +1,3 @@
-"""
-リアルタイム解析を行うワーカークラス
-
-1. 以下の処理を行う
-  - モデルのロード
-  - フレームのキャプチャ
-  - フレームの編集
-  - 推論処理
-  - フレームの保存
-  - UI への通知
-2. キャプチャしたフレームを保存する場合は、フレーム保存用ディレクトリを作成する
-3. モデルのロードに失敗した場合、モデルが見つからないことを UI に通知
-4. フレームのキャプチャが失敗した場合、エラーを UI に通知
-"""
-
 from PySide6.QtCore import Signal, QThread
 from gui.utils.data_store import DataStore
 from cores.capture import FrameCapture
@@ -28,6 +13,15 @@ from pathlib import Path
 
 
 class DetectWorker(QThread):
+    """リアルタイム解析を行うワーカークラス
+    
+    Attributes:
+        ready: 推論処理が開始されたことを通知するシグナル
+        error: エラーが発生したことを通知するシグナル
+        progress: 推論結果を通知するシグナル
+        send_image: 画像を送信するシグナル
+        remaining_time: 残り時間を通知するシグナル
+    """
     ready = Signal()
     error = Signal(str)
     progress = Signal(int, float, str)
@@ -49,7 +43,18 @@ class DetectWorker(QThread):
             )
 
     def run(self) -> None:
-
+        """スレッド処理を実行する
+        
+        1. モデルのロード
+        2. カメラのオープン
+        3. フレームのキャプチャ
+        4. フレームの編集
+        5. 推論処理
+        6. フレームの保存
+        7. UI への通知
+        8. スレッドの待機時間
+        9. 3-8 を指定時間繰り返す
+        """
         self.logger.info("DetectWorker started.")
 
         try:
@@ -144,10 +149,19 @@ class DetectWorker(QThread):
         return None
 
     def cancel(self) -> None:
+        """スレッドを終了する
+
+        このメソッドが呼び出されると、キャンセルフラグが立つ
+        """
         self.logger.info("DetectWorker terminating...")
         self.is_cancelled = True
 
     def update_binarize_th(self, value: Optional[int]) -> None:
+        """二値化の閾値を更新する
+
+        Args:
+            value (Optional[int]): 二値化の閾値、None の場合は自動設定
+        """
         self.binarize_th = value
         self.logger.info(f"Update binarize_th: {self.binarize_th}")
 

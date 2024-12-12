@@ -75,10 +75,10 @@ class TestMethods:
 
     @patch("gui.views.replay_exe_view.export_result")
     @patch("gui.views.replay_exe_view.export_settings")
-    def test_export_process(self, export_settings, export_result, window):
+    def test_export(self, export_settings, export_result, window):
         self.data_store.set("out_dir", "test")
 
-        window.export_process()
+        window.export()
 
         export_result.assert_called_once()
         export_settings.assert_called_once()
@@ -105,20 +105,20 @@ class TestWorkerCallback:
     def test_frame_devide_finished(self, window):
         frames = ["frame1", "frame2"]
         timestamps = ["00:01", "00:02"]
-        window.detect_process = Mock()
+        window.detect_start = Mock()
 
         window.frame_devide_finished(frames, timestamps)
 
         assert self.data_store.get("frames") == frames
         assert self.data_store.get("timestamps") == timestamps
-        window.detect_process.assert_called_once()
+        window.detect_start.assert_called_once()
 
     @patch("gui.views.replay_exe_view.DetectWorker")
-    def test_detect_process(self, worker_class, window):
+    def test_detect_start(self, worker_class, window):
         worker_instance = Mock()
         worker_class.return_value = worker_instance
 
-        window.detect_process()
+        window.detect_start()
 
         worker_instance.start.assert_called_once()
         worker_instance.progress.connect.assert_called_once_with(window.detect_progress)
@@ -154,7 +154,7 @@ class TestWorkerCallback:
         assert not window.extracted_label.pixmap().isNull()
 
     def test_detect_finished(self, window):
-        window.export_process = Mock()
+        window.export = Mock()
         window.results = [1, 2, 3]
         window.failed_rates = [0.1, 0.2, 0.3]
 
@@ -162,7 +162,7 @@ class TestWorkerCallback:
 
         assert self.data_store.get("results") == window.results
         assert self.data_store.get("failed_rates") == window.failed_rates
-        window.export_process.assert_called_once()
+        window.export.assert_called_once()
 
     def test_detect_cancelled(self, window):
         window.term_label = Mock()

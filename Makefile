@@ -1,10 +1,11 @@
-.PHONY: help lint format prune test check
+.PHONY: help lint format prune test docs check
 
 help:
 	@echo "make lint                  - type checking by mypy"
 	@echo "make format                - format the code by black"
 	@echo "make prune                 - remove unused imports by autoflake"
 	@echo "make test                  - run tests by pytest"
+	@echo "make docs                  - generate documentation by pdoc"
 	@echo "make check                 - run all the above commands"
 
 lint:
@@ -18,6 +19,14 @@ prune:
 
 test:
 	pytest --log-level=DEBUG tests/*py
+
+docs:
+	mv train _train
+	mv tests _tests
+	pdoc --output-dir docs --html --force --skip-errors .
+	mv _train train
+	mv _tests tests
+	
 
 check:
 	mypy --config-file mypy.ini .

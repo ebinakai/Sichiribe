@@ -19,6 +19,9 @@ ROOT = FILE.parent / ".."
 
 
 class CNNLite(CNNCore):
+    """TensorFlow Lite形式の学習済みモデルを使用したCNNクラス
+    """
+
     model: "Interpreter"
     input_details: List[Dict[str, Any]]
     output_details: List[Dict[str, Any]]
@@ -44,6 +47,14 @@ class CNNLite(CNNCore):
 
     # 画像から数字を推論
     def inference_7seg_classifier(self, image: np.ndarray) -> List[int]:
+        """画像から7セグメント数字を推論する
+        
+        Args:
+            image (np.ndarray): 推論対象の画像
+            
+        Returns:
+            List[int]: 各桁の推論結果
+        """
         # 各桁に分割
         preprocessed_images = self.preprocess_image(image)
 

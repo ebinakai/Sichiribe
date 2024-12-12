@@ -50,3 +50,6 @@ settings.json
 
 # pytest
 .pytest_cache/
+
+# pdoc
+docs/**/*.html

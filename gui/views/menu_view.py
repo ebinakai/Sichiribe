@@ -1,10 +1,3 @@
-"""
-アプリケーション起動後に表示されるメニュー画面のViewクラス
-
-1. リアルタイム処理とファイル読み込み処理の選択ができる
-2. 処理が終わった場合はこの画面に戻って来る
-"""
-
 from PySide6.QtWidgets import QHBoxLayout, QVBoxLayout, QPushButton
 from PySide6.QtCore import Qt
 from gui.widgets.custom_qwidget import CustomQWidget
@@ -13,6 +6,12 @@ import logging
 
 
 class MenuWindow(CustomQWidget):
+    """
+    アプリケーション起動後に表示されるメニュー画面のViewクラス
+
+    1. リアルタイム処理とファイル読み込み処理の選択ができる
+    2. 処理が終わった場合はこの画面に戻って来る
+    """
     def __init__(self, screen_manager: ScreenManager) -> None:
         self.logger = logging.getLogger("__main__").getChild(__name__)
         self.screen_manager = screen_manager
@@ -21,6 +20,8 @@ class MenuWindow(CustomQWidget):
         screen_manager.add_screen("menu", self, "")
 
     def initUI(self):
+        """UIの初期化
+        """
         main_layout = QVBoxLayout()
         button_layout = QVBoxLayout()
         footer_layout = QHBoxLayout()
@@ -56,4 +57,8 @@ class MenuWindow(CustomQWidget):
         main_layout.addLayout(footer_layout)
 
     def display(self):
+        """画面表示時の処理
+        
+        画面間共有データストアをクリアする
+        """
         self.data_store.clear()
