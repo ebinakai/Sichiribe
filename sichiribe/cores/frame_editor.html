@@ -1,0 +1,464 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1">
+<meta name="generator" content="pdoc3 0.11.3">
+<title>sichiribe.cores.frame_editor API documentation</title>
+<meta name="description" content="">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/13.0.0/sanitize.min.css" integrity="sha512-y1dtMcuvtTMJc1yPgEqF0ZjQbhnc/bFhyvIyVNb9Zk5mIGtqVaAB1Ttl28su8AvFMOY0EwRbAe+HCLqj6W7/KA==" crossorigin>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/13.0.0/typography.min.css" integrity="sha512-Y1DYSb995BAfxobCkKepB1BqJJTPrOp3zPL74AWFugHHmmdcvO+C48WLrUOlhGMc0QG7AE3f7gmvvcrmX2fDoA==" crossorigin>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/default.min.css" crossorigin>
+<style>:root{--highlight-color:#fe9}.flex{display:flex !important}body{line-height:1.5em}#content{padding:20px}#sidebar{padding:1.5em;overflow:hidden}#sidebar > *:last-child{margin-bottom:2cm}.http-server-breadcrumbs{font-size:130%;margin:0 0 15px 0}#footer{font-size:.75em;padding:5px 30px;border-top:1px solid #ddd;text-align:right}#footer p{margin:0 0 0 1em;display:inline-block}#footer p:last-child{margin-right:30px}h1,h2,h3,h4,h5{font-weight:300}h1{font-size:2.5em;line-height:1.1em}h2{font-size:1.75em;margin:2em 0 .50em 0}h3{font-size:1.4em;margin:1.6em 0 .7em 0}h4{margin:0;font-size:105%}h1:target,h2:target,h3:target,h4:target,h5:target,h6:target{background:var(--highlight-color);padding:.2em 0}a{color:#058;text-decoration:none;transition:color .2s ease-in-out}a:visited{color:#503}a:hover{color:#b62}.title code{font-weight:bold}h2[id^="header-"]{margin-top:2em}.ident{color:#900;font-weight:bold}pre code{font-size:.8em;line-height:1.4em;padding:1em;display:block}code{background:#f3f3f3;font-family:"DejaVu Sans Mono",monospace;padding:1px 4px;overflow-wrap:break-word}h1 code{background:transparent}pre{border-top:1px solid #ccc;border-bottom:1px solid #ccc;margin:1em 0}#http-server-module-list{display:flex;flex-flow:column}#http-server-module-list div{display:flex}#http-server-module-list dt{min-width:10%}#http-server-module-list p{margin-top:0}.toc ul,#index{list-style-type:none;margin:0;padding:0}#index code{background:transparent}#index h3{border-bottom:1px solid #ddd}#index ul{padding:0}#index h4{margin-top:.6em;font-weight:bold}@media (min-width:200ex){#index .two-column{column-count:2}}@media (min-width:300ex){#index .two-column{column-count:3}}dl{margin-bottom:2em}dl dl:last-child{margin-bottom:4em}dd{margin:0 0 1em 3em}#header-classes + dl > dd{margin-bottom:3em}dd dd{margin-left:2em}dd p{margin:10px 0}.name{background:#eee;font-size:.85em;padding:5px 10px;display:inline-block;min-width:40%}.name:hover{background:#e0e0e0}dt:target .name{background:var(--highlight-color)}.name > span:first-child{white-space:nowrap}.name.class > span:nth-child(2){margin-left:.4em}.inherited{color:#999;border-left:5px solid #eee;padding-left:1em}.inheritance em{font-style:normal;font-weight:bold}.desc h2{font-weight:400;font-size:1.25em}.desc h3{font-size:1em}.desc dt code{background:inherit}.source summary,.git-link-div{color:#666;text-align:right;font-weight:400;font-size:.8em;text-transform:uppercase}.source summary > *{white-space:nowrap;cursor:pointer}.git-link{color:inherit;margin-left:1em}.source pre{max-height:500px;overflow:auto;margin:0}.source pre code{font-size:12px;overflow:visible}.hlist{list-style:none}.hlist li{display:inline}.hlist li:after{content:',\2002'}.hlist li:last-child:after{content:none}.hlist .hlist{display:inline;padding-left:1em}img{max-width:100%}td{padding:0 .5em}.admonition{padding:.1em 1em;margin:1em 0}.admonition-title{font-weight:bold}.admonition.note,.admonition.info,.admonition.important{background:#aef}.admonition.todo,.admonition.versionadded,.admonition.tip,.admonition.hint{background:#dfd}.admonition.warning,.admonition.versionchanged,.admonition.deprecated{background:#fd4}.admonition.error,.admonition.danger,.admonition.caution{background:lightpink}</style>
+<style media="screen and (min-width: 700px)">@media screen and (min-width:700px){#sidebar{width:30%;height:100vh;overflow:auto;position:sticky;top:0}#content{width:70%;max-width:100ch;padding:3em 4em;border-left:1px solid #ddd}pre code{font-size:1em}.name{font-size:1em}main{display:flex;flex-direction:row-reverse;justify-content:flex-end}.toc ul ul,#index ul ul{padding-left:1em}.toc > ul > li{margin-top:.5em}}</style>
+<style media="print">@media print{#sidebar h1{page-break-before:always}.source{display:none}}@media print{*{background:transparent !important;color:#000 !important;box-shadow:none !important;text-shadow:none !important}a[href]:after{content:" (" attr(href) ")";font-size:90%}a[href][title]:after{content:none}abbr[title]:after{content:" (" attr(title) ")"}.ir a:after,a[href^="javascript:"]:after,a[href^="#"]:after{content:""}pre,blockquote{border:1px solid #999;page-break-inside:avoid}thead{display:table-header-group}tr,img{page-break-inside:avoid}img{max-width:100% !important}@page{margin:0.5cm}p,h2,h3{orphans:3;widows:3}h1,h2,h3,h4,h5,h6{page-break-after:avoid}}</style>
+<script defer src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js" integrity="sha512-D9gUyxqja7hBtkWpPWGt9wfbfaMGVt9gnyCvYa+jojwwPHLCzUm5i8rpk7vD7wNee9bA35eYIjobYPaQuKS1MQ==" crossorigin></script>
+<script>window.addEventListener('DOMContentLoaded', () => {
+hljs.configure({languages: ['bash', 'css', 'diff', 'graphql', 'ini', 'javascript', 'json', 'plaintext', 'python', 'python-repl', 'rust', 'shell', 'sql', 'typescript', 'xml', 'yaml']});
+hljs.highlightAll();
+})</script>
+</head>
+<body>
+<main>
+<article id="content">
+<header>
+<h1 class="title">Module <code>sichiribe.cores.frame_editor</code></h1>
+</header>
+<section id="section-intro">
+</section>
+<section>
+</section>
+<section>
+</section>
+<section>
+</section>
+<section>
+<h2 class="section-title" id="header-classes">Classes</h2>
+<dl>
+<dt id="sichiribe.cores.frame_editor.FrameEditor"><code class="flex name class">
+<span>class <span class="ident">FrameEditor</span></span>
+<span>(</span><span>num_digits: int = 4, crop_width: int = 100, crop_height: int = 100)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>取得したフレームに関する処理を行うクラス</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class FrameEditor:
+    &#34;&#34;&#34;取得したフレームに関する処理を行うクラス
+    &#34;&#34;&#34;
+    def __init__(
+        self,
+        num_digits: int = 4,
+        crop_width: int = 100,
+        crop_height: int = 100,
+    ) -&gt; None:
+
+        self.return_frames: List[List[Union[str, np.ndarray]]] = []
+        self.num_digits = num_digits
+        self.crop_width = crop_width
+        self.crop_height = crop_height
+        self.click_points: List = []
+
+        self.logger = logging.getLogger(&#34;__main__&#34;).getChild(__name__)
+        self.logger.debug(&#34;Frame Editor loaded.&#34;)
+
+    def get_click_points(self) -&gt; List:
+        &#34;&#34;&#34;クリックポイントを取得する
+
+        Returns:
+            List: クリックポイント
+        &#34;&#34;&#34;
+        return self.click_points
+
+    # 動画をフレームに分割
+    def frame_devide(
+        self,
+        video_path: str,
+        video_skip_sec: int = 0,
+        sampling_sec: int = 3,
+        batch_frames: int = 10,
+        save_frame: bool = True,
+        out_dir: str = &#34;frames&#34;,
+        is_crop: bool = True,
+        click_points: List = [],
+        extract_single_frame: bool = False,
+    ) -&gt; Tuple[Union[np.ndarray, List[List[np.ndarray]]], List[str]]:
+        &#34;&#34;&#34;動画をフレームに分割する
+        
+        Args:
+            video_path (str): 動画ファイルのパス
+            video_skip_sec (int, optional): 動画の開始位置をスキップする秒数
+            sampling_sec (int, optional): サンプリング間隔
+            batch_frames (int, optional): 1回のバッチで取得するフレーム数
+            save_frame (bool, optional): フレームを保存するかどうか
+            out_dir (str, optional): 保存先ディレクトリ
+            is_crop (bool, optional): 画像を切り出すかどうか
+            click_points (List, optional): クリックポイントの初期値
+            extract_single_frame (bool, optional): 最初の位置フレームだけ取得するかどうか
+            
+        Returns:
+            Tuple[Union[np.ndarray, List[List[np.ndarray]]], List[str]]: フレーム, タイムスタンプ
+        &#34;&#34;&#34;
+        self.click_points = click_points
+
+        if save_frame:
+            Path(out_dir).mkdir(parents=True, exist_ok=True)
+            clear_directory(out_dir)
+
+        cap = cv2.VideoCapture(video_path)
+        if not cap.isOpened():
+            self.logger.error(&#34;Error: Could not open video file.&#34;)
+            exit(1)
+
+        fps = cap.get(cv2.CAP_PROP_FPS)
+        interval_frames = 1 if sampling_sec == 0 else int(fps * sampling_sec)
+        skip_frames = fps * video_skip_sec
+        frame_count = 0
+        frame_batch = []
+        timestamps: List = []
+        return_frames = []
+        return_frame = None
+
+        # 指定の開始位置までスキップ
+        cap.set(cv2.CAP_PROP_POS_FRAMES, skip_frames)
+
+        while True:
+            ret, frame = cap.read()
+            if not ret:
+                self.logger.debug(&#34;Finsish: Could not read frame.&#34;)
+                break
+
+            # サンプリング間隔に基づいてフレームを保存
+            if frame_count % interval_frames &lt; batch_frames:
+                self.logger.debug(f&#34;Frame collected: {frame_count}&#34;)
+
+                if is_crop:
+                    if len(self.click_points) != 4:
+                        self.region_select(frame)
+                    cropped_frame = self.crop(frame, self.click_points)
+                    if cropped_frame is None:
+                        self.logger.error(&#34;Error: Could not crop image.&#34;)
+                        frame_count += 1
+                        continue
+                    frame = cropped_frame
+
+                # 最初の位置フレームだけ取得
+                if extract_single_frame:
+                    return_frame = frame
+                    break
+
+                if save_frame:
+                    frame_filename = Path(out_dir) / f&#34;frame_{frame_count:06d}.jpg&#34;
+                    cv2.imwrite(str(frame_filename), frame)
+                frame_batch.append(frame)
+
+            elif len(frame_batch) != 0:
+                return_frames.append(frame_batch)
+                i = len(timestamps)
+                timestamp = timedelta(seconds=sampling_sec * i + video_skip_sec)
+                timestamps.append(str(timestamp))
+                frame_batch = []
+
+            frame_count += 1
+
+        cap.release()
+        self.logger.debug(&#34;Capture resources released.&#34;)
+        return_value = return_frames if return_frame is None else return_frame
+        return return_value, timestamps
+
+    def crop(
+        self,
+        image: np.ndarray,
+        click_points: List,
+    ) -&gt; Optional[np.ndarray]:
+        &#34;&#34;&#34;クリックポイント4点から画像を切り出す
+
+        Args:
+            image (np.ndarray): 画像
+            click_points (List): クリックポイント
+            
+        Returns:
+            Optional[np.ndarray]: 切り出した画像
+        &#34;&#34;&#34;
+        if len(click_points) != 4:
+            return None
+
+        # 射影変換
+        pts1 = np.array(
+            [click_points[0], click_points[1], click_points[2], click_points[3]],
+            dtype=np.float32,
+        )
+
+        pts2 = np.array(
+            [
+                [0, 0],
+                [self.crop_width * self.num_digits, 0],
+                [self.crop_width * self.num_digits, self.crop_height],
+                [0, self.crop_height],
+            ],
+            dtype=np.float32,
+        )
+        M = cv2.getPerspectiveTransform(pts1, pts2)
+        extract_image = cv2.warpPerspective(
+            image, M, (self.crop_width * self.num_digits, self.crop_height)
+        )
+
+        return extract_image
+
+    def region_select(self, image: Union[str, np.ndarray]) -&gt; List[np.ndarray]:
+        &#34;&#34;&#34;画像から7セグメント領域を選択する
+        
+        OpenCVの別ウィンドウで開かれ、選択後にyキーを押すことで選択を確定する
+
+        Args:
+            image (Union[str, np.ndarray]): 画像
+
+        Returns:
+            List[np.ndarray]: クリックポイント
+        &#34;&#34;&#34;
+        img = image if isinstance(image, np.ndarray) else cv2.imread(image)
+
+        window_name = &#34;Select 7seg Region&#34;
+        cv2.namedWindow(window_name)
+        cv2.setMouseCallback(window_name, self.mouse_callback)
+
+        while True:
+            key = cv2.waitKey(1)
+            if key == ord(&#34;y&#34;) and len(self.click_points) == 4:  # yキーで選択終了
+                cv2.destroyAllWindows()
+                cv2.waitKey(1)
+                return self.click_points
+
+            img_clone = img.copy()
+            extract_image = self.crop(img_clone, self.click_points)
+
+            # デバッグ情報描画
+            img_clone, extract_image = self.draw_region_outline(
+                img_clone,
+                extract_image,
+                self.click_points,
+            )
+
+            cv2.imshow(window_name, img_clone)
+            if extract_image is not None:
+                cv2.imshow(&#34;Result&#34;, extract_image)
+
+    def mouse_callback(self, event, x, y, flags, param) -&gt; None:
+        &#34;&#34;&#34;マウスイベントのコールバック関数
+        &#34;&#34;&#34;
+        if event == cv2.EVENT_LBUTTONDOWN:
+            new_point = [x, y]
+
+            if len(self.click_points) &lt; 4:
+                self.click_points.append(new_point)
+            else:
+                # 4点以上の場合、最も近い点を入れ替える
+                distances = np.linalg.norm(
+                    np.array(self.click_points) - new_point, axis=1
+                )
+                closest_index = np.argmin(distances)
+                self.click_points[closest_index] = new_point
+                self.click_points = self.order_points(self.click_points)
+
+    def order_points(self, click_points: List) -&gt; List:
+        &#34;&#34;&#34;クリックポイントを左上、右上、右下、左下の順に並び替える
+        &#34;&#34;&#34;
+        points_ = np.array(click_points)
+
+        # x座標で昇順にソート
+        sorted_by_x = points_[np.argsort(points_[:, 0])]
+
+        # 左側の2点と右側の2点に分ける
+        left_points = sorted_by_x[:2]
+        right_points = sorted_by_x[2:]
+
+        # 左側の2点のうち、y座標が小さいものを左上、大きいものを左下とする
+        left_points = left_points[np.argsort(left_points[:, 1])]
+        top_left, bottom_left = left_points
+
+        # 右側の2点のうち、y座標が小さいものを右上、大きいものを右下とする
+        right_points = right_points[np.argsort(right_points[:, 1])]
+        top_right, bottom_right = right_points
+
+        return [
+            top_left.tolist(),
+            top_right.tolist(),
+            bottom_right.tolist(),
+            bottom_left.tolist(),
+        ]
+
+    # 選択領域の可視化
+    def draw_region_outline(
+        self,
+        image: np.ndarray,
+        extract_image: Optional[np.ndarray],
+        click_points: List,
+    ) -&gt; Tuple[np.ndarray, Optional[np.ndarray]]:
+        &#34;&#34;&#34;選択領域のアウトラインを描画する
+        &#34;&#34;&#34;
+        for click_point in click_points:
+            cv2.circle(image, (click_point[0], click_point[1]), 5, (0, 255, 0), -1)
+        if len(click_points) &gt;= 3:
+            cv2.drawContours(image, [np.array(click_points)], -1, (0, 255, 0), 2)  # type: ignore
+
+        if extract_image is not None:
+            extract_image = self.draw_separation_lines(extract_image)
+        return image, extract_image
+
+    def draw_separation_lines(self, extract_image: np.ndarray) -&gt; np.ndarray:
+        &#34;&#34;&#34;切り出し画像に分割線を描画する
+        &#34;&#34;&#34;
+        for index in range(self.num_digits):
+            temp_x = int((extract_image.shape[1] / self.num_digits) * index)
+            temp_y = extract_image.shape[0]
+
+            if index &gt; 0:
+                cv2.line(extract_image, (temp_x, 0), (temp_x, temp_y), (0, 255, 0), 1)
+        return extract_image</code></pre>
+</details>
+<h3>Methods</h3>
+<dl>
+<dt id="sichiribe.cores.frame_editor.FrameEditor.crop"><code class="name flex">
+<span>def <span class="ident">crop</span></span>(<span>self, image: numpy.ndarray, click_points: List) ‑> numpy.ndarray | None</span>
+</code></dt>
+<dd>
+<div class="desc"><p>クリックポイント4点から画像を切り出す</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>image</code></strong> :&ensp;<code>np.ndarray</code></dt>
+<dd>画像</dd>
+<dt><strong><code>click_points</code></strong> :&ensp;<code>List</code></dt>
+<dd>クリックポイント</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>Optional[np.ndarray]</code></dt>
+<dd>切り出した画像</dd>
+</dl></div>
+</dd>
+<dt id="sichiribe.cores.frame_editor.FrameEditor.draw_region_outline"><code class="name flex">
+<span>def <span class="ident">draw_region_outline</span></span>(<span>self,<br>image: numpy.ndarray,<br>extract_image: numpy.ndarray | None,<br>click_points: List) ‑> Tuple[numpy.ndarray, numpy.ndarray | None]</span>
+</code></dt>
+<dd>
+<div class="desc"><p>選択領域のアウトラインを描画する</p></div>
+</dd>
+<dt id="sichiribe.cores.frame_editor.FrameEditor.draw_separation_lines"><code class="name flex">
+<span>def <span class="ident">draw_separation_lines</span></span>(<span>self, extract_image: numpy.ndarray) ‑> numpy.ndarray</span>
+</code></dt>
+<dd>
+<div class="desc"><p>切り出し画像に分割線を描画する</p></div>
+</dd>
+<dt id="sichiribe.cores.frame_editor.FrameEditor.frame_devide"><code class="name flex">
+<span>def <span class="ident">frame_devide</span></span>(<span>self,<br>video_path: str,<br>video_skip_sec: int = 0,<br>sampling_sec: int = 3,<br>batch_frames: int = 10,<br>save_frame: bool = True,<br>out_dir: str = 'frames',<br>is_crop: bool = True,<br>click_points: List = [],<br>extract_single_frame: bool = False) ‑> Tuple[numpy.ndarray | List[List[numpy.ndarray]], List[str]]</span>
+</code></dt>
+<dd>
+<div class="desc"><p>動画をフレームに分割する</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>video_path</code></strong> :&ensp;<code>str</code></dt>
+<dd>動画ファイルのパス</dd>
+<dt><strong><code>video_skip_sec</code></strong> :&ensp;<code>int</code>, optional</dt>
+<dd>動画の開始位置をスキップする秒数</dd>
+<dt><strong><code>sampling_sec</code></strong> :&ensp;<code>int</code>, optional</dt>
+<dd>サンプリング間隔</dd>
+<dt><strong><code>batch_frames</code></strong> :&ensp;<code>int</code>, optional</dt>
+<dd>1回のバッチで取得するフレーム数</dd>
+<dt><strong><code>save_frame</code></strong> :&ensp;<code>bool</code>, optional</dt>
+<dd>フレームを保存するかどうか</dd>
+<dt><strong><code>out_dir</code></strong> :&ensp;<code>str</code>, optional</dt>
+<dd>保存先ディレクトリ</dd>
+<dt><strong><code>is_crop</code></strong> :&ensp;<code>bool</code>, optional</dt>
+<dd>画像を切り出すかどうか</dd>
+<dt><strong><code>click_points</code></strong> :&ensp;<code>List</code>, optional</dt>
+<dd>クリックポイントの初期値</dd>
+<dt><strong><code>extract_single_frame</code></strong> :&ensp;<code>bool</code>, optional</dt>
+<dd>最初の位置フレームだけ取得するかどうか</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>Tuple[Union[np.ndarray, List[List[np.ndarray]]], List[str]]</code></dt>
+<dd>フレーム, タイムスタンプ</dd>
+</dl></div>
+</dd>
+<dt id="sichiribe.cores.frame_editor.FrameEditor.get_click_points"><code class="name flex">
+<span>def <span class="ident">get_click_points</span></span>(<span>self) ‑> List</span>
+</code></dt>
+<dd>
+<div class="desc"><p>クリックポイントを取得する</p>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>List</code></dt>
+<dd>クリックポイント</dd>
+</dl></div>
+</dd>
+<dt id="sichiribe.cores.frame_editor.FrameEditor.mouse_callback"><code class="name flex">
+<span>def <span class="ident">mouse_callback</span></span>(<span>self, event, x, y, flags, param) ‑> None</span>
+</code></dt>
+<dd>
+<div class="desc"><p>マウスイベントのコールバック関数</p></div>
+</dd>
+<dt id="sichiribe.cores.frame_editor.FrameEditor.order_points"><code class="name flex">
+<span>def <span class="ident">order_points</span></span>(<span>self, click_points: List) ‑> List</span>
+</code></dt>
+<dd>
+<div class="desc"><p>クリックポイントを左上、右上、右下、左下の順に並び替える</p></div>
+</dd>
+<dt id="sichiribe.cores.frame_editor.FrameEditor.region_select"><code class="name flex">
+<span>def <span class="ident">region_select</span></span>(<span>self, image: str | numpy.ndarray) ‑> List[numpy.ndarray]</span>
+</code></dt>
+<dd>
+<div class="desc"><p>画像から7セグメント領域を選択する</p>
+<p>OpenCVの別ウィンドウで開かれ、選択後にyキーを押すことで選択を確定する</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>image</code></strong> :&ensp;<code>Union[str, np.ndarray]</code></dt>
+<dd>画像</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>List[np.ndarray]</code></dt>
+<dd>クリックポイント</dd>
+</dl></div>
+</dd>
+</dl>
+</dd>
+</dl>
+</section>
+</article>
+<nav id="sidebar">
+<div class="toc">
+<ul></ul>
+</div>
+<ul id="index">
+<li><h3>Super-module</h3>
+<ul>
+<li><code><a title="sichiribe.cores" href="index.html">sichiribe.cores</a></code></li>
+</ul>
+</li>
+<li><h3><a href="#header-classes">Classes</a></h3>
+<ul>
+<li>
+<h4><code><a title="sichiribe.cores.frame_editor.FrameEditor" href="#sichiribe.cores.frame_editor.FrameEditor">FrameEditor</a></code></h4>
+<ul class="">
+<li><code><a title="sichiribe.cores.frame_editor.FrameEditor.crop" href="#sichiribe.cores.frame_editor.FrameEditor.crop">crop</a></code></li>
+<li><code><a title="sichiribe.cores.frame_editor.FrameEditor.draw_region_outline" href="#sichiribe.cores.frame_editor.FrameEditor.draw_region_outline">draw_region_outline</a></code></li>
+<li><code><a title="sichiribe.cores.frame_editor.FrameEditor.draw_separation_lines" href="#sichiribe.cores.frame_editor.FrameEditor.draw_separation_lines">draw_separation_lines</a></code></li>
+<li><code><a title="sichiribe.cores.frame_editor.FrameEditor.frame_devide" href="#sichiribe.cores.frame_editor.FrameEditor.frame_devide">frame_devide</a></code></li>
+<li><code><a title="sichiribe.cores.frame_editor.FrameEditor.get_click_points" href="#sichiribe.cores.frame_editor.FrameEditor.get_click_points">get_click_points</a></code></li>
+<li><code><a title="sichiribe.cores.frame_editor.FrameEditor.mouse_callback" href="#sichiribe.cores.frame_editor.FrameEditor.mouse_callback">mouse_callback</a></code></li>
+<li><code><a title="sichiribe.cores.frame_editor.FrameEditor.order_points" href="#sichiribe.cores.frame_editor.FrameEditor.order_points">order_points</a></code></li>
+<li><code><a title="sichiribe.cores.frame_editor.FrameEditor.region_select" href="#sichiribe.cores.frame_editor.FrameEditor.region_select">region_select</a></code></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</nav>
+</main>
+<footer id="footer">
+<p>Generated by <a href="https://pdoc3.github.io/pdoc" title="pdoc: Python API documentation generator"><cite>pdoc</cite> 0.11.3</a>.</p>
+</footer>
+</body>
+</html>

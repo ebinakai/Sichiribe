@@ -1,0 +1,322 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1">
+<meta name="generator" content="pdoc3 0.11.3">
+<title>sichiribe.cores.cnn API documentation</title>
+<meta name="description" content="">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/13.0.0/sanitize.min.css" integrity="sha512-y1dtMcuvtTMJc1yPgEqF0ZjQbhnc/bFhyvIyVNb9Zk5mIGtqVaAB1Ttl28su8AvFMOY0EwRbAe+HCLqj6W7/KA==" crossorigin>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/13.0.0/typography.min.css" integrity="sha512-Y1DYSb995BAfxobCkKepB1BqJJTPrOp3zPL74AWFugHHmmdcvO+C48WLrUOlhGMc0QG7AE3f7gmvvcrmX2fDoA==" crossorigin>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/default.min.css" crossorigin>
+<style>:root{--highlight-color:#fe9}.flex{display:flex !important}body{line-height:1.5em}#content{padding:20px}#sidebar{padding:1.5em;overflow:hidden}#sidebar > *:last-child{margin-bottom:2cm}.http-server-breadcrumbs{font-size:130%;margin:0 0 15px 0}#footer{font-size:.75em;padding:5px 30px;border-top:1px solid #ddd;text-align:right}#footer p{margin:0 0 0 1em;display:inline-block}#footer p:last-child{margin-right:30px}h1,h2,h3,h4,h5{font-weight:300}h1{font-size:2.5em;line-height:1.1em}h2{font-size:1.75em;margin:2em 0 .50em 0}h3{font-size:1.4em;margin:1.6em 0 .7em 0}h4{margin:0;font-size:105%}h1:target,h2:target,h3:target,h4:target,h5:target,h6:target{background:var(--highlight-color);padding:.2em 0}a{color:#058;text-decoration:none;transition:color .2s ease-in-out}a:visited{color:#503}a:hover{color:#b62}.title code{font-weight:bold}h2[id^="header-"]{margin-top:2em}.ident{color:#900;font-weight:bold}pre code{font-size:.8em;line-height:1.4em;padding:1em;display:block}code{background:#f3f3f3;font-family:"DejaVu Sans Mono",monospace;padding:1px 4px;overflow-wrap:break-word}h1 code{background:transparent}pre{border-top:1px solid #ccc;border-bottom:1px solid #ccc;margin:1em 0}#http-server-module-list{display:flex;flex-flow:column}#http-server-module-list div{display:flex}#http-server-module-list dt{min-width:10%}#http-server-module-list p{margin-top:0}.toc ul,#index{list-style-type:none;margin:0;padding:0}#index code{background:transparent}#index h3{border-bottom:1px solid #ddd}#index ul{padding:0}#index h4{margin-top:.6em;font-weight:bold}@media (min-width:200ex){#index .two-column{column-count:2}}@media (min-width:300ex){#index .two-column{column-count:3}}dl{margin-bottom:2em}dl dl:last-child{margin-bottom:4em}dd{margin:0 0 1em 3em}#header-classes + dl > dd{margin-bottom:3em}dd dd{margin-left:2em}dd p{margin:10px 0}.name{background:#eee;font-size:.85em;padding:5px 10px;display:inline-block;min-width:40%}.name:hover{background:#e0e0e0}dt:target .name{background:var(--highlight-color)}.name > span:first-child{white-space:nowrap}.name.class > span:nth-child(2){margin-left:.4em}.inherited{color:#999;border-left:5px solid #eee;padding-left:1em}.inheritance em{font-style:normal;font-weight:bold}.desc h2{font-weight:400;font-size:1.25em}.desc h3{font-size:1em}.desc dt code{background:inherit}.source summary,.git-link-div{color:#666;text-align:right;font-weight:400;font-size:.8em;text-transform:uppercase}.source summary > *{white-space:nowrap;cursor:pointer}.git-link{color:inherit;margin-left:1em}.source pre{max-height:500px;overflow:auto;margin:0}.source pre code{font-size:12px;overflow:visible}.hlist{list-style:none}.hlist li{display:inline}.hlist li:after{content:',\2002'}.hlist li:last-child:after{content:none}.hlist .hlist{display:inline;padding-left:1em}img{max-width:100%}td{padding:0 .5em}.admonition{padding:.1em 1em;margin:1em 0}.admonition-title{font-weight:bold}.admonition.note,.admonition.info,.admonition.important{background:#aef}.admonition.todo,.admonition.versionadded,.admonition.tip,.admonition.hint{background:#dfd}.admonition.warning,.admonition.versionchanged,.admonition.deprecated{background:#fd4}.admonition.error,.admonition.danger,.admonition.caution{background:lightpink}</style>
+<style media="screen and (min-width: 700px)">@media screen and (min-width:700px){#sidebar{width:30%;height:100vh;overflow:auto;position:sticky;top:0}#content{width:70%;max-width:100ch;padding:3em 4em;border-left:1px solid #ddd}pre code{font-size:1em}.name{font-size:1em}main{display:flex;flex-direction:row-reverse;justify-content:flex-end}.toc ul ul,#index ul ul{padding-left:1em}.toc > ul > li{margin-top:.5em}}</style>
+<style media="print">@media print{#sidebar h1{page-break-before:always}.source{display:none}}@media print{*{background:transparent !important;color:#000 !important;box-shadow:none !important;text-shadow:none !important}a[href]:after{content:" (" attr(href) ")";font-size:90%}a[href][title]:after{content:none}abbr[title]:after{content:" (" attr(title) ")"}.ir a:after,a[href^="javascript:"]:after,a[href^="#"]:after{content:""}pre,blockquote{border:1px solid #999;page-break-inside:avoid}thead{display:table-header-group}tr,img{page-break-inside:avoid}img{max-width:100% !important}@page{margin:0.5cm}p,h2,h3{orphans:3;widows:3}h1,h2,h3,h4,h5,h6{page-break-after:avoid}}</style>
+<script defer src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js" integrity="sha512-D9gUyxqja7hBtkWpPWGt9wfbfaMGVt9gnyCvYa+jojwwPHLCzUm5i8rpk7vD7wNee9bA35eYIjobYPaQuKS1MQ==" crossorigin></script>
+<script>window.addEventListener('DOMContentLoaded', () => {
+hljs.configure({languages: ['bash', 'css', 'diff', 'graphql', 'ini', 'javascript', 'json', 'plaintext', 'python', 'python-repl', 'rust', 'shell', 'sql', 'typescript', 'xml', 'yaml']});
+hljs.highlightAll();
+})</script>
+</head>
+<body>
+<main>
+<article id="content">
+<header>
+<h1 class="title">Module <code>sichiribe.cores.cnn</code></h1>
+</header>
+<section id="section-intro">
+</section>
+<section>
+</section>
+<section>
+</section>
+<section>
+<h2 class="section-title" id="header-functions">Functions</h2>
+<dl>
+<dt id="sichiribe.cores.cnn.cnn_init"><code class="name flex">
+<span>def <span class="ident">cnn_init</span></span>(<span>num_digits: int, model_filename: str | None = None) ‑> <a title="sichiribe.cores.cnn.CNNCore" href="#sichiribe.cores.cnn.CNNCore">CNNCore</a></span>
+</code></dt>
+<dd>
+<div class="desc"><p>インストールされているライブラリに応じてCNNモデルを選択する</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>num_digits</code></strong> :&ensp;<code>int</code></dt>
+<dd>推論する桁数</dd>
+<dt><strong><code>model_filename</code></strong> :&ensp;<code>Optional[str]</code>, optional</dt>
+<dd>モデルファイル名。Noneの場合はデフォルトのモデルを使用。デフォルトはNone。</dd>
+</dl></div>
+</dd>
+</dl>
+</section>
+<section>
+<h2 class="section-title" id="header-classes">Classes</h2>
+<dl>
+<dt id="sichiribe.cores.cnn.CNNCore"><code class="flex name class">
+<span>class <span class="ident">CNNCore</span></span>
+<span>(</span><span>num_digits: int)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>CNNを使用した7セグメント数字認識のための基底クラス</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class CNNCore(Detector):
+    &#34;&#34;&#34;CNNを使用した7セグメント数字認識のための基底クラス
+    &#34;&#34;&#34;
+    def __init__(self, num_digits: int) -&gt; None:
+        self.num_digits = num_digits
+        self.model: Optional[Any]
+
+        self.logger = logging.getLogger(&#34;__main__&#34;).getChild(__name__)
+
+        # 画像の各種設定
+        # 空白の表示に対応させるため、blankのところを「&#39; &#39;」で空白に設定
+        self.folder = np.array([&#34;0&#34;, &#34;1&#34;, &#34;2&#34;, &#34;3&#34;, &#34;4&#34;, &#34;5&#34;, &#34;6&#34;, &#34;7&#34;, &#34;8&#34;, &#34;9&#34;, &#34;&#34;])
+        self.image_width = 100  # 使用する学習済みモデルと同じwidth（横幅）を指定
+        self.image_height = 100  # 使用する学習済みモデルと同じheight（縦の高さ）を指定
+        self.color_setting = 1  # 学習済みモデルと同じ画像のカラー設定にする。モノクロ・グレースケールの場合は「1」。カラーの場合は「3」
+        self.cv2_color_setting = 0  # 同上。cv2.imreadではモノクロ・グレースケールの場合は「0」。カラーの場合は「1」
+        self.crop_size = 100  # 画像をトリミングするサイズ
+
+    def inference_7seg_classifier(self, image_bin: np.ndarray) -&gt; List[int]:
+        &#34;&#34;&#34;画像から7セグメント数字を推論する
+
+        Args:
+            image_bin (np.ndarray): 推論対象の画像
+
+        Raises:
+            NotImplementedError: サブクラスで実装されていない場合
+
+        Returns:
+            List[int]: 各桁の推論結果
+        &#34;&#34;&#34;
+        raise NotImplementedError(&#34;This method must be implemented in the subclass&#34;)
+
+    def preprocess_image(self, image: np.ndarray) -&gt; np.ndarray:
+        &#34;&#34;&#34;画像を準備する
+
+        各桁を一度に処理できるように画像をトリミングし、リサイズする
+        
+        Args:
+            image (np.ndarray): 入力画像
+            
+        Returns:
+            np.ndarray: 画像の準備結果
+        &#34;&#34;&#34;
+        images = []
+        for index in range(self.num_digits):
+            # 画像を一桁にトリミング
+            img = image[
+                0 : self.crop_size,
+                index * self.crop_size : (index + 1) * self.crop_size,
+            ]
+            img = cv2.resize(img, (self.image_width, self.image_height))
+            img_ = (
+                img.reshape(
+                    self.image_width, self.image_height, self.color_setting
+                ).astype(&#34;float32&#34;)
+                / 255
+            )
+            images.append(img_)
+        return np.array(images, dtype=np.float32)
+
+    def predict(
+        self,
+        images: Union[str, np.ndarray, List[np.ndarray], List[str]],
+        binarize_th: Optional[int] = None,
+    ) -&gt; tuple[int, float]:
+        &#34;&#34;&#34;画像のリストから7セグメント数字を推論する
+
+        Args:
+            images (Union[str, np.ndarray, List[np.ndarray], List[str]]): 推論対象の画像またはパスのリスト
+            binarize_th (Optional[int], optional): 二値化の閾値。Noneの場合は自動設定。デフォルトはNone。
+
+        Returns:
+            tuple[int, float]: 推論結果とエラー率
+        &#34;&#34;&#34;
+
+        images_ = images if isinstance(images, list) else [images]
+
+        results = np.zeros((0, self.num_digits))
+
+        for image in images_:
+
+            image_gs = self.load_image(image)
+
+            if image_gs is None:
+                self.logger.error(&#34;Error: Could not read image file.&#34;)
+                continue
+
+            image_gs = cv2.resize(
+                image_gs, (self.crop_size * self.num_digits, self.crop_size)
+            )
+
+            image_bin = self.preprocess_binarization(
+                image_gs, binarize_th, output_grayscale=True
+            )
+
+            argmax_indices = self.inference_7seg_classifier(image_bin)
+
+            results = np.vstack([results, argmax_indices])
+
+        # 最頻値を取得
+        result, errors_per_digit = self.find_mode_per_column_np(results)
+
+        # 最後にラベルに対応させる
+        result_digits = self.folder[result.astype(int)]
+        result_str = &#34;&#34;.join(result_digits)
+        result_int = int(result_str) if result_str != &#34;&#34; else 0
+
+        failed_rate = np.mean(errors_per_digit)
+
+        self.logger.debug(&#34;Detected label: %s&#34;, result)
+        self.logger.debug(&#34;Error: %s&#34;, failed_rate)
+        return result_int, failed_rate
+
+    def find_mode_per_column_np(
+        self, predictions: np.ndarray
+    ) -&gt; Tuple[np.ndarray, np.ndarray]:
+        &#34;&#34;&#34;各列の最頻値を取得する
+        
+        Args:
+            predictions (np.ndarray): 推論結果の配列
+            
+        Returns:
+            Tuple[np.ndarray, np.ndarray]: 最頻値の配列と各桁のエラー率の配列
+        &#34;&#34;&#34;
+        result = []
+        errors_per_digit = []
+        for i in range(predictions.shape[1]):  # 各桁に対して
+            digit_predictions = predictions[:, i]  # 各列を抽出
+
+            values, counts = np.unique(digit_predictions, return_counts=True)
+            mode_value = values[np.argmax(counts)]  # 最も頻出する値を取得
+
+            incorrect_predictions = np.sum(digit_predictions != mode_value)
+            error_rate = incorrect_predictions / len(digit_predictions)
+
+            result.append(mode_value)
+            errors_per_digit.append(error_rate)
+        return np.array(result), np.array(errors_per_digit)</code></pre>
+</details>
+<h3>Ancestors</h3>
+<ul class="hlist">
+<li>cores.detector.Detector</li>
+<li>abc.ABC</li>
+</ul>
+<h3>Methods</h3>
+<dl>
+<dt id="sichiribe.cores.cnn.CNNCore.find_mode_per_column_np"><code class="name flex">
+<span>def <span class="ident">find_mode_per_column_np</span></span>(<span>self, predictions: numpy.ndarray) ‑> Tuple[numpy.ndarray, numpy.ndarray]</span>
+</code></dt>
+<dd>
+<div class="desc"><p>各列の最頻値を取得する</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>predictions</code></strong> :&ensp;<code>np.ndarray</code></dt>
+<dd>推論結果の配列</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>Tuple[np.ndarray, np.ndarray]</code></dt>
+<dd>最頻値の配列と各桁のエラー率の配列</dd>
+</dl></div>
+</dd>
+<dt id="sichiribe.cores.cnn.CNNCore.inference_7seg_classifier"><code class="name flex">
+<span>def <span class="ident">inference_7seg_classifier</span></span>(<span>self, image_bin: numpy.ndarray) ‑> List[int]</span>
+</code></dt>
+<dd>
+<div class="desc"><p>画像から7セグメント数字を推論する</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>image_bin</code></strong> :&ensp;<code>np.ndarray</code></dt>
+<dd>推論対象の画像</dd>
+</dl>
+<h2 id="raises">Raises</h2>
+<dl>
+<dt><code>NotImplementedError</code></dt>
+<dd>サブクラスで実装されていない場合</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>List[int]</code></dt>
+<dd>各桁の推論結果</dd>
+</dl></div>
+</dd>
+<dt id="sichiribe.cores.cnn.CNNCore.predict"><code class="name flex">
+<span>def <span class="ident">predict</span></span>(<span>self,<br>images: str | numpy.ndarray | List[numpy.ndarray] | List[str],<br>binarize_th: int | None = None) ‑> tuple[int, float]</span>
+</code></dt>
+<dd>
+<div class="desc"><p>画像のリストから7セグメント数字を推論する</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>images</code></strong> :&ensp;<code>Union[str, np.ndarray, List[np.ndarray], List[str]]</code></dt>
+<dd>推論対象の画像またはパスのリスト</dd>
+<dt><strong><code>binarize_th</code></strong> :&ensp;<code>Optional[int]</code>, optional</dt>
+<dd>二値化の閾値。Noneの場合は自動設定。デフォルトはNone。</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>tuple[int, float]</code></dt>
+<dd>推論結果とエラー率</dd>
+</dl></div>
+</dd>
+<dt id="sichiribe.cores.cnn.CNNCore.preprocess_image"><code class="name flex">
+<span>def <span class="ident">preprocess_image</span></span>(<span>self, image: numpy.ndarray) ‑> numpy.ndarray</span>
+</code></dt>
+<dd>
+<div class="desc"><p>画像を準備する</p>
+<p>各桁を一度に処理できるように画像をトリミングし、リサイズする</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>image</code></strong> :&ensp;<code>np.ndarray</code></dt>
+<dd>入力画像</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>np.ndarray</code></dt>
+<dd>画像の準備結果</dd>
+</dl></div>
+</dd>
+</dl>
+</dd>
+</dl>
+</section>
+</article>
+<nav id="sidebar">
+<div class="toc">
+<ul></ul>
+</div>
+<ul id="index">
+<li><h3>Super-module</h3>
+<ul>
+<li><code><a title="sichiribe.cores" href="index.html">sichiribe.cores</a></code></li>
+</ul>
+</li>
+<li><h3><a href="#header-functions">Functions</a></h3>
+<ul class="">
+<li><code><a title="sichiribe.cores.cnn.cnn_init" href="#sichiribe.cores.cnn.cnn_init">cnn_init</a></code></li>
+</ul>
+</li>
+<li><h3><a href="#header-classes">Classes</a></h3>
+<ul>
+<li>
+<h4><code><a title="sichiribe.cores.cnn.CNNCore" href="#sichiribe.cores.cnn.CNNCore">CNNCore</a></code></h4>
+<ul class="">
+<li><code><a title="sichiribe.cores.cnn.CNNCore.find_mode_per_column_np" href="#sichiribe.cores.cnn.CNNCore.find_mode_per_column_np">find_mode_per_column_np</a></code></li>
+<li><code><a title="sichiribe.cores.cnn.CNNCore.inference_7seg_classifier" href="#sichiribe.cores.cnn.CNNCore.inference_7seg_classifier">inference_7seg_classifier</a></code></li>
+<li><code><a title="sichiribe.cores.cnn.CNNCore.predict" href="#sichiribe.cores.cnn.CNNCore.predict">predict</a></code></li>
+<li><code><a title="sichiribe.cores.cnn.CNNCore.preprocess_image" href="#sichiribe.cores.cnn.CNNCore.preprocess_image">preprocess_image</a></code></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</nav>
+</main>
+<footer id="footer">
+<p>Generated by <a href="https://pdoc3.github.io/pdoc" title="pdoc: Python API documentation generator"><cite>pdoc</cite> 0.11.3</a>.</p>
+</footer>
+</body>
+</html>

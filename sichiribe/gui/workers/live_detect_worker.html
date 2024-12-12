@@ -1,0 +1,355 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1">
+<meta name="generator" content="pdoc3 0.11.3">
+<title>sichiribe.gui.workers.live_detect_worker API documentation</title>
+<meta name="description" content="">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/13.0.0/sanitize.min.css" integrity="sha512-y1dtMcuvtTMJc1yPgEqF0ZjQbhnc/bFhyvIyVNb9Zk5mIGtqVaAB1Ttl28su8AvFMOY0EwRbAe+HCLqj6W7/KA==" crossorigin>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/13.0.0/typography.min.css" integrity="sha512-Y1DYSb995BAfxobCkKepB1BqJJTPrOp3zPL74AWFugHHmmdcvO+C48WLrUOlhGMc0QG7AE3f7gmvvcrmX2fDoA==" crossorigin>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/default.min.css" crossorigin>
+<style>:root{--highlight-color:#fe9}.flex{display:flex !important}body{line-height:1.5em}#content{padding:20px}#sidebar{padding:1.5em;overflow:hidden}#sidebar > *:last-child{margin-bottom:2cm}.http-server-breadcrumbs{font-size:130%;margin:0 0 15px 0}#footer{font-size:.75em;padding:5px 30px;border-top:1px solid #ddd;text-align:right}#footer p{margin:0 0 0 1em;display:inline-block}#footer p:last-child{margin-right:30px}h1,h2,h3,h4,h5{font-weight:300}h1{font-size:2.5em;line-height:1.1em}h2{font-size:1.75em;margin:2em 0 .50em 0}h3{font-size:1.4em;margin:1.6em 0 .7em 0}h4{margin:0;font-size:105%}h1:target,h2:target,h3:target,h4:target,h5:target,h6:target{background:var(--highlight-color);padding:.2em 0}a{color:#058;text-decoration:none;transition:color .2s ease-in-out}a:visited{color:#503}a:hover{color:#b62}.title code{font-weight:bold}h2[id^="header-"]{margin-top:2em}.ident{color:#900;font-weight:bold}pre code{font-size:.8em;line-height:1.4em;padding:1em;display:block}code{background:#f3f3f3;font-family:"DejaVu Sans Mono",monospace;padding:1px 4px;overflow-wrap:break-word}h1 code{background:transparent}pre{border-top:1px solid #ccc;border-bottom:1px solid #ccc;margin:1em 0}#http-server-module-list{display:flex;flex-flow:column}#http-server-module-list div{display:flex}#http-server-module-list dt{min-width:10%}#http-server-module-list p{margin-top:0}.toc ul,#index{list-style-type:none;margin:0;padding:0}#index code{background:transparent}#index h3{border-bottom:1px solid #ddd}#index ul{padding:0}#index h4{margin-top:.6em;font-weight:bold}@media (min-width:200ex){#index .two-column{column-count:2}}@media (min-width:300ex){#index .two-column{column-count:3}}dl{margin-bottom:2em}dl dl:last-child{margin-bottom:4em}dd{margin:0 0 1em 3em}#header-classes + dl > dd{margin-bottom:3em}dd dd{margin-left:2em}dd p{margin:10px 0}.name{background:#eee;font-size:.85em;padding:5px 10px;display:inline-block;min-width:40%}.name:hover{background:#e0e0e0}dt:target .name{background:var(--highlight-color)}.name > span:first-child{white-space:nowrap}.name.class > span:nth-child(2){margin-left:.4em}.inherited{color:#999;border-left:5px solid #eee;padding-left:1em}.inheritance em{font-style:normal;font-weight:bold}.desc h2{font-weight:400;font-size:1.25em}.desc h3{font-size:1em}.desc dt code{background:inherit}.source summary,.git-link-div{color:#666;text-align:right;font-weight:400;font-size:.8em;text-transform:uppercase}.source summary > *{white-space:nowrap;cursor:pointer}.git-link{color:inherit;margin-left:1em}.source pre{max-height:500px;overflow:auto;margin:0}.source pre code{font-size:12px;overflow:visible}.hlist{list-style:none}.hlist li{display:inline}.hlist li:after{content:',\2002'}.hlist li:last-child:after{content:none}.hlist .hlist{display:inline;padding-left:1em}img{max-width:100%}td{padding:0 .5em}.admonition{padding:.1em 1em;margin:1em 0}.admonition-title{font-weight:bold}.admonition.note,.admonition.info,.admonition.important{background:#aef}.admonition.todo,.admonition.versionadded,.admonition.tip,.admonition.hint{background:#dfd}.admonition.warning,.admonition.versionchanged,.admonition.deprecated{background:#fd4}.admonition.error,.admonition.danger,.admonition.caution{background:lightpink}</style>
+<style media="screen and (min-width: 700px)">@media screen and (min-width:700px){#sidebar{width:30%;height:100vh;overflow:auto;position:sticky;top:0}#content{width:70%;max-width:100ch;padding:3em 4em;border-left:1px solid #ddd}pre code{font-size:1em}.name{font-size:1em}main{display:flex;flex-direction:row-reverse;justify-content:flex-end}.toc ul ul,#index ul ul{padding-left:1em}.toc > ul > li{margin-top:.5em}}</style>
+<style media="print">@media print{#sidebar h1{page-break-before:always}.source{display:none}}@media print{*{background:transparent !important;color:#000 !important;box-shadow:none !important;text-shadow:none !important}a[href]:after{content:" (" attr(href) ")";font-size:90%}a[href][title]:after{content:none}abbr[title]:after{content:" (" attr(title) ")"}.ir a:after,a[href^="javascript:"]:after,a[href^="#"]:after{content:""}pre,blockquote{border:1px solid #999;page-break-inside:avoid}thead{display:table-header-group}tr,img{page-break-inside:avoid}img{max-width:100% !important}@page{margin:0.5cm}p,h2,h3{orphans:3;widows:3}h1,h2,h3,h4,h5,h6{page-break-after:avoid}}</style>
+<script defer src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js" integrity="sha512-D9gUyxqja7hBtkWpPWGt9wfbfaMGVt9gnyCvYa+jojwwPHLCzUm5i8rpk7vD7wNee9bA35eYIjobYPaQuKS1MQ==" crossorigin></script>
+<script>window.addEventListener('DOMContentLoaded', () => {
+hljs.configure({languages: ['bash', 'css', 'diff', 'graphql', 'ini', 'javascript', 'json', 'plaintext', 'python', 'python-repl', 'rust', 'shell', 'sql', 'typescript', 'xml', 'yaml']});
+hljs.highlightAll();
+})</script>
+</head>
+<body>
+<main>
+<article id="content">
+<header>
+<h1 class="title">Module <code>sichiribe.gui.workers.live_detect_worker</code></h1>
+</header>
+<section id="section-intro">
+</section>
+<section>
+</section>
+<section>
+</section>
+<section>
+</section>
+<section>
+<h2 class="section-title" id="header-classes">Classes</h2>
+<dl>
+<dt id="sichiribe.gui.workers.live_detect_worker.DetectWorker"><code class="flex name class">
+<span>class <span class="ident">DetectWorker</span></span>
+</code></dt>
+<dd>
+<div class="desc"><p>リアルタイム解析を行うワーカークラス</p>
+<h2 id="attributes">Attributes</h2>
+<dl>
+<dt><strong><code>ready</code></strong></dt>
+<dd>推論処理が開始されたことを通知するシグナル</dd>
+<dt><strong><code>error</code></strong></dt>
+<dd>エラーが発生したことを通知するシグナル</dd>
+<dt><strong><code>progress</code></strong></dt>
+<dd>推論結果を通知するシグナル</dd>
+<dt><strong><code>send_image</code></strong></dt>
+<dd>画像を送信するシグナル</dd>
+<dt><strong><code>remaining_time</code></strong></dt>
+<dd>残り時間を通知するシグナル</dd>
+</dl>
+<p><strong>init</strong>(self, parent: Optional[PySide6.QtCore.QObject] = None) -&gt; None</p>
+<p>Initialize self.
+See help(type(self)) for accurate signature.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class DetectWorker(QThread):
+    &#34;&#34;&#34;リアルタイム解析を行うワーカークラス
+    
+    Attributes:
+        ready: 推論処理が開始されたことを通知するシグナル
+        error: エラーが発生したことを通知するシグナル
+        progress: 推論結果を通知するシグナル
+        send_image: 画像を送信するシグナル
+        remaining_time: 残り時間を通知するシグナル
+    &#34;&#34;&#34;
+    ready = Signal()
+    error = Signal(str)
+    progress = Signal(int, float, str)
+    send_image = Signal(np.ndarray)
+    remaining_time = Signal(float)
+    SLEEP_INTERVAL = 0.1
+
+    def __init__(self) -&gt; None:
+        super().__init__()
+        self.logger = logging.getLogger(&#34;__main__&#34;).getChild(__name__)
+        self.data_store = DataStore.get_instance()
+        self.is_cancelled = False
+        self.binarize_th: Optional[int] = None
+        self._is_capturing = True
+
+        if self.data_store.get(&#34;save_frame&#34;):
+            (Path(self.data_store.get(&#34;out_dir&#34;)) / &#34;frames&#34;).mkdir(
+                parents=True, exist_ok=True
+            )
+
+    def run(self) -&gt; None:
+        &#34;&#34;&#34;スレッド処理を実行する
+        
+        1. モデルのロード
+        2. カメラのオープン
+        3. フレームのキャプチャ
+        4. フレームの編集
+        5. 推論処理
+        6. フレームの保存
+        7. UI への通知
+        8. スレッドの待機時間
+        9. 3-8 を指定時間繰り返す
+        &#34;&#34;&#34;
+        self.logger.info(&#34;DetectWorker started.&#34;)
+
+        try:
+            self.dt = cnn_init(num_digits=self.data_store.get(&#34;num_digits&#34;))
+        except Exception as e:
+            self.logger.error(f&#34;Failed to load the model: {e}&#34;)
+            self.error.emit(&#34;CNNモデルの読み込みに失敗しました&#34;)
+            return None
+
+        try:
+            self.fc = FrameCapture(device_num=self.data_store.get(&#34;device_num&#34;))
+        except Exception as e:
+            self.logger.error(f&#34;Failed to open camera: {e}&#34;)
+            self.error.emit(&#34;カメラへのアクセスに失敗しました&#34;)
+            return None
+
+        self.fc.set_cap_size(*self.data_store.get(&#34;cap_size&#34;))
+        self.fe = FrameEditor(num_digits=self.data_store.get(&#34;num_digits&#34;))
+
+        start_time = time.time()
+        end_time = time.time() + self.data_store.get(&#34;total_sampling_sec&#34;)
+        frame_count = 0
+        timestamps = []
+        is_first_loop = True
+
+        while time.time() &lt; end_time and not self.is_cancelled:
+            temp_time = time.time()
+
+            # タイムスタンプを &#34;HH:MM:SS&#34; 形式で生成
+            elapsed_time = time.time() - start_time
+            timestamp = timedelta(seconds=int(elapsed_time))
+            timestamp_str = str(timestamp)
+            timestamps.append(timestamp_str)
+
+            frame_batch = []
+            self._is_capturing = True
+            for i in range(self.data_store.get(&#34;num_digits&#34;)):
+                frame = self.fc.capture()
+
+                if frame is None:
+                    self.error.emit(&#34;フレームの取得に失敗しました&#34;)
+                    self.is_cancelled = True
+                    break
+
+                cropped_frame = self.fe.crop(frame, self.data_store.get(&#34;click_points&#34;))
+                if cropped_frame is None:
+                    self.logger.error(&#34;Failed to crop the frame.&#34;)
+                    continue
+                frame_batch.append(cropped_frame)
+
+                if self.data_store.get(&#34;save_frame&#34;):
+                    frame_filename = (
+                        Path(self.data_store.get(&#34;out_dir&#34;))
+                        / &#34;frames&#34;
+                        / f&#34;frame_{frame_count:06d}.jpg&#34;
+                    )
+                    cv2.imwrite(str(frame_filename), cropped_frame)
+                    self.logger.debug(
+                        f&#34;Frame {frame_count} has been saved as: {frame_filename}&#34;
+                    )
+                    frame_count += 1
+            self._is_capturing = False
+
+            # GUI への送信用の画像二値化であり、predict 内で再度処理する
+            image_bin = self.dt.preprocess_binarization(
+                frame_batch[0], self.binarize_th
+            )
+            self.send_image.emit(image_bin)
+
+            value, failed_rate = self.dt.predict(frame_batch, self.binarize_th)
+            self.logger.info(f&#34;Detected: {value}, Failed rate: {failed_rate}&#34;)
+
+            if is_first_loop:
+                self.ready.emit()
+                is_first_loop = False
+
+            self.progress.emit(value, failed_rate, timestamp_str)
+
+            elapsed_time = time.time() - temp_time
+            time_to_wait = max(0, self.data_store.get(&#34;sampling_sec&#34;) - elapsed_time)
+            time_end_wait = time.time() + time_to_wait
+            if time_to_wait &gt; 0:
+                self.logger.debug(f&#34;Waiting for {time_to_wait:.2f}s&#34;)
+
+                while time.time() &lt; time_end_wait and not self.is_cancelled:
+                    remaining_time = end_time - time.time()
+                    self.remaining_time.emit(max(remaining_time, 0))
+                    time.sleep(self.SLEEP_INTERVAL)
+
+        self.fc.release()
+
+        return None
+
+    def cancel(self) -&gt; None:
+        &#34;&#34;&#34;スレッドを終了する
+
+        このメソッドが呼び出されると、キャンセルフラグが立つ
+        &#34;&#34;&#34;
+        self.logger.info(&#34;DetectWorker terminating...&#34;)
+        self.is_cancelled = True
+
+    def update_binarize_th(self, value: Optional[int]) -&gt; None:
+        &#34;&#34;&#34;二値化の閾値を更新する
+
+        Args:
+            value (Optional[int]): 二値化の閾値、None の場合は自動設定
+        &#34;&#34;&#34;
+        self.binarize_th = value
+        self.logger.info(f&#34;Update binarize_th: {self.binarize_th}&#34;)
+
+        if not self._is_capturing:
+            frame = self.fc.capture()
+            if frame is None:
+                self.logger.debug(&#34;Frame missing.&#34;)
+                return None
+
+            cropped_frame = self.fe.crop(frame, self.data_store.get(&#34;click_points&#34;))
+            if cropped_frame is None:
+                self.logger.debug(&#34;Failed to crop the frame.&#34;)
+                return None
+
+            image_bin = self.dt.preprocess_binarization(cropped_frame, self.binarize_th)
+            self.send_image.emit(image_bin)</code></pre>
+</details>
+<h3>Ancestors</h3>
+<ul class="hlist">
+<li>PySide6.QtCore.QThread</li>
+<li>PySide6.QtCore.QObject</li>
+<li>Shiboken.Object</li>
+</ul>
+<h3>Class variables</h3>
+<dl>
+<dt id="sichiribe.gui.workers.live_detect_worker.DetectWorker.SLEEP_INTERVAL"><code class="name">var <span class="ident">SLEEP_INTERVAL</span></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="sichiribe.gui.workers.live_detect_worker.DetectWorker.staticMetaObject"><code class="name">var <span class="ident">staticMetaObject</span></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+</dl>
+<h3>Methods</h3>
+<dl>
+<dt id="sichiribe.gui.workers.live_detect_worker.DetectWorker.cancel"><code class="name flex">
+<span>def <span class="ident">cancel</span></span>(<span>self) ‑> None</span>
+</code></dt>
+<dd>
+<div class="desc"><p>スレッドを終了する</p>
+<p>このメソッドが呼び出されると、キャンセルフラグが立つ</p></div>
+</dd>
+<dt id="sichiribe.gui.workers.live_detect_worker.DetectWorker.error"><code class="name flex">
+<span>def <span class="ident">error</span></span>(<span>...)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="sichiribe.gui.workers.live_detect_worker.DetectWorker.progress"><code class="name flex">
+<span>def <span class="ident">progress</span></span>(<span>...)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="sichiribe.gui.workers.live_detect_worker.DetectWorker.ready"><code class="name flex">
+<span>def <span class="ident">ready</span></span>(<span>...)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="sichiribe.gui.workers.live_detect_worker.DetectWorker.remaining_time"><code class="name flex">
+<span>def <span class="ident">remaining_time</span></span>(<span>...)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="sichiribe.gui.workers.live_detect_worker.DetectWorker.run"><code class="name flex">
+<span>def <span class="ident">run</span></span>(<span>self) ‑> None</span>
+</code></dt>
+<dd>
+<div class="desc"><p>スレッド処理を実行する</p>
+<ol>
+<li>モデルのロード</li>
+<li>カメラのオープン</li>
+<li>フレームのキャプチャ</li>
+<li>フレームの編集</li>
+<li>推論処理</li>
+<li>フレームの保存</li>
+<li>UI への通知</li>
+<li>スレッドの待機時間</li>
+<li>3-8 を指定時間繰り返す</li>
+</ol></div>
+</dd>
+<dt id="sichiribe.gui.workers.live_detect_worker.DetectWorker.send_image"><code class="name flex">
+<span>def <span class="ident">send_image</span></span>(<span>...)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="sichiribe.gui.workers.live_detect_worker.DetectWorker.update_binarize_th"><code class="name flex">
+<span>def <span class="ident">update_binarize_th</span></span>(<span>self, value: int | None) ‑> None</span>
+</code></dt>
+<dd>
+<div class="desc"><p>二値化の閾値を更新する</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>value</code></strong> :&ensp;<code>Optional[int]</code></dt>
+<dd>二値化の閾値、None の場合は自動設定</dd>
+</dl></div>
+</dd>
+</dl>
+</dd>
+</dl>
+</section>
+</article>
+<nav id="sidebar">
+<div class="toc">
+<ul></ul>
+</div>
+<ul id="index">
+<li><h3>Super-module</h3>
+<ul>
+<li><code><a title="sichiribe.gui.workers" href="index.html">sichiribe.gui.workers</a></code></li>
+</ul>
+</li>
+<li><h3><a href="#header-classes">Classes</a></h3>
+<ul>
+<li>
+<h4><code><a title="sichiribe.gui.workers.live_detect_worker.DetectWorker" href="#sichiribe.gui.workers.live_detect_worker.DetectWorker">DetectWorker</a></code></h4>
+<ul class="two-column">
+<li><code><a title="sichiribe.gui.workers.live_detect_worker.DetectWorker.SLEEP_INTERVAL" href="#sichiribe.gui.workers.live_detect_worker.DetectWorker.SLEEP_INTERVAL">SLEEP_INTERVAL</a></code></li>
+<li><code><a title="sichiribe.gui.workers.live_detect_worker.DetectWorker.cancel" href="#sichiribe.gui.workers.live_detect_worker.DetectWorker.cancel">cancel</a></code></li>
+<li><code><a title="sichiribe.gui.workers.live_detect_worker.DetectWorker.error" href="#sichiribe.gui.workers.live_detect_worker.DetectWorker.error">error</a></code></li>
+<li><code><a title="sichiribe.gui.workers.live_detect_worker.DetectWorker.progress" href="#sichiribe.gui.workers.live_detect_worker.DetectWorker.progress">progress</a></code></li>
+<li><code><a title="sichiribe.gui.workers.live_detect_worker.DetectWorker.ready" href="#sichiribe.gui.workers.live_detect_worker.DetectWorker.ready">ready</a></code></li>
+<li><code><a title="sichiribe.gui.workers.live_detect_worker.DetectWorker.remaining_time" href="#sichiribe.gui.workers.live_detect_worker.DetectWorker.remaining_time">remaining_time</a></code></li>
+<li><code><a title="sichiribe.gui.workers.live_detect_worker.DetectWorker.run" href="#sichiribe.gui.workers.live_detect_worker.DetectWorker.run">run</a></code></li>
+<li><code><a title="sichiribe.gui.workers.live_detect_worker.DetectWorker.send_image" href="#sichiribe.gui.workers.live_detect_worker.DetectWorker.send_image">send_image</a></code></li>
+<li><code><a title="sichiribe.gui.workers.live_detect_worker.DetectWorker.staticMetaObject" href="#sichiribe.gui.workers.live_detect_worker.DetectWorker.staticMetaObject">staticMetaObject</a></code></li>
+<li><code><a title="sichiribe.gui.workers.live_detect_worker.DetectWorker.update_binarize_th" href="#sichiribe.gui.workers.live_detect_worker.DetectWorker.update_binarize_th">update_binarize_th</a></code></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</nav>
+</main>
+<footer id="footer">
+<p>Generated by <a href="https://pdoc3.github.io/pdoc" title="pdoc: Python API documentation generator"><cite>pdoc</cite> 0.11.3</a>.</p>
+</footer>
+</body>
+</html>
