@@ -38,7 +38,7 @@ jobs:
           mv train _train
           mv tests _tests
           mkdir -p html
-          pdoc --template-dir custom_template --html --force .
+          pdoc --template-dir docs_template --html --force .
           mv html/sichiribe docs
           cp res/favicon.ico docs
 
