@@ -94,7 +94,7 @@ jobs:
             mv "Info.plist" "Sichiribe.app/Contents/"
           fi
           chmod -R 755 "Sichiribe.app"
-          codesign --force --sign - "Sichiribe.app"
+          codesign --force --sign - --deep "Sichiribe.app"
 
       - name: Upload Artifacts
         uses: actions/upload-artifact@v4
