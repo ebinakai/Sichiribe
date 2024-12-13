@@ -161,6 +161,7 @@ def cnn_init(num_digits: int, model_filename: Optional[str] = None) -> CNNCore:
     logger = logging.getLogger("__main__").getChild(__name__)
 
     try:
+        from tflite_runtime import interpreter as tflite
         from cores.cnn_tflite import CNNLite
 
         logger.info("TensorFlow Lite Runtime detected. Using TFLite model.")
@@ -176,6 +177,7 @@ def cnn_init(num_digits: int, model_filename: Optional[str] = None) -> CNNCore:
 
     try:
         from cores.cnn_tf import CNNTf
+        from tensorflow.keras.models import load_model
 
         logger.info("TensorFlow detected. Using Keras model.")
         model_filename = (
@@ -186,6 +188,7 @@ def cnn_init(num_digits: int, model_filename: Optional[str] = None) -> CNNCore:
         logger.debug("TensorFlow not found. Attempting to import ONNX Runtime.")
 
     try:
+        import onnxruntime as ort
         from cores.cnn_onnx import CNNOnnx
 
         logger.info("ONNX Runtime detected. Using ONNX model.")
