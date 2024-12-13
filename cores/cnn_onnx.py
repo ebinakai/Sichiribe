@@ -2,7 +2,7 @@
 CNN Implementation using ONNX
 
 Requirements:
-- tflite_runtime
+- onnxruntime
 
 Alternative Implementations:
 - cnn_tf.py (TensorFlow version)

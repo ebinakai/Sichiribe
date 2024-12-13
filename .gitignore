@@ -53,3 +53,4 @@ settings.json
 
 # pdoc
 docs/**/*.html
+docs/**/*.ico

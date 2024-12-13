@@ -24,8 +24,9 @@ docs:
 	mv train _train
 	mv tests _tests
 	mkdir -p html
-	pdoc --html --force .
-	rm -rf docs && mv html/sichiribe docs
+	pdoc --template-dir custom_template --html --force .
+	rm -rf docs && mv html/sichiribe docs && rm -r html
+	cp res/favicon.ico docs
 	mv _train train
 	mv _tests tests
 	
