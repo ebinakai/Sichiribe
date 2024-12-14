@@ -1,20 +1,3 @@
-"""
-リアルタイム解析の設定を行うViewクラス
-
-1. 以下を設定する
-    - カメラID
-    - 7セグメント表示器の桁数
-    - 動画をサンプリングする頻度
-    - 一回のサンプリングで何フレーム取得するか
-    - 総サンプリング時間
-    - 出力形式
-    - キャプチャしたフレームを保存するか
-2. 実行ボタンを押すと、次の画面に遷移する
-3. 構成ファイルから実行ボタンを押すと、設定ファイルからパラメータを読み込んで実行する
-    - 構成ファイルとして、設定ファイル(*.json)を指定する
-    - 構成ファイルの click_points に 4 つの座標が含まれている場合、カメラフィードと領域選択画面をスキップして実行する
-"""
-
 from PySide6.QtWidgets import (
     QHBoxLayout,
     QVBoxLayout,
@@ -37,6 +20,20 @@ from pathlib import Path
 
 
 class LiveSettingWindow(SettingWidget):
+    """
+    リアルタイム解析の設定を行うViewクラス
+
+    以下を設定する
+
+    - カメラID
+    - 7セグメント表示器の桁数
+    - 動画をサンプリングする頻度
+    - 一回のサンプリングで何フレーム取得するか
+    - 総サンプリング時間
+    - 出力形式
+    - キャプチャしたフレームを保存するか
+    """
+
     def __init__(self, screen_manager: ScreenManager) -> None:
         self.logger = logging.getLogger("__main__").getChild(__name__)
         self.screen_manager = screen_manager
@@ -46,6 +43,7 @@ class LiveSettingWindow(SettingWidget):
         screen_manager.add_screen("live_setting", self, "ライブ解析設定")
 
     def initUI(self):
+        """UIの初期化"""
         main_layout = QVBoxLayout()
         form_layout = QFormLayout()
         footer_layout = QHBoxLayout()
@@ -129,6 +127,10 @@ class LiveSettingWindow(SettingWidget):
         main_layout.addLayout(footer_layout)
 
     def display(self) -> None:
+        """画面表示時の処理
+
+        画面間共有データを取得し、UIに設定する
+        """
         super().display()
         has_click_points = (
             self.data_store.has("click_points")
@@ -140,22 +142,30 @@ class LiveSettingWindow(SettingWidget):
         self.skip_region_select.setChecked(has_click_points)
 
     def select_folder(self) -> None:
+        """保存場所を選択するダイアログを表示"""
         folder_path = QFileDialog.getExistingDirectory(self, "フォルダを選択", "")
 
         if folder_path:
             self.out_dir.setText(folder_path)
 
     def calc_max_frames(self) -> None:
+        """サンプリング頻度に応じて最大フレーム数を設定"""
         sampling_sec = self.sampling_sec.value()
         self.batch_frames.setMaximum(sampling_sec * 5)
 
     def back(self) -> None:
+        """戻るボタンがクリックされたときの処理"""
         self.get_settings_from_ui()
         self.settings_manager.save(self.data_store.get_all())
         self.confirm_txt.setText("")
         self.screen_manager.show_screen("menu")
 
     def load_setting(self) -> None:
+        """設定ファイルからパラメータを読み込んで実行する
+
+        - 構成ファイルとして、設定ファイル(*.json)を指定する
+        - 構成ファイルの click_points に 4 つの座標が含まれている場合、カメラフィードと領域選択画面をスキップして実行する
+        """
         self.confirm_txt.setText("")
         file_path, _ = QFileDialog.getOpenFileName(
             self, "ファイルを選択", "", "設定ファイル(*.json)"
@@ -180,6 +190,7 @@ class LiveSettingWindow(SettingWidget):
         self.next_page()
 
     def next(self) -> None:
+        """次へボタンがクリックされたときの処理"""
         if self.out_dir.text() == "":
             self.confirm_txt.setText("保存場所を選択してください")
             return
@@ -199,6 +210,7 @@ class LiveSettingWindow(SettingWidget):
         self.next_page()
 
     def next_page(self) -> None:
+        """次の画面に遷移する"""
         if (
             len(self.data_store.get("click_points")) == 4
             and len(self.data_store.get("cap_size")) == 2
@@ -208,6 +220,7 @@ class LiveSettingWindow(SettingWidget):
             self.screen_manager.get_screen("live_feed").trigger("startup")
 
     def set_ui_from_settings(self) -> None:
+        """設定値をUIに反映する"""
         self.device_num.setValue(self.data_store.get("device_num"))
         self.num_digits.setValue(self.data_store.get("num_digits"))
         self.sampling_sec.setValue(self.data_store.get("sampling_sec"))
@@ -220,6 +233,7 @@ class LiveSettingWindow(SettingWidget):
         self.out_dir.setText(self.data_store.get("out_dir"))
 
     def get_settings_from_ui(self):
+        """UIから設定値を取得する"""
         self.data_store.set("device_num", self.device_num.value())
         self.data_store.set("num_digits", self.num_digits.value())
         self.data_store.set("sampling_sec", self.sampling_sec.value())

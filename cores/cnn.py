@@ -12,6 +12,8 @@ logging.getLogger("h5py").setLevel(logging.ERROR)
 
 
 class CNNCore(Detector):
+    """CNNを使用した7セグメント数字認識のための基底クラス"""
+
     def __init__(self, num_digits: int) -> None:
         self.num_digits = num_digits
         self.model: Optional[Any]
@@ -28,10 +30,30 @@ class CNNCore(Detector):
         self.crop_size = 100  # 画像をトリミングするサイズ
 
     def inference_7seg_classifier(self, image_bin: np.ndarray) -> List[int]:
+        """画像から7セグメント数字を推論する
+
+        Args:
+            image_bin (np.ndarray): 推論対象の画像
+
+        Raises:
+            NotImplementedError: サブクラスで実装されていない場合
+
+        Returns:
+            List[int]: 各桁の推論結果
+        """
         raise NotImplementedError("This method must be implemented in the subclass")
 
-    # 各桁を一度に処理できるように画像を準備
     def preprocess_image(self, image: np.ndarray) -> np.ndarray:
+        """画像を準備する
+
+        各桁を一度に処理できるように画像をトリミングし、リサイズする
+
+        Args:
+            image (np.ndarray): 入力画像
+
+        Returns:
+            np.ndarray: 画像の準備結果
+        """
         images = []
         for index in range(self.num_digits):
             # 画像を一桁にトリミング
@@ -54,6 +76,15 @@ class CNNCore(Detector):
         images: Union[str, np.ndarray, List[np.ndarray], List[str]],
         binarize_th: Optional[int] = None,
     ) -> tuple[int, float]:
+        """画像のリストから7セグメント数字を推論する
+
+        Args:
+            images (Union[str, np.ndarray, List[np.ndarray], List[str]]): 推論対象の画像またはパスのリスト
+            binarize_th (Optional[int], optional): 二値化の閾値。Noneの場合は自動設定。デフォルトはNone。
+
+        Returns:
+            tuple[int, float]: 推論結果とエラー率
+        """
 
         images_ = images if isinstance(images, list) else [images]
 
@@ -96,6 +127,14 @@ class CNNCore(Detector):
     def find_mode_per_column_np(
         self, predictions: np.ndarray
     ) -> Tuple[np.ndarray, np.ndarray]:
+        """各列の最頻値を取得する
+
+        Args:
+            predictions (np.ndarray): 推論結果の配列
+
+        Returns:
+            Tuple[np.ndarray, np.ndarray]: 最頻値の配列と各桁のエラー率の配列
+        """
         result = []
         errors_per_digit = []
         for i in range(predictions.shape[1]):  # 各桁に対して
@@ -113,9 +152,16 @@ class CNNCore(Detector):
 
 
 def cnn_init(num_digits: int, model_filename: Optional[str] = None) -> CNNCore:
+    """インストールされているライブラリに応じてCNNモデルを選択する
+
+    Args:
+        num_digits (int): 推論する桁数
+        model_filename (Optional[str], optional): モデルファイル名。Noneの場合はデフォルトのモデルを使用。デフォルトはNone。
+    """
     logger = logging.getLogger("__main__").getChild(__name__)
 
     try:
+        from tflite_runtime import interpreter as tflite
         from cores.cnn_tflite import CNNLite
 
         logger.info("TensorFlow Lite Runtime detected. Using TFLite model.")
@@ -131,6 +177,7 @@ def cnn_init(num_digits: int, model_filename: Optional[str] = None) -> CNNCore:
 
     try:
         from cores.cnn_tf import CNNTf
+        from tensorflow.keras.models import load_model
 
         logger.info("TensorFlow detected. Using Keras model.")
         model_filename = (
@@ -141,6 +188,7 @@ def cnn_init(num_digits: int, model_filename: Optional[str] = None) -> CNNCore:
         logger.debug("TensorFlow not found. Attempting to import ONNX Runtime.")
 
     try:
+        import onnxruntime as ort
         from cores.cnn_onnx import CNNOnnx
 
         logger.info("ONNX Runtime detected. Using ONNX model.")

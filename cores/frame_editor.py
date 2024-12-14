@@ -8,6 +8,8 @@ from pathlib import Path
 
 
 class FrameEditor:
+    """取得したフレームに関する処理を行うクラス"""
+
     def __init__(
         self,
         num_digits: int = 4,
@@ -25,6 +27,11 @@ class FrameEditor:
         self.logger.debug("Frame Editor loaded.")
 
     def get_click_points(self) -> List:
+        """クリックポイントを取得する
+
+        Returns:
+            List: クリックポイント
+        """
         return self.click_points
 
     # 動画をフレームに分割
@@ -40,6 +47,22 @@ class FrameEditor:
         click_points: List = [],
         extract_single_frame: bool = False,
     ) -> Tuple[Union[np.ndarray, List[List[np.ndarray]]], List[str]]:
+        """動画をフレームに分割する
+
+        Args:
+            video_path (str): 動画ファイルのパス
+            video_skip_sec (int, optional): 動画の開始位置をスキップする秒数
+            sampling_sec (int, optional): サンプリング間隔
+            batch_frames (int, optional): 1回のバッチで取得するフレーム数
+            save_frame (bool, optional): フレームを保存するかどうか
+            out_dir (str, optional): 保存先ディレクトリ
+            is_crop (bool, optional): 画像を切り出すかどうか
+            click_points (List, optional): クリックポイントの初期値
+            extract_single_frame (bool, optional): 最初の位置フレームだけ取得するかどうか
+
+        Returns:
+            Tuple[Union[np.ndarray, List[List[np.ndarray]]], List[str]]: フレーム, タイムスタンプ
+        """
         self.click_points = click_points
 
         if save_frame:
@@ -107,12 +130,20 @@ class FrameEditor:
         return_value = return_frames if return_frame is None else return_frame
         return return_value, timestamps
 
-    # クリックポイント4点から画像を切り出す
     def crop(
         self,
         image: np.ndarray,
         click_points: List,
     ) -> Optional[np.ndarray]:
+        """クリックポイント4点から画像を切り出す
+
+        Args:
+            image (np.ndarray): 画像
+            click_points (List): クリックポイント
+
+        Returns:
+            Optional[np.ndarray]: 切り出した画像
+        """
         if len(click_points) != 4:
             return None
 
@@ -139,6 +170,16 @@ class FrameEditor:
         return extract_image
 
     def region_select(self, image: Union[str, np.ndarray]) -> List[np.ndarray]:
+        """画像から7セグメント領域を選択する
+
+        OpenCVの別ウィンドウで開かれ、選択後にyキーを押すことで選択を確定する
+
+        Args:
+            image (Union[str, np.ndarray]): 画像
+
+        Returns:
+            List[np.ndarray]: クリックポイント
+        """
         img = image if isinstance(image, np.ndarray) else cv2.imread(image)
 
         window_name = "Select 7seg Region"
@@ -167,6 +208,7 @@ class FrameEditor:
                 cv2.imshow("Result", extract_image)
 
     def mouse_callback(self, event, x, y, flags, param) -> None:
+        """マウスイベントのコールバック関数"""
         if event == cv2.EVENT_LBUTTONDOWN:
             new_point = [x, y]
 
@@ -182,6 +224,7 @@ class FrameEditor:
                 self.click_points = self.order_points(self.click_points)
 
     def order_points(self, click_points: List) -> List:
+        """クリックポイントを左上、右上、右下、左下の順に並び替える"""
         points_ = np.array(click_points)
 
         # x座標で昇順にソート
@@ -213,6 +256,7 @@ class FrameEditor:
         extract_image: Optional[np.ndarray],
         click_points: List,
     ) -> Tuple[np.ndarray, Optional[np.ndarray]]:
+        """選択領域のアウトラインを描画する"""
         for click_point in click_points:
             cv2.circle(image, (click_point[0], click_point[1]), 5, (0, 255, 0), -1)
         if len(click_points) >= 3:
@@ -223,6 +267,7 @@ class FrameEditor:
         return image, extract_image
 
     def draw_separation_lines(self, extract_image: np.ndarray) -> np.ndarray:
+        """切り出し画像に分割線を描画する"""
         for index in range(self.num_digits):
             temp_x = int((extract_image.shape[1] / self.num_digits) * index)
             temp_y = extract_image.shape[0]

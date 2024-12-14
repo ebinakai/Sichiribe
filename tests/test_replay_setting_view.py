@@ -25,7 +25,6 @@ def window(qtbot):
     screen_manager = Mock()
     window = ReplaySettingWindow(screen_manager)
     qtbot.addWidget(window)
-    window.show()
     return window
 
 

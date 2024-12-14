@@ -7,11 +7,6 @@ from cores.capture import FrameCapture
 
 
 @pytest.fixture
-def sample_frame():
-    return np.zeros((480, 640, 3), dtype=np.uint8)
-
-
-@pytest.fixture
 @patch("cv2.VideoCapture")
 @patch("time.sleep")
 def init_frame_capture(mock_sleep, mock_video_capture, sample_frame):

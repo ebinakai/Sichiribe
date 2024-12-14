@@ -3,18 +3,16 @@ from unittest.mock import Mock
 from gui.views.replay_threshold_view import ReplayThresholdWindow
 from gui.utils.data_store import DataStore
 from cores.frame_editor import FrameEditor
-import numpy as np
 
 
 @pytest.fixture
-def window(qtbot):
+def window(qtbot, sample_frame):
     screen_manager = Mock()
     screen_manager.save_screen_size.return_value = (800, 600)
     window = ReplayThresholdWindow(screen_manager)
     qtbot.addWidget(window)
-    window.first_frame = np.zeros((100, 100, 3), dtype=np.uint8)
+    window.first_frame = sample_frame
     window.fe = FrameEditor()
-    window.show()
     return window
 
 

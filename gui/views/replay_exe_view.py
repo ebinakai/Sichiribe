@@ -1,16 +1,3 @@
-"""
-動画ファイル解析を行うViewクラス
-
-1. 実際のフレーム分割・推論処理はDetectWorkerクラスで行う
-2. 以下の処理を行う
-    - 最初のフレームを7セグ領域切り取り画面に渡す
-    - 7セグ領域切り取り画面からのパラメータを受け取り、フレーム分割を行う
-    - 分割フレームを受け取り、解析を行う
-    - 結果を MplCanvas のグラフに表示する
-    - 結果をファイルに出力する
-    - メニュー画面に戻る
-"""
-
 from PySide6.QtWidgets import QHBoxLayout, QVBoxLayout, QPushButton, QLabel
 from PySide6.QtCore import Qt
 from PySide6.QtGui import QPixmap
@@ -29,6 +16,18 @@ import numpy as np
 
 
 class ReplayExeWindow(CustomQWidget):
+    """
+    動画ファイル解析を行うViewクラス
+
+    - 実際のフレーム分割・推論処理はDetectWorkerクラスで行う
+    - 以下の処理を行う
+        1. 最初のフレームを7セグ領域切り取り画面に渡す
+        2. 7セグ領域切り取り画面からのパラメータを受け取り、フレーム分割を行う
+        3. 分割フレームを受け取り、解析を行う
+        4. 結果を MplCanvas のグラフに表示する
+        5. 結果をファイルに出力する
+    """
+
     def __init__(self, screen_manager: ScreenManager) -> None:
         self.logger = logging.getLogger("__main__").getChild(__name__)
         self.settings_manager = SettingsManager("replay")
@@ -43,6 +42,7 @@ class ReplayExeWindow(CustomQWidget):
         screen_manager.add_screen("replay_exe", self, "動画解析中")
 
     def initUI(self):
+        """UIの初期化"""
         main_layout = QVBoxLayout()
         graph_layout = QVBoxLayout()
         extracted_image_layout = QHBoxLayout()
@@ -76,11 +76,23 @@ class ReplayExeWindow(CustomQWidget):
         main_layout.addLayout(footer_layout)
 
     def cancel(self) -> None:
+        """解析中止処理
+
+        ボタンのクリックで解析を中止する
+        """
         if self.dt_worker is not None:
             self.term_label.setText("中止中...")
             self.dt_worker.cancel()
 
     def trigger(self, action, *args):
+        """アクションをトリガーする
+
+        Args:
+            action (str): アクション名
+
+        Raises:
+            ValueError: アクションが不正な場合
+        """
         if action == "startup":
             self.startup(*args)
         elif action == "continue":
@@ -89,6 +101,10 @@ class ReplayExeWindow(CustomQWidget):
             raise ValueError(f"Invalid action: {action}")
 
     def startup(self) -> None:
+        """各種初期化処理を行う
+
+        動画ファイルから最初のフレームを取得し、7セグメント領域切り取り画面に渡す
+        """
         self.graph_label.gen_graph(
             title="Results",
             xlabel="Timestamp",
@@ -127,6 +143,7 @@ class ReplayExeWindow(CustomQWidget):
             )
 
     def frame_devide_process(self) -> None:
+        """フレーム分割処理を行う"""
         self.screen_manager.show_screen("log")
         settings = self.settings_manager.remove_non_require_keys(
             self.data_store.get_all()
@@ -140,13 +157,20 @@ class ReplayExeWindow(CustomQWidget):
     def frame_devide_finished(
         self, frames: List[Union[str, np.ndarray]], timestamps: List[str]
     ) -> None:
+        """フレーム分割処理完了時の処理
+
+        Args:
+            frames (List[Union[str, np.ndarray]]): 分割されたフレームまたはそのパスのリスト
+            timestamps (List[str]): タイムスタンプのリスト
+        """
         self.logger.debug("timestamps: %s" % timestamps)
         self.logger.info("Frame Devide finished.")
         self.data_store.set("frames", frames)
         self.data_store.set("timestamps", timestamps)
-        self.detect_process()
+        self.detect_start()
 
-    def detect_process(self) -> None:
+    def detect_start(self) -> None:
+        """解析処理を開始する"""
         self.dt_worker = DetectWorker()
         self.dt_worker.progress.connect(self.detect_progress)
         self.dt_worker.send_image.connect(self.display_extract_image)
@@ -157,17 +181,37 @@ class ReplayExeWindow(CustomQWidget):
         self.logger.info("Detect started.")
 
     def model_not_found(self) -> None:
+        """モデルが見つからなかった場合の処理
+
+        ワーカーからのシグナルを受け取り、メニュー画面に戻る
+        """
         self.logger.error("Model not found.")
         self.screen_manager.show_screen("menu")
         self.clear_env()
 
     def detect_progress(self, result: int, failed_rate: float, timestamp: str) -> None:
+        """解析進捗を受け取る
+
+        ワーカーからのシグナルを受け取り、結果をグラフに表示する
+
+        Args:
+            result (int): 解析結果
+            failed_rate (float): 失敗率
+            timestamp (str): タイムスタンプ
+        """
         self.screen_manager.show_screen("replay_exe")
         self.results.append(result)
         self.failed_rates.append(failed_rate)
         self.update_graph(result, failed_rate, timestamp)
 
     def update_graph(self, result: int, failed_rate: float, timestamp: str) -> None:
+        """グラフを更新する
+
+        Args:
+            result (int): 解析結果
+            failed_rate (float): 失敗率
+            timestamp (str): タイムスタンプ
+        """
         self.graph_results.append(result)
         self.graph_failed_rates.append(failed_rate)
         self.graph_timestamps.append(timestamp)
@@ -176,11 +220,19 @@ class ReplayExeWindow(CustomQWidget):
         )
 
     def display_extract_image(self, image: np.ndarray) -> None:
+        """切り出し画像を表示する
+
+        推論時の2値化しきい値を適用した7セグメント領域を表示する
+        """
         image = self.fe.draw_separation_lines(image)
         q_image = convert_cv_to_qimage(image)
         self.extracted_label.setPixmap(QPixmap.fromImage(q_image))
 
     def detect_cancelled(self) -> None:
+        """解析中止時の処理
+
+        ワーカーからのシグナルを受け取り、タイムスタンプを推論結果の数に合わせる
+        """
         self.term_label.setText("中止しました")
         self.logger.info("Detect cancelled.")
         self.data_store.set(
@@ -188,22 +240,32 @@ class ReplayExeWindow(CustomQWidget):
         )
 
     def detect_finished(self) -> None:
+        """解析完了時の処理
+
+        ワーカーからのシグナルを受け取り、結果を保存し、環境をクリアする
+        """
         self.graph_label.clear()
         self.logger.info("Detect finished.")
         self.logger.info(f"Results: {self.results}")
         self.data_store.set("results", self.results)
         self.data_store.set("failed_rates", self.failed_rates)
-        self.export_process()
+        self.export()
         self.screen_manager.show_screen("menu")
         self.clear_env()
 
-    def export_process(self) -> None:
+    def export(self) -> None:
+        """解析結果をファイルに出力する
+
+        解析結果をファイルに出力し、保存場所を表示する
+        使用したパラメータも出力する
+        """
         self.logger.info("Data exporting...")
         export_result(self.data_store.get_all())
         export_settings(self.data_store.get_all())
         self.screen_manager.popup(f"保存場所：{self.data_store.get('out_dir')}")
 
     def clear_env(self) -> None:
+        """環境をクリアする"""
         self.graph_label.clear()
         self.extracted_label.clear()
         self.term_label.setText("")

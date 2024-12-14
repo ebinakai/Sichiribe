@@ -24,11 +24,6 @@ def mock_frame_editor():
 @pytest.fixture
 def window(qtbot, mock_screen_manager, mock_frame_editor):
     with patch("PySide6.QtWidgets.QApplication.primaryScreen") as mock_screen:
-        mock_geometry = Mock()
-        mock_geometry.width.return_value = 1920
-        mock_geometry.height.return_value = 1080
-        mock_screen.return_value.availableGeometry.return_value = mock_geometry
-
         window = RegionSelectWindow(mock_screen_manager)
         window.fe = mock_frame_editor
         qtbot.addWidget(window)

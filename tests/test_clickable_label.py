@@ -21,7 +21,6 @@ def label(qtbot):
 
 
 class TestClickableLabel:
-
     def test_mouse_press_event(self, label):
         mock_callback = MagicMock()
         label.handle_event = mock_callback

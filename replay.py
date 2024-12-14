@@ -1,6 +1,5 @@
 """
-動画ファイルから7セグメントディスプレイの数字を読み取る
-詳細については、https://github.com/EbinaKai/Sichiribe/wiki/How-to-use-CLI#execution-replay を参照
+詳細については、[ドキュメント](https://github.com/EbinaKai/Sichiribe/wiki/How-to-use-CLI#execution-replay) を参照
 """
 
 from cores.cnn import cnn_init
@@ -26,6 +25,11 @@ ROOT = FILE.parent
 
 
 def get_args() -> argparse.Namespace:
+    """コマンドライン引数を取得
+
+    Returns:
+        argparse.Namespace: コマンドライン引数
+    """
     export_formats = get_supported_formats()
 
     parser = argparse.ArgumentParser(
@@ -68,6 +72,18 @@ def get_args() -> argparse.Namespace:
 
 
 def main(settings) -> None:
+    """動画ファイルから7セグメントディスプレイの数字を読み取る
+
+    Args:
+        settings (Dict[str, Any]): 設定情報
+
+    Notes:
+        処理の流れ:
+
+        1. 動画ファイルからフレームをサンプリング
+        2. サンプリングしたフレームをCNNで解析
+        3. 解析結果をエクスポート
+    """
     frame_editor = FrameEditor(settings["num_digits"])
     detector = cnn_init(num_digits=settings["num_digits"])
 

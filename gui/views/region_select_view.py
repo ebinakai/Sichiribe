@@ -1,11 +1,3 @@
-"""
-映像中の7セグメント領域を選択する画面のViewクラス
-
-1. 4点を選択することで7セグメント領域を囲むことができる
-2. opencvの画像処理を行うため、FrameEditorクラスを利用する
-3. 選択が終わると次の画面に遷移する
-"""
-
 import logging
 from typing import List
 import numpy as np
@@ -27,6 +19,14 @@ from gui.widgets.clickable_label import ClickableLabel
 
 
 class RegionSelectWindow(CustomQWidget):
+    """
+    映像中の7セグメント領域を選択する画面のViewクラス
+
+    1. 4点を選択することで7セグメント領域を囲むことができる
+    2. opencvの画像処理を行うため、FrameEditorクラスを利用する
+    3. 選択が終わると次の画面に遷移する
+    """
+
     def __init__(self, screen_manager: ScreenManager) -> None:
         self.logger = logging.getLogger("__main__").getChild(__name__)
         self.screen_manager = screen_manager
@@ -42,6 +42,7 @@ class RegionSelectWindow(CustomQWidget):
         self.target_height = int((screen_rect.height() - 100) * 0.8)
 
     def initUI(self):
+        """UIの初期化"""
         main_layout = QVBoxLayout()
         header_layout = QVBoxLayout()
         image_layout = QVBoxLayout()
@@ -93,20 +94,42 @@ class RegionSelectWindow(CustomQWidget):
         main_layout.addLayout(footer_layout)
 
     def trigger(self, action, *args) -> None:
+        """アクションをトリガーする
+
+        Args:
+            action (str): アクション名
+
+        Raises:
+            ValueError: アクションが不正な場合
+        """
         if action == "startup":
             self.startup(*args)
         else:
             raise ValueError(f"Invalid action: {action}")
 
     def set_image(self, image: np.ndarray) -> None:
+        """領域選択用の画像を設定する
+
+        画像を画面サイズに合わせてリサイズする
+
+        Args:
+            image (np.ndarray): 領域選択用の画像
+        """
         self.image_original = image
         self.image, self.resize_scale = resize_image(
             image, self.target_width, self.target_height
         )
 
+        height, width, channel = self.image.shape
+        self.image_size = QSize(width, height)
+
         self.update_image(self.image.copy())
 
     def label_clicked(self, event: QMouseEvent) -> None:
+        """ラベルがクリックされたときの処理
+
+        マウスイベントからクリックされた座標を取得し、クリックポイントを更新する
+        """
         if (
             event.button() == Qt.MouseButton.LeftButton
             or event.button() == Qt.MouseButton.NoButton
@@ -142,28 +165,47 @@ class RegionSelectWindow(CustomQWidget):
             self.update_image(self.image.copy())
 
     def display_image(self, image: np.ndarray) -> None:
+        """画像をラベルに表示する
+
+        Args:
+            image (np.ndarray): 表示する画像
+        """
         q_image = convert_cv_to_qimage(image)
         self.main_label.setPixmap(QPixmap.fromImage(q_image))
         self.main_label.adjustSize()
 
     def display_extract_image(self, image: np.ndarray) -> None:
+        """切り取った画像をラベルに表示する
+
+        Args:
+            image (np.ndarray): 表示する画像
+        """
         q_image = convert_cv_to_qimage(image)
         self.extracted_label.setPixmap(QPixmap.fromImage(q_image))
 
     def update_image(self, image: np.ndarray) -> None:
+        """画像を更新する
+
+        1. 選択領域を切り出す
+        2. クリックポイントを描画して表示する
+        3. 切り取った画像を表示する
+        """
         click_points = np.array(self.click_points) / self.resize_scale
         extract_image = self.fe.crop(self.image_original, click_points.tolist())
         image, extract_image = self.fe.draw_region_outline(
             image, extract_image, self.click_points
         )
-        height, width, channel = self.image.shape
-        self.image_size = QSize(width, height)
         self.display_image(image)
 
         if extract_image is not None:
             self.display_extract_image(extract_image)
 
     def startup(self, prev_screen: str) -> None:
+        """画面を起動する
+
+        Args:
+            prev_screen (str): 前の画面名
+        """
         self.logger.info("Starting RegionSelectWindow.")
         self.prev_screen = prev_screen
         self.fe = FrameEditor(num_digits=self.data_store.get("num_digits"))
@@ -180,6 +222,7 @@ class RegionSelectWindow(CustomQWidget):
         QTimer.singleShot(1, lambda: self.window().move(window_pos.x(), 1))
 
     def finish_select(self) -> None:
+        """選択を終了して次の画面に遷移する"""
         if len(self.click_points) != 4:
             self.confirm_txt.setText("7セグメント領域を囲ってください")
             return
@@ -194,11 +237,17 @@ class RegionSelectWindow(CustomQWidget):
         QTimer.singleShot(1, self.switch_next)
 
     def cancel_select(self) -> None:
+        """選択をキャンセルして前の画面に戻る"""
         self.logger.info("Region selection canceled.")
         self.clear_env()
         QTimer.singleShot(1, lambda: self.switch_back())
 
     def switch_back(self) -> None:
+        """前の画面に戻る
+
+        Raises:
+            ValueError: 前の画面が不正な場合
+        """
         self.logger.debug(f"Switching to back screen({self.prev_screen}).")
         if self.prev_screen == "replay_exe":
             self.screen_manager.show_screen("replay_setting")
@@ -209,6 +258,11 @@ class RegionSelectWindow(CustomQWidget):
         self.prev_screen = ""
 
     def switch_next(self) -> None:
+        """次の画面に遷移する
+
+        Raises:
+            ValueError: 次の画面が不正な場合
+        """
         self.logger.debug(f"Switching to next screen({self.prev_screen}).")
         if self.prev_screen == "replay_exe":
             self.screen_manager.get_screen("replay_threshold").trigger("startup")
@@ -219,6 +273,7 @@ class RegionSelectWindow(CustomQWidget):
         self.prev_screen = ""
 
     def clear_env(self) -> None:
+        """環境をクリアする"""
         self.main_label.clear()
         self.extracted_label.clear()
         self.click_points = []

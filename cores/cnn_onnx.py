@@ -1,9 +1,26 @@
+"""
+CNN Implementation using ONNX
+
+Requirements:
+- onnxruntime
+
+Alternative Implementations:
+- cnn_tf.py (TensorFlow version)
+- cnn_tflite.py (TFLite version)
+
+Note: If ONNX is not installed, please install it or use an alternative implementation.
+"""
+
+try:
+    import onnxruntime as ort
+except ImportError:
+    pass
+
 from cores.cnn import CNNCore
 import logging
 from typing import TYPE_CHECKING, List
 import numpy as np
 from pathlib import Path
-import onnxruntime as ort
 
 if TYPE_CHECKING:
     from onnxruntime.capi.onnxruntime_inference_collection import InferenceSession
@@ -13,6 +30,8 @@ ROOT = FILE.parent / ".."
 
 
 class CNNOnnx(CNNCore):
+    """ONNX形式の学習済みモデルを使用したCNNクラス"""
+
     model: "InferenceSession"
 
     def __init__(self, num_digits: int, model_filename: str) -> None:
@@ -33,6 +52,14 @@ class CNNOnnx(CNNCore):
         self.logger.info("ONNX Model loaded.")
 
     def inference_7seg_classifier(self, image: np.ndarray) -> List[int]:
+        """画像から7セグメント数字を推論する
+
+        Args:
+            image (np.ndarray): 推論対象の画像
+
+        Returns:
+            List[int]: 各桁の推論結果
+        """
         # 各桁に分割
         preprocessed_images = self.preprocess_image(image)
 

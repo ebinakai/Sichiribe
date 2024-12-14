@@ -1,12 +1,3 @@
-"""
-カメラの画角をキャプチャするためのワーカークラス
-
-1. キャプチャデバイスを設定し、キャプチャサイズを取得する
-2. キャプチャデバイスからフレームを取得し、進捗を通知する
-3. キャンセルフラグが立った場合は、キャンセルを通知し、キャプチャを終了する
-4. 終了フラグが立った場合は、終了を通知し、キャプチャを終了する
-"""
-
 from PySide6.QtCore import Signal, QThread
 from gui.utils.data_store import DataStore
 from cores.capture import FrameCapture
@@ -16,6 +7,16 @@ import time
 
 
 class LiveFeedWorker(QThread):
+    """ライブフィードを取得するワーカークラス
+
+    Attributes:
+        cap_size: キャプチャサイズを通知するシグナル
+        progress: フレームを通知するシグナル
+        end: 終了を通知するシグナル
+        cancelled: キャンセルを通知するシグナル
+        error: エラーを通知するシグナル
+    """
+
     cap_size = Signal(tuple)
     progress = Signal(np.ndarray)
     end = Signal(np.ndarray)
@@ -33,6 +34,16 @@ class LiveFeedWorker(QThread):
         self._is_finished = False
 
     def run(self) -> None:
+        """スレッド処理を実行する
+
+        1. カメラのオープン
+        2. キャプチャサイズの設定
+        3. フレームのキャプチャ
+        4. UI への通知
+        5. スレッドの待機時間
+        6. 3-5 をキャンセルされるまで繰り返す
+        7. カメラのリリース
+        """
         try:
             fc = FrameCapture(self.data_store.get("device_num"))
         except Exception as e:
@@ -68,9 +79,17 @@ class LiveFeedWorker(QThread):
         return None
 
     def stop(self) -> None:
+        """スレッド処理を停止する
+
+        このメソッドを呼び出すと、終了フラグが立つ
+        """
         self.logger.info("Capture Feed stopping...")
         self._is_finished = True
 
     def cancel(self) -> None:
+        """スレッド処理をキャンセルする
+
+        このメソッドを呼び出すと、キャンセルフラグが立つ
+        """
         self.logger.info("Capture Feed canceling...")
         self._is_cancelled = True

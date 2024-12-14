@@ -1,0 +1,49 @@
+name: Generate Documentation
+
+on:
+  pull_request:
+    branches:
+      - main
+    paths:
+      - '**/*.py'
+
+jobs:
+  generate-docs:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pages: write 
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python 3.11
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: 'pip'
+          cache-dependency-path: |
+            **/requirements.txt
+
+      - name: Install dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libegl1
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Generate Documentation
+        run: |
+          mv train _train
+          mv tests _tests
+          mkdir -p html
+          pdoc --template-dir docs_template --html --force .
+          mv html/sichiribe docs
+          cp res/favicon.ico docs
+
+      - name: Deploy Documentation
+        uses: peaceiris/actions-gh-pages@v3
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./docs

@@ -1,14 +1,3 @@
-"""
-リアルタイム解析を行うViewクラス
-
-1. 実際の推論処理はDetectWorkerクラスで行う
-2. 以下の処理を行う
-    - パラメータをDetectWorkerに渡し、結果を受け取る
-    - 結果を MplCanvas のグラフに表示する
-    - 結果をファイルに出力する
-    - メニュー画面に戻る
-"""
-
 from PySide6.QtWidgets import (
     QHBoxLayout,
     QVBoxLayout,
@@ -34,6 +23,8 @@ from datetime import timedelta
 
 
 class LiveExeWindow(CustomQWidget):
+    """リアルタイム解析を行うViewクラス"""
+
     def __init__(self, screen_manager: ScreenManager) -> None:
         self.logger = logging.getLogger("__main__").getChild(__name__)
         self.settings_manager = SettingsManager("live")
@@ -50,6 +41,7 @@ class LiveExeWindow(CustomQWidget):
         screen_manager.add_screen("live_exe", self, "ライブ解析中")
 
     def initUI(self):
+        """ウィジェットのUIを初期化する"""
         main_layout = QVBoxLayout()
         graph_layout = QVBoxLayout()
         extracted_image_layout = QHBoxLayout()
@@ -103,17 +95,34 @@ class LiveExeWindow(CustomQWidget):
         main_layout.addLayout(footer_layout)
 
     def trigger(self, action, *args):
+        """
+        ウィジェットのアクションをトリガーする
+
+        Args:
+            action (str): 実行するアクションの名前
+
+        Raises:
+            ValueError: actionが不正な場合
+        """
         if action == "startup":
             self.startup(*args)
         else:
             raise ValueError(f"Invalid action: {action}")
 
     def cancel(self) -> None:
+        """解析を中止する"""
         if self.worker is not None:
             self.term_label.setText("中止中...")
             self.worker.cancel()
 
     def update_binarize_th(self, value: Optional[int]) -> None:
+        """
+        画像二値化しきい値を更新する
+        しきい値が0の場合は自動設定にする
+
+        Args:
+            value (Optional[int]): 画像二値化しきい値
+        """
         value = None if value == 0 else value
         binarize_th_str = "自動設定" if value is None else str(value)
         self.binarize_th_label.setText(binarize_th_str)
@@ -121,12 +130,18 @@ class LiveExeWindow(CustomQWidget):
             self.worker.update_binarize_th(value)
 
     def graph_clear(self) -> None:
+        """グラフをクリアする"""
         self.graph_results = []
         self.graph_failed_rates = []
         self.graph_timestamps = []
         self.update_graph(self.results[-1], self.failed_rates[-1], self.timestamps[-1])
 
     def startup(self) -> None:
+        """各種初期化処理を行う
+
+        初期化後、推論処理のワーカーを起動する
+        """
+
         self.logger.info("Starting LiveExeWindow.")
         self.screen_manager.show_screen("log")
         settings = self.settings_manager.remove_non_require_keys(
@@ -166,12 +181,26 @@ class LiveExeWindow(CustomQWidget):
         self.logger.info("Detect started.")
 
     def detect_progress(self, result: int, failed_rate: float, timestamp: str) -> None:
+        """解析進捗を表示する
+
+        Args:
+            result (int): 推論結果
+            failed_rate (float): 失敗率
+            timestamp (str): 開始からの経過時間
+        """
         self.results.append(result)
         self.failed_rates.append(failed_rate)
         self.timestamps.append(timestamp)
         self.update_graph(result, failed_rate, timestamp)
 
     def update_graph(self, result: int, failed_rate: float, timestamp: str) -> None:
+        """グラフを更新する
+
+        Args:
+            result (int): 推論結果
+            failed_rate (float): 失敗率
+            timestamp (str): 開始からの経過時間
+        """
         self.graph_results.append(result)
         self.graph_failed_rates.append(failed_rate)
         self.graph_timestamps.append(timestamp)
@@ -180,14 +209,25 @@ class LiveExeWindow(CustomQWidget):
         )
 
     def display_extract_image(self, image: np.ndarray) -> None:
+        """推論した7セグディスプレイを表示する
+
+        Args:
+            image (np.ndarray): 抽出画像
+        """
         image = self.fe.draw_separation_lines(image)
         q_image = convert_cv_to_qimage(image)
         self.extracted_label.setPixmap(QPixmap.fromImage(q_image))
 
     def update_remaining_time(self, remaining_time: float) -> None:
+        """残り時間を表示する
+
+        Args:
+            remaining_time (float): 残り時間
+        """
         self.remaining_time_label.setText(str(timedelta(seconds=int(remaining_time))))
 
     def detect_finished(self) -> None:
+        """解析結果の保存し、環境をクリアしたあと、メニュー画面に戻る"""
         self.logger.info("Detect finished.")
         self.data_store.set("results", self.results)
         self.data_store.set("failed_rates", self.failed_rates)
@@ -197,12 +237,14 @@ class LiveExeWindow(CustomQWidget):
         self.clear_env()
 
     def export_process(self) -> None:
+        """解析結果をエクスポートする"""
         self.logger.info("Data exporting...")
         export_result(self.data_store.get_all())
         export_settings(self.data_store.get_all())
         self.screen_manager.popup(f"保存場所：{self.data_store.get('out_dir')}")
 
     def clear_env(self) -> None:
+        """環境をクリアする"""
         self.graph_label.clear()
         self.extracted_label.clear()
         self.term_label.setText("")

@@ -7,7 +7,6 @@ from matplotlib.axes import Axes
 @pytest.fixture
 def canvas(qtbot):
     canvas = MplCanvas()
-    canvas.show()
     qtbot.addWidget(canvas)
     return canvas
 

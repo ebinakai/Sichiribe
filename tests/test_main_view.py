@@ -7,7 +7,6 @@ from gui.views.main_view import MainWindow
 def window(qtbot):
     window = MainWindow()
     qtbot.addWidget(window)
-    window.show()
     return window
 
 

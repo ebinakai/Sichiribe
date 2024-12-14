@@ -6,6 +6,8 @@ from typing import Optional
 
 
 class FrameCapture:
+    """フレームのキャプチャに関するクラス"""
+
     def __init__(
         self,
         device_num: int = 0,
@@ -21,7 +23,12 @@ class FrameCapture:
         time.sleep(0.1)
 
     def show_camera_feed(self) -> None:
+        """カメラフィードを表示する
 
+        OpenCVのウィンドウがアクティブな間、フレームを取得し続ける
+
+        yキーを押すとウィンドウが閉じる
+        """
         while cv2.waitKey(10) & 0xFF != ord("y"):
             frame = self.capture()
             if frame is None:
@@ -35,6 +42,7 @@ class FrameCapture:
         cv2.waitKey(1)
 
     def capture(self) -> Optional[np.ndarray]:
+        """フレームを取得する"""
         ret, frame = self.cap.read()
         if ret:
             return frame
@@ -43,10 +51,20 @@ class FrameCapture:
             return None
 
     def release(self) -> None:
+        """カメラリソースを解放する"""
         self.cap.release()
         cv2.destroyAllWindows()
 
     def set_cap_size(self, width: float, height: float) -> tuple[float, float]:
+        """カメラの解像度を設定する
+
+        Args:
+            width (float): 幅
+            height (float): 高さ
+
+        Returns:
+            tuple[float, float]: 設定された幅と高さ
+        """
         self.cap.set(cv2.CAP_PROP_FRAME_WIDTH, width)
         self.cap.set(cv2.CAP_PROP_FRAME_HEIGHT, height)
         self.logger.debug(

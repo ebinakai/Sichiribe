@@ -15,11 +15,6 @@ def frame_editor():
 
 
 @pytest.fixture
-def sample_frame():
-    return np.zeros((480, 640, 3), dtype=np.uint8)
-
-
-@pytest.fixture
 def sample_click_points():
     return np.array([[129, 596], [179, 595], [178, 616], [128, 617]])
 

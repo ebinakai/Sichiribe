@@ -1,4 +1,21 @@
-from tflite_runtime import interpreter as tflite
+"""
+CNN Implementation using TensorFlow Lite
+
+Requirements:
+- tflite_runtime
+
+Alternative Implementations:
+- cnn_tf.py (TensorFlow version)
+- cnn_onnx.py (ONNX version)
+
+Note: If TensorFlow Lite is not installed, please install it or use an alternative implementation.
+"""
+
+try:
+    from tflite_runtime import interpreter as tflite
+except ImportError:
+    pass
+
 from cores.cnn import CNNCore
 import os
 import logging
@@ -19,6 +36,8 @@ ROOT = FILE.parent / ".."
 
 
 class CNNLite(CNNCore):
+    """TensorFlow Lite形式の学習済みモデルを使用したCNNクラス"""
+
     model: "Interpreter"
     input_details: List[Dict[str, Any]]
     output_details: List[Dict[str, Any]]
@@ -44,6 +63,14 @@ class CNNLite(CNNCore):
 
     # 画像から数字を推論
     def inference_7seg_classifier(self, image: np.ndarray) -> List[int]:
+        """画像から7セグメント数字を推論する
+
+        Args:
+            image (np.ndarray): 推論対象の画像
+
+        Returns:
+            List[int]: 各桁の推論結果
+        """
         # 各桁に分割
         preprocessed_images = self.preprocess_image(image)
 

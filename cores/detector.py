@@ -6,10 +6,22 @@ from abc import ABC, abstractmethod
 
 
 class Detector(ABC):
+    """推論処理を行うための抽象クラス"""
+
     def __init__(self) -> None:
         self.logger = logging.getLogger("__main__").getChild(__name__)
 
     def load_image(self, image: Union[str, np.ndarray]) -> np.ndarray:
+        """画像を読み込む
+
+        グレースケール画像に変換して返す
+
+        Args:
+            image (Union[str, np.ndarray]): 画像のパスまたは画像データ
+
+        Returns:
+            np.ndarray: グレースケールの画像データ
+        """
         if isinstance(image, np.ndarray):
             if len(image.shape) == 2:
                 return image
@@ -20,6 +32,10 @@ class Detector(ABC):
 
     @abstractmethod
     def predict(self, *args, **kwargs) -> Any:
+        """推論処理を行う
+
+        このメソッドはサブクラスで実装する必要がある
+        """
         raise NotImplementedError("This method must be implemented in the subclass")
 
     def preprocess_binarization(
@@ -28,6 +44,15 @@ class Detector(ABC):
         binarize_th: Optional[int] = None,
         output_grayscale: bool = False,
     ) -> np.ndarray:
+        """画像の前処理を行う
+
+        画像の2値化、ノイズ除去を行う
+
+        Args:
+            image (np.ndarray): 画像データ
+            binarize_th (Optional[int], optional): 2値化の閾値。Noneの場合は大津の2値化を行う。デフォルトはNone
+            output_grayscale (bool, optional): 出力をグレースケールにするかどうか。デフォルトはFalse
+        """
 
         if len(image.shape) == 3 and image.shape[2] == 3:
             image = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)

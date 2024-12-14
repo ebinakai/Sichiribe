@@ -1,11 +1,3 @@
-"""
-動画ファイル解析のための二値化しきい値を設定するViewクラス
-
-1. 初期値は大津の二値化を適用した画像を表示
-2. スライダーでしきい値を設定し、画像を更新する
-3. 次へボタンを押すと、しきい値をパラメータに保存し、次の画面に遷移する
-"""
-
 from PySide6.QtWidgets import (
     QHBoxLayout,
     QVBoxLayout,
@@ -27,6 +19,8 @@ import numpy as np
 
 
 class ReplayThresholdWindow(CustomQWidget):
+    """動画解析のしきい値設定画面を表示するViewクラス"""
+
     def __init__(self, screen_manager: ScreenManager) -> None:
         self.logger = logging.getLogger("__main__").getChild(__name__)
         self.screen_manager = screen_manager
@@ -38,6 +32,7 @@ class ReplayThresholdWindow(CustomQWidget):
         screen_manager.add_screen("replay_threshold", self, "二値化しきい値設定")
 
     def initUI(self):
+        """UIの初期化"""
         main_layout = QVBoxLayout()
         extracted_image_layout = QHBoxLayout()
         form_layout = QFormLayout()
@@ -80,12 +75,21 @@ class ReplayThresholdWindow(CustomQWidget):
         main_layout.addLayout(footer_layout)
 
     def trigger(self, action, *args):
+        """アクションをトリガーする
+
+        Args:
+            action (str): アクション名
+
+        Raises:
+            ValueError: 無効なアクション名
+        """
         if action == "startup":
             self.startup()
         else:
             raise ValueError("Invalid action.")
 
     def startup(self) -> None:
+        """各種初期化処理を行う"""
         self.screen_manager.show_screen("replay_threshold")
         self.fe = FrameEditor(self.data_store.get("num_digits"))
 
@@ -98,12 +102,17 @@ class ReplayThresholdWindow(CustomQWidget):
         self.update_binarize_th(0)
 
     def update_binarize_th(self, value: int) -> None:
+        """しきい値を更新する
+
+        Args:
+            value (int): しきい値
+        """
         self.threshold = None if value == 0 else value
         binarize_th_str = "自動設定" if self.threshold is None else str(self.threshold)
         self.binarize_th_label.setText(binarize_th_str)
 
         if self.first_frame is None:
-            self.logger.error("Frame lost.")
+            self.logger.error("Frame is lost.")
             self.clear_env()
             self.screen_manager.restore_screen_size()
             self.screen_manager.show_screen("menu")
@@ -113,17 +122,27 @@ class ReplayThresholdWindow(CustomQWidget):
         self.display_extract_image(image_bin)
 
     def display_extract_image(self, image: np.ndarray) -> None:
+        """画像を表示する
+
+        Args:
+            image (np.ndarray): 画像
+        """
         image = self.fe.draw_separation_lines(image)
         q_image = convert_cv_to_qimage(image)
         self.extracted_label.setPixmap(QPixmap.fromImage(q_image))
 
     def next(self) -> None:
+        """次へボタンがクリックされたときの処理
+
+        しきい値をパラメータに保存し、次の画面に遷移する
+        """
         self.logger.info("Set threshold finished.")
         self.data_store.set("threshold", self.threshold)
         self.clear_env()
         self.screen_manager.get_screen("replay_exe").trigger("continue")
 
     def clear_env(self) -> None:
+        """環境をクリアする"""
         self.extracted_label.clear()
         self.binarize_th.setValue(0)
         self.logger.info("Environment cleared.")
