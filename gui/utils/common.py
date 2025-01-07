@@ -1,3 +1,5 @@
+"""GUIアプリケーション内で使用する汎用関数"""
+
 from PySide6.QtGui import QImage
 from PySide6.QtWidgets import QApplication, QWidget
 import numpy as np

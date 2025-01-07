@@ -1,3 +1,5 @@
+"""リアルタイム解析を行うワーカークラス"""
+
 from PySide6.QtCore import Signal, QThread
 from gui.utils.data_store import DataStore
 from cores.capture import FrameCapture

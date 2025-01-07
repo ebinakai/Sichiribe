@@ -1,3 +1,5 @@
+"""画面遷移と管理を行うメインウィンドウ"""
+
 from PySide6.QtWidgets import QMainWindow, QStackedWidget
 from gui.utils.router import init_screen_manager
 from gui.utils.common import center_window

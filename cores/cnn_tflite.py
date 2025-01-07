@@ -1,14 +1,17 @@
 """
-CNN Implementation using TensorFlow Lite
+TensorFlow Liteを使用したCNNモデルの実装
+
+このモジュールは、TensorFlow Liteを用いて軽量な畳み込みニューラルネットワーク（CNN）の実装を行う機能を提供する
 
 Requirements:
-- tflite_runtime
+    - tflite_runtime: 軽量な推論エンジンとして使用
 
-Alternative Implementations:
-- cnn_tf.py (TensorFlow version)
-- cnn_onnx.py (ONNX version)
+Alternative_Implementations:
+    - cnn_tf.py: TensorFlowを使用したバージョン
+    - cnn_onnx.py: ONNXを使用したバージョン
 
-Note: If TensorFlow Lite is not installed, please install it or use an alternative implementation.
+Notes:
+    - TensorFlow Liteがインストールされていない場合は、ライブラリをインストールするか、代替実装を利用すること
 """
 
 try:

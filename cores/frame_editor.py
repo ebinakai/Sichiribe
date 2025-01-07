@@ -1,3 +1,5 @@
+"""取得したフレーム群に対する処理機能"""
+
 from typing import Union, List, Optional, Tuple
 import cv2
 import logging

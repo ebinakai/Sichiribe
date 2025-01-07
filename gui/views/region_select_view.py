@@ -1,3 +1,5 @@
+"""解析する7セグメント領域の選択画面"""
+
 import logging
 from typing import List
 import numpy as np
@@ -20,7 +22,7 @@ from gui.widgets.clickable_label import ClickableLabel
 
 class RegionSelectWindow(CustomQWidget):
     """
-    映像中の7セグメント領域を選択する画面のViewクラス
+    解析する7セグメント領域を選択する画面のViewクラス
 
     1. 4点を選択することで7セグメント領域を囲むことができる
     2. opencvの画像処理を行うため、FrameEditorクラスを利用する

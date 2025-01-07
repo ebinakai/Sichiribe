@@ -1,3 +1,5 @@
+"""設定画面の基底クラス"""
+
 from gui.widgets.custom_qwidget import CustomQWidget
 from cores.settings_manager import SettingsManager
 from logging import Logger

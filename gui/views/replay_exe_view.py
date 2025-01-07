@@ -1,3 +1,5 @@
+"""動画ファイル解析の実行画面"""
+
 from PySide6.QtWidgets import QHBoxLayout, QVBoxLayout, QPushButton, QLabel
 from PySide6.QtCore import Qt
 from PySide6.QtGui import QPixmap

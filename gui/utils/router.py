@@ -1,3 +1,5 @@
+"""GUIアプリケーションの画面構成の定義ファイル"""
+
 from PySide6.QtWidgets import QStackedWidget, QMainWindow
 from gui.utils.screen_manager import ScreenManager
 from gui.views.menu_view import MenuWindow

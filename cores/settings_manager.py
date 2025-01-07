@@ -1,3 +1,5 @@
+"""設定ファイルの管理機能"""
+
 from pathlib import Path
 from cores.export_utils import get_supported_formats
 from cores.common import filter_dict, is_directory_writable

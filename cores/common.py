@@ -1,3 +1,5 @@
+"""コア機能内で使用する汎用関数"""
+
 import os
 import shutil
 import logging

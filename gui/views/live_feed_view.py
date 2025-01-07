@@ -1,3 +1,5 @@
+"""リアルタイム解析用ライブフィード画面"""
+
 from PySide6.QtWidgets import QHBoxLayout, QVBoxLayout, QPushButton, QLabel
 from PySide6.QtCore import QTimer, Qt
 from PySide6.QtGui import QPixmap

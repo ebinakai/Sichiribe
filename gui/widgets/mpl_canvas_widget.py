@@ -1,3 +1,5 @@
+"""matplotlibのFigureを表示するためのカスタムウィジェット"""
+
 from datetime import datetime
 from matplotlib import dates as mdates
 from matplotlib import pyplot as plt
