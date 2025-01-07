@@ -1,3 +1,5 @@
+"""アプリケーション全体で共有されるデータの管理機能"""
+
 from typing import Dict, Any
 from threading import Lock
 

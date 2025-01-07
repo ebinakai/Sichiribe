@@ -1,3 +1,5 @@
+"""カスタムウィジェットの基底クラス"""
+
 from PySide6.QtWidgets import QWidget
 from gui.utils.data_store import DataStore
 

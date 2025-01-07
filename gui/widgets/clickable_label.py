@@ -1,10 +1,12 @@
+"""マウスイベントに対応できるラベルクラス"""
+
 from PySide6.QtWidgets import QLabel
 from PySide6.QtGui import QMouseEvent
 from PySide6.QtCore import Qt
 
 
 class ClickableLabel(QLabel):
-    """マウスイベントに対応できるラベルクラス
+    """クリック位置や状態を扱うマウスイベントに対応できるラベルクラス
 
     マウスクリックとドラッグ時にイベントが発火する
     """

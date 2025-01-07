@@ -1,3 +1,5 @@
+"""動画解析のしきい値設定画面"""
+
 from PySide6.QtWidgets import (
     QHBoxLayout,
     QVBoxLayout,

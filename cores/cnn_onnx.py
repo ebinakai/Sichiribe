@@ -1,14 +1,14 @@
 """
-CNN Implementation using ONNX
+ONNXライブラリを使用したCNNモデルの推論機能
+
+このモジュールは、ONNXフォーマットのモデルを用いて畳み込みニューラルネットワーク（CNN）の推論を行う機能を提供する
 
 Requirements:
-- onnxruntime
+    - onnxruntime: 推論エンジンとして使用
 
-Alternative Implementations:
-- cnn_tf.py (TensorFlow version)
-- cnn_tflite.py (TFLite version)
-
-Note: If ONNX is not installed, please install it or use an alternative implementation.
+Alternative_Implementations:
+    - cnn_tf.py: TensorFlowを使用したバージョン
+    - cnn_tflite.py: TensorFlow Liteを使用したバージョン
 """
 
 try:

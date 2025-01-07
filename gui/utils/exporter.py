@@ -1,3 +1,5 @@
+"""GUIアプリケーション用の出力機能"""
+
 from cores.export_utils import export, build_data_records
 from cores.common import filter_dict
 from typing import Dict

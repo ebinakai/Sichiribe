@@ -1,3 +1,5 @@
+"""エクスポート機能"""
+
 import logging
 import json
 import csv

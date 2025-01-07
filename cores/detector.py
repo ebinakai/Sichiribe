@@ -1,3 +1,5 @@
+"""画像の推論と前処理を行う抽象クラスを提供するモジュール"""
+
 import logging
 from typing import Optional, Union, Any
 import cv2

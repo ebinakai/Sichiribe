@@ -1,15 +1,13 @@
+"""システムからのログ出力を画面に表示する機能"""
+
 from PySide6.QtWidgets import QVBoxLayout, QTextEdit
 from PySide6.QtCore import Signal, QObject
 from gui.widgets.custom_qwidget import CustomQWidget
 from gui.utils.screen_manager import ScreenManager
 import logging
 
-# ログをメインスレッドに送信するためのクラス
-
-
 class LogEmitter(QObject):
-    """ログを送信するためのクラス"""
-
+    """ログをメインスレッドに送信するためのクラス"""
     new_log = Signal(str)
 
 

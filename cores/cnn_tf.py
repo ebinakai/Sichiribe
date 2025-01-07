@@ -1,14 +1,17 @@
 """
-CNN Implementation using TensorFlow
+TensorFlowを使用したCNNモデルの実装
+
+このモジュールは、TensorFlowを用いて畳み込みニューラルネットワーク（CNN）の実装を行う機能を提供する
 
 Requirements:
-- tensorflow
+    - tensorflow: CNNモデルの構築と推論に使用
 
-Alternative Implementations:
-- cnn_tflite.py (TFLite version)
-- cnn_onnx.py (ONNX version)
+Alternative_Implementations:
+    - cnn_tflite.py: TensorFlow Liteを使用したバージョン
+    - cnn_onnx.py: ONNXを使用したバージョン
 
-Note: If TensorFlow is not installed, please install it or use an alternative implementation.
+Notes:
+    - TensorFlowがインストールされていない場合は、ライブラリをインストールするか、代替実装を利用すること
 """
 
 try:

@@ -1,3 +1,5 @@
+"""CNNを使用した7セグメント数字認識機能"""
+
 from cores.detector import Detector
 import os
 import logging

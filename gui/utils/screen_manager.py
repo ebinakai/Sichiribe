@@ -1,3 +1,5 @@
+"""画面情報を保持し、管理を行う機能"""
+
 from PySide6.QtWidgets import QApplication, QStackedWidget, QMainWindow, QMessageBox
 from PySide6.QtGui import QPalette
 from PySide6.QtCore import QEventLoop, QTimer, QPoint, QSize
@@ -9,9 +11,7 @@ from typing import Tuple, Dict, Optional
 
 @dataclass
 class ScreenInfo:
-    """
-    画面情報を保持するデータクラス
-    """
+    """画面情報を保持するデータクラス"""
 
     widget: CustomQWidget
     title: str

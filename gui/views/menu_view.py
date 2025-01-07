@@ -1,3 +1,6 @@
+"""アプリケーション起動後に表示されるメニュー画面"""
+
+
 from PySide6.QtWidgets import QHBoxLayout, QVBoxLayout, QPushButton
 from PySide6.QtCore import Qt
 from gui.widgets.custom_qwidget import CustomQWidget
