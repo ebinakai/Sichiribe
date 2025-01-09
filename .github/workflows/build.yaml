@@ -6,10 +6,6 @@ on:
       - main
     paths:
       - '**/*.py'
-    paths-ignore:
-      - 'tests/**'
-      - "samples/**"
-      - "train/**"
 
 jobs:
   build:
