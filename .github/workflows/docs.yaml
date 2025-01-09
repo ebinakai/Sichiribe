@@ -6,7 +6,7 @@ on:
       - main
     paths:
       - '**/*.py'
-      - 'docs_template'
+      - 'docs_template/*'
 
 jobs:
   generate-docs:
