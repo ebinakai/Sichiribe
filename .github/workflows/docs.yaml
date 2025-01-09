@@ -6,6 +6,7 @@ on:
       - main
     paths:
       - '**/*.py'
+      - 'docs_template/*'
 
 jobs:
   generate-docs:
@@ -39,7 +40,7 @@ jobs:
           mv tests _tests
           mkdir -p html
           pdoc --template-dir docs_template --html --force .
-          mv html/sichiribe docs
+          mv html/2024-sichiribe docs
           cp res/favicon.ico docs
 
       - name: Deploy Documentation

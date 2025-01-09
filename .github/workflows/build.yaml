@@ -4,17 +4,8 @@ on:
   pull_request:
     branches:
       - main
-    paths-ignore:
-      - 'tests/**'
-      - "samples/**"
-      - "train/**"
-      - '**/*.md'
-      - '**/*.yaml'
-      - '**/*.yml'
-      - '**/*.ini'
-      - '**/*.json'
-      - '**/*.txt'
-      - 'Makefile'
+    paths:
+      - '**/*.py'
 
 jobs:
   build:
