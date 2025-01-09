@@ -372,7 +372,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1">
   <meta name="generator" content="pdoc3 ${pdoc.__version__}">
-  <link rel="icon" type="image/x-icon" href="/sichiribe/favicon.ico">
+  <link rel="icon" type="image/x-icon" href="/2024-sichiribe/favicon.ico">
 
 <%
     module_list = 'modules' in context.keys()  # Whether we're showing module list in server mode
