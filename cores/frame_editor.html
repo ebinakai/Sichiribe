@@ -4,8 +4,8 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1">
 <meta name="generator" content="pdoc3 0.11.3">
-<link rel="icon" type="image/x-icon" href="/sichiribe/favicon.ico">
-<title>sichiribe.cores.frame_editor API documentation</title>
+<link rel="icon" type="image/x-icon" href="/2024-sichiribe/favicon.ico">
+<title>2024-sichiribe.cores.frame_editor API documentation</title>
 <meta name="description" content="取得したフレーム群に対する処理機能">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/13.0.0/sanitize.min.css" integrity="sha512-y1dtMcuvtTMJc1yPgEqF0ZjQbhnc/bFhyvIyVNb9Zk5mIGtqVaAB1Ttl28su8AvFMOY0EwRbAe+HCLqj6W7/KA==" crossorigin>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/13.0.0/typography.min.css" integrity="sha512-Y1DYSb995BAfxobCkKepB1BqJJTPrOp3zPL74AWFugHHmmdcvO+C48WLrUOlhGMc0QG7AE3f7gmvvcrmX2fDoA==" crossorigin>
@@ -23,7 +23,7 @@ hljs.highlightAll();
 <main>
 <article id="content">
 <header>
-<h1 class="title">Module <code>sichiribe.cores.frame_editor</code></h1>
+<h1 class="title">Module <code>2024-sichiribe.cores.frame_editor</code></h1>
 </header>
 <section id="section-intro">
 <p>取得したフレーム群に対する処理機能</p>
@@ -37,7 +37,7 @@ hljs.highlightAll();
 <section>
 <h2 class="section-title" id="header-classes">Classes</h2>
 <dl>
-<dt id="sichiribe.cores.frame_editor.FrameEditor"><code class="flex name class">
+<dt id="2024-sichiribe.cores.frame_editor.FrameEditor"><code class="flex name class">
 <span>class <span class="ident">FrameEditor</span></span>
 <span>(</span><span>num_digits: int = 4, crop_width: int = 100, crop_height: int = 100)</span>
 </code></dt>
@@ -318,7 +318,7 @@ hljs.highlightAll();
 </details>
 <h3>Methods</h3>
 <dl>
-<dt id="sichiribe.cores.frame_editor.FrameEditor.crop"><code class="name flex">
+<dt id="2024-sichiribe.cores.frame_editor.FrameEditor.crop"><code class="name flex">
 <span>def <span class="ident">crop</span></span>(<span>self, image: numpy.ndarray, click_points: List) ‑> numpy.ndarray | None</span>
 </code></dt>
 <dd>
@@ -336,19 +336,19 @@ hljs.highlightAll();
 <dd>切り出した画像</dd>
 </dl></div>
 </dd>
-<dt id="sichiribe.cores.frame_editor.FrameEditor.draw_region_outline"><code class="name flex">
+<dt id="2024-sichiribe.cores.frame_editor.FrameEditor.draw_region_outline"><code class="name flex">
 <span>def <span class="ident">draw_region_outline</span></span>(<span>self,<br>image: numpy.ndarray,<br>extract_image: numpy.ndarray | None,<br>click_points: List) ‑> Tuple[numpy.ndarray, numpy.ndarray | None]</span>
 </code></dt>
 <dd>
 <div class="desc"><p>選択領域のアウトラインを描画する</p></div>
 </dd>
-<dt id="sichiribe.cores.frame_editor.FrameEditor.draw_separation_lines"><code class="name flex">
+<dt id="2024-sichiribe.cores.frame_editor.FrameEditor.draw_separation_lines"><code class="name flex">
 <span>def <span class="ident">draw_separation_lines</span></span>(<span>self, extract_image: numpy.ndarray) ‑> numpy.ndarray</span>
 </code></dt>
 <dd>
 <div class="desc"><p>切り出し画像に分割線を描画する</p></div>
 </dd>
-<dt id="sichiribe.cores.frame_editor.FrameEditor.frame_devide"><code class="name flex">
+<dt id="2024-sichiribe.cores.frame_editor.FrameEditor.frame_devide"><code class="name flex">
 <span>def <span class="ident">frame_devide</span></span>(<span>self,<br>video_path: str,<br>video_skip_sec: int = 0,<br>sampling_sec: int = 3,<br>batch_frames: int = 10,<br>save_frame: bool = True,<br>out_dir: str = 'frames',<br>is_crop: bool = True,<br>click_points: List = [],<br>extract_single_frame: bool = False) ‑> Tuple[numpy.ndarray | List[List[numpy.ndarray]], List[str]]</span>
 </code></dt>
 <dd>
@@ -380,7 +380,7 @@ hljs.highlightAll();
 <dd>フレーム, タイムスタンプ</dd>
 </dl></div>
 </dd>
-<dt id="sichiribe.cores.frame_editor.FrameEditor.get_click_points"><code class="name flex">
+<dt id="2024-sichiribe.cores.frame_editor.FrameEditor.get_click_points"><code class="name flex">
 <span>def <span class="ident">get_click_points</span></span>(<span>self) ‑> List</span>
 </code></dt>
 <dd>
@@ -391,19 +391,19 @@ hljs.highlightAll();
 <dd>クリックポイント</dd>
 </dl></div>
 </dd>
-<dt id="sichiribe.cores.frame_editor.FrameEditor.mouse_callback"><code class="name flex">
+<dt id="2024-sichiribe.cores.frame_editor.FrameEditor.mouse_callback"><code class="name flex">
 <span>def <span class="ident">mouse_callback</span></span>(<span>self, event, x, y, flags, param) ‑> None</span>
 </code></dt>
 <dd>
 <div class="desc"><p>マウスイベントのコールバック関数</p></div>
 </dd>
-<dt id="sichiribe.cores.frame_editor.FrameEditor.order_points"><code class="name flex">
+<dt id="2024-sichiribe.cores.frame_editor.FrameEditor.order_points"><code class="name flex">
 <span>def <span class="ident">order_points</span></span>(<span>self, click_points: List) ‑> List</span>
 </code></dt>
 <dd>
 <div class="desc"><p>クリックポイントを左上、右上、右下、左下の順に並び替える</p></div>
 </dd>
-<dt id="sichiribe.cores.frame_editor.FrameEditor.region_select"><code class="name flex">
+<dt id="2024-sichiribe.cores.frame_editor.FrameEditor.region_select"><code class="name flex">
 <span>def <span class="ident">region_select</span></span>(<span>self, image: str | numpy.ndarray) ‑> List[numpy.ndarray]</span>
 </code></dt>
 <dd>
@@ -432,22 +432,22 @@ hljs.highlightAll();
 <ul id="index">
 <li><h3>Super-module</h3>
 <ul>
-<li><code><a title="sichiribe.cores" href="index.html">sichiribe.cores</a></code></li>
+<li><code><a title="2024-sichiribe.cores" href="index.html">2024-sichiribe.cores</a></code></li>
 </ul>
 </li>
 <li><h3><a href="#header-classes">Classes</a></h3>
 <ul>
 <li>
-<h4><code><a title="sichiribe.cores.frame_editor.FrameEditor" href="#sichiribe.cores.frame_editor.FrameEditor">FrameEditor</a></code></h4>
+<h4><code><a title="2024-sichiribe.cores.frame_editor.FrameEditor" href="#2024-sichiribe.cores.frame_editor.FrameEditor">FrameEditor</a></code></h4>
 <ul class="">
-<li><code><a title="sichiribe.cores.frame_editor.FrameEditor.crop" href="#sichiribe.cores.frame_editor.FrameEditor.crop">crop</a></code></li>
-<li><code><a title="sichiribe.cores.frame_editor.FrameEditor.draw_region_outline" href="#sichiribe.cores.frame_editor.FrameEditor.draw_region_outline">draw_region_outline</a></code></li>
-<li><code><a title="sichiribe.cores.frame_editor.FrameEditor.draw_separation_lines" href="#sichiribe.cores.frame_editor.FrameEditor.draw_separation_lines">draw_separation_lines</a></code></li>
-<li><code><a title="sichiribe.cores.frame_editor.FrameEditor.frame_devide" href="#sichiribe.cores.frame_editor.FrameEditor.frame_devide">frame_devide</a></code></li>
-<li><code><a title="sichiribe.cores.frame_editor.FrameEditor.get_click_points" href="#sichiribe.cores.frame_editor.FrameEditor.get_click_points">get_click_points</a></code></li>
-<li><code><a title="sichiribe.cores.frame_editor.FrameEditor.mouse_callback" href="#sichiribe.cores.frame_editor.FrameEditor.mouse_callback">mouse_callback</a></code></li>
-<li><code><a title="sichiribe.cores.frame_editor.FrameEditor.order_points" href="#sichiribe.cores.frame_editor.FrameEditor.order_points">order_points</a></code></li>
-<li><code><a title="sichiribe.cores.frame_editor.FrameEditor.region_select" href="#sichiribe.cores.frame_editor.FrameEditor.region_select">region_select</a></code></li>
+<li><code><a title="2024-sichiribe.cores.frame_editor.FrameEditor.crop" href="#2024-sichiribe.cores.frame_editor.FrameEditor.crop">crop</a></code></li>
+<li><code><a title="2024-sichiribe.cores.frame_editor.FrameEditor.draw_region_outline" href="#2024-sichiribe.cores.frame_editor.FrameEditor.draw_region_outline">draw_region_outline</a></code></li>
+<li><code><a title="2024-sichiribe.cores.frame_editor.FrameEditor.draw_separation_lines" href="#2024-sichiribe.cores.frame_editor.FrameEditor.draw_separation_lines">draw_separation_lines</a></code></li>
+<li><code><a title="2024-sichiribe.cores.frame_editor.FrameEditor.frame_devide" href="#2024-sichiribe.cores.frame_editor.FrameEditor.frame_devide">frame_devide</a></code></li>
+<li><code><a title="2024-sichiribe.cores.frame_editor.FrameEditor.get_click_points" href="#2024-sichiribe.cores.frame_editor.FrameEditor.get_click_points">get_click_points</a></code></li>
+<li><code><a title="2024-sichiribe.cores.frame_editor.FrameEditor.mouse_callback" href="#2024-sichiribe.cores.frame_editor.FrameEditor.mouse_callback">mouse_callback</a></code></li>
+<li><code><a title="2024-sichiribe.cores.frame_editor.FrameEditor.order_points" href="#2024-sichiribe.cores.frame_editor.FrameEditor.order_points">order_points</a></code></li>
+<li><code><a title="2024-sichiribe.cores.frame_editor.FrameEditor.region_select" href="#2024-sichiribe.cores.frame_editor.FrameEditor.region_select">region_select</a></code></li>
 </ul>
 </li>
 </ul>

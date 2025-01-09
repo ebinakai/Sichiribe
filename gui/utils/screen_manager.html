@@ -4,8 +4,8 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1">
 <meta name="generator" content="pdoc3 0.11.3">
-<link rel="icon" type="image/x-icon" href="/sichiribe/favicon.ico">
-<title>sichiribe.gui.utils.screen_manager API documentation</title>
+<link rel="icon" type="image/x-icon" href="/2024-sichiribe/favicon.ico">
+<title>2024-sichiribe.gui.utils.screen_manager API documentation</title>
 <meta name="description" content="画面情報を保持し、管理を行う機能">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/13.0.0/sanitize.min.css" integrity="sha512-y1dtMcuvtTMJc1yPgEqF0ZjQbhnc/bFhyvIyVNb9Zk5mIGtqVaAB1Ttl28su8AvFMOY0EwRbAe+HCLqj6W7/KA==" crossorigin>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/13.0.0/typography.min.css" integrity="sha512-Y1DYSb995BAfxobCkKepB1BqJJTPrOp3zPL74AWFugHHmmdcvO+C48WLrUOlhGMc0QG7AE3f7gmvvcrmX2fDoA==" crossorigin>
@@ -23,7 +23,7 @@ hljs.highlightAll();
 <main>
 <article id="content">
 <header>
-<h1 class="title">Module <code>sichiribe.gui.utils.screen_manager</code></h1>
+<h1 class="title">Module <code>2024-sichiribe.gui.utils.screen_manager</code></h1>
 </header>
 <section id="section-intro">
 <p>画面情報を保持し、管理を行う機能</p>
@@ -37,7 +37,7 @@ hljs.highlightAll();
 <section>
 <h2 class="section-title" id="header-classes">Classes</h2>
 <dl>
-<dt id="sichiribe.gui.utils.screen_manager.ScreenInfo"><code class="flex name class">
+<dt id="2024-sichiribe.gui.utils.screen_manager.ScreenInfo"><code class="flex name class">
 <span>class <span class="ident">ScreenInfo</span></span>
 <span>(</span><span>widget: gui.widgets.custom_qwidget.CustomQWidget, title: str)</span>
 </code></dt>
@@ -56,17 +56,17 @@ class ScreenInfo:
 </details>
 <h3>Class variables</h3>
 <dl>
-<dt id="sichiribe.gui.utils.screen_manager.ScreenInfo.title"><code class="name">var <span class="ident">title</span> : str</code></dt>
+<dt id="2024-sichiribe.gui.utils.screen_manager.ScreenInfo.title"><code class="name">var <span class="ident">title</span> : str</code></dt>
 <dd>
 <div class="desc"></div>
 </dd>
-<dt id="sichiribe.gui.utils.screen_manager.ScreenInfo.widget"><code class="name">var <span class="ident">widget</span> : gui.widgets.custom_qwidget.CustomQWidget</code></dt>
+<dt id="2024-sichiribe.gui.utils.screen_manager.ScreenInfo.widget"><code class="name">var <span class="ident">widget</span> : gui.widgets.custom_qwidget.CustomQWidget</code></dt>
 <dd>
 <div class="desc"></div>
 </dd>
 </dl>
 </dd>
-<dt id="sichiribe.gui.utils.screen_manager.ScreenManager"><code class="flex name class">
+<dt id="2024-sichiribe.gui.utils.screen_manager.ScreenManager"><code class="flex name class">
 <span>class <span class="ident">ScreenManager</span></span>
 <span>(</span><span>stacked_widget: PySide6.QtWidgets.QStackedWidget,<br>main_window: PySide6.QtWidgets.QMainWindow)</span>
 </code></dt>
@@ -215,7 +215,7 @@ quit: アプリケーションを終了する</p></div>
 </details>
 <h3>Methods</h3>
 <dl>
-<dt id="sichiribe.gui.utils.screen_manager.ScreenManager.add_screen"><code class="name flex">
+<dt id="2024-sichiribe.gui.utils.screen_manager.ScreenManager.add_screen"><code class="name flex">
 <span>def <span class="ident">add_screen</span></span>(<span>self, name: str, widget: gui.widgets.custom_qwidget.CustomQWidget, title: str) ‑> None</span>
 </code></dt>
 <dd>
@@ -231,7 +231,7 @@ quit: アプリケーションを終了する</p></div>
 <h2 id="returns">Returns</h2>
 <p>None</p></div>
 </dd>
-<dt id="sichiribe.gui.utils.screen_manager.ScreenManager.check_if_dark_mode"><code class="name flex">
+<dt id="2024-sichiribe.gui.utils.screen_manager.ScreenManager.check_if_dark_mode"><code class="name flex">
 <span>def <span class="ident">check_if_dark_mode</span></span>(<span>self) ‑> bool</span>
 </code></dt>
 <dd>
@@ -242,7 +242,7 @@ quit: アプリケーションを終了する</p></div>
 <dd>ダークモードかどうか</dd>
 </dl></div>
 </dd>
-<dt id="sichiribe.gui.utils.screen_manager.ScreenManager.get_screen"><code class="name flex">
+<dt id="2024-sichiribe.gui.utils.screen_manager.ScreenManager.get_screen"><code class="name flex">
 <span>def <span class="ident">get_screen</span></span>(<span>self, name: str) ‑> gui.widgets.custom_qwidget.CustomQWidget</span>
 </code></dt>
 <dd>
@@ -257,7 +257,7 @@ quit: アプリケーションを終了する</p></div>
 <dd>画面のウィジェットオブジェクト</dd>
 </dl></div>
 </dd>
-<dt id="sichiribe.gui.utils.screen_manager.ScreenManager.popup"><code class="name flex">
+<dt id="2024-sichiribe.gui.utils.screen_manager.ScreenManager.popup"><code class="name flex">
 <span>def <span class="ident">popup</span></span>(<span>self, message: str) ‑> None</span>
 </code></dt>
 <dd>
@@ -269,26 +269,26 @@ quit: アプリケーションを終了する</p></div>
 <dd>表示内容</dd>
 </dl></div>
 </dd>
-<dt id="sichiribe.gui.utils.screen_manager.ScreenManager.quit"><code class="name flex">
+<dt id="2024-sichiribe.gui.utils.screen_manager.ScreenManager.quit"><code class="name flex">
 <span>def <span class="ident">quit</span></span>(<span>self) ‑> None</span>
 </code></dt>
 <dd>
 <div class="desc"></div>
 </dd>
-<dt id="sichiribe.gui.utils.screen_manager.ScreenManager.resize_defualt"><code class="name flex">
+<dt id="2024-sichiribe.gui.utils.screen_manager.ScreenManager.resize_defualt"><code class="name flex">
 <span>def <span class="ident">resize_defualt</span></span>(<span>self) ‑> None</span>
 </code></dt>
 <dd>
 <div class="desc"></div>
 </dd>
-<dt id="sichiribe.gui.utils.screen_manager.ScreenManager.restore_screen_size"><code class="name flex">
+<dt id="2024-sichiribe.gui.utils.screen_manager.ScreenManager.restore_screen_size"><code class="name flex">
 <span>def <span class="ident">restore_screen_size</span></span>(<span>self) ‑> None</span>
 </code></dt>
 <dd>
 <div class="desc"><p>保存された画面の位置とサイズを復元する
 リサイズ後は、保存された位置とサイズはクリアされる</p></div>
 </dd>
-<dt id="sichiribe.gui.utils.screen_manager.ScreenManager.save_screen_size"><code class="name flex">
+<dt id="2024-sichiribe.gui.utils.screen_manager.ScreenManager.save_screen_size"><code class="name flex">
 <span>def <span class="ident">save_screen_size</span></span>(<span>self) ‑> Tuple[PySide6.QtCore.QPoint, PySide6.QtCore.QSize]</span>
 </code></dt>
 <dd>
@@ -298,7 +298,7 @@ quit: アプリケーションを終了する</p></div>
 <dd>画面の位置とサイズ</dd>
 </dl></div>
 </dd>
-<dt id="sichiribe.gui.utils.screen_manager.ScreenManager.show_screen"><code class="name flex">
+<dt id="2024-sichiribe.gui.utils.screen_manager.ScreenManager.show_screen"><code class="name flex">
 <span>def <span class="ident">show_screen</span></span>(<span>self, name: str) ‑> None</span>
 </code></dt>
 <dd>
@@ -320,30 +320,30 @@ quit: アプリケーションを終了する</p></div>
 <ul id="index">
 <li><h3>Super-module</h3>
 <ul>
-<li><code><a title="sichiribe.gui.utils" href="index.html">sichiribe.gui.utils</a></code></li>
+<li><code><a title="2024-sichiribe.gui.utils" href="index.html">2024-sichiribe.gui.utils</a></code></li>
 </ul>
 </li>
 <li><h3><a href="#header-classes">Classes</a></h3>
 <ul>
 <li>
-<h4><code><a title="sichiribe.gui.utils.screen_manager.ScreenInfo" href="#sichiribe.gui.utils.screen_manager.ScreenInfo">ScreenInfo</a></code></h4>
+<h4><code><a title="2024-sichiribe.gui.utils.screen_manager.ScreenInfo" href="#2024-sichiribe.gui.utils.screen_manager.ScreenInfo">ScreenInfo</a></code></h4>
 <ul class="">
-<li><code><a title="sichiribe.gui.utils.screen_manager.ScreenInfo.title" href="#sichiribe.gui.utils.screen_manager.ScreenInfo.title">title</a></code></li>
-<li><code><a title="sichiribe.gui.utils.screen_manager.ScreenInfo.widget" href="#sichiribe.gui.utils.screen_manager.ScreenInfo.widget">widget</a></code></li>
+<li><code><a title="2024-sichiribe.gui.utils.screen_manager.ScreenInfo.title" href="#2024-sichiribe.gui.utils.screen_manager.ScreenInfo.title">title</a></code></li>
+<li><code><a title="2024-sichiribe.gui.utils.screen_manager.ScreenInfo.widget" href="#2024-sichiribe.gui.utils.screen_manager.ScreenInfo.widget">widget</a></code></li>
 </ul>
 </li>
 <li>
-<h4><code><a title="sichiribe.gui.utils.screen_manager.ScreenManager" href="#sichiribe.gui.utils.screen_manager.ScreenManager">ScreenManager</a></code></h4>
+<h4><code><a title="2024-sichiribe.gui.utils.screen_manager.ScreenManager" href="#2024-sichiribe.gui.utils.screen_manager.ScreenManager">ScreenManager</a></code></h4>
 <ul class="two-column">
-<li><code><a title="sichiribe.gui.utils.screen_manager.ScreenManager.add_screen" href="#sichiribe.gui.utils.screen_manager.ScreenManager.add_screen">add_screen</a></code></li>
-<li><code><a title="sichiribe.gui.utils.screen_manager.ScreenManager.check_if_dark_mode" href="#sichiribe.gui.utils.screen_manager.ScreenManager.check_if_dark_mode">check_if_dark_mode</a></code></li>
-<li><code><a title="sichiribe.gui.utils.screen_manager.ScreenManager.get_screen" href="#sichiribe.gui.utils.screen_manager.ScreenManager.get_screen">get_screen</a></code></li>
-<li><code><a title="sichiribe.gui.utils.screen_manager.ScreenManager.popup" href="#sichiribe.gui.utils.screen_manager.ScreenManager.popup">popup</a></code></li>
-<li><code><a title="sichiribe.gui.utils.screen_manager.ScreenManager.quit" href="#sichiribe.gui.utils.screen_manager.ScreenManager.quit">quit</a></code></li>
-<li><code><a title="sichiribe.gui.utils.screen_manager.ScreenManager.resize_defualt" href="#sichiribe.gui.utils.screen_manager.ScreenManager.resize_defualt">resize_defualt</a></code></li>
-<li><code><a title="sichiribe.gui.utils.screen_manager.ScreenManager.restore_screen_size" href="#sichiribe.gui.utils.screen_manager.ScreenManager.restore_screen_size">restore_screen_size</a></code></li>
-<li><code><a title="sichiribe.gui.utils.screen_manager.ScreenManager.save_screen_size" href="#sichiribe.gui.utils.screen_manager.ScreenManager.save_screen_size">save_screen_size</a></code></li>
-<li><code><a title="sichiribe.gui.utils.screen_manager.ScreenManager.show_screen" href="#sichiribe.gui.utils.screen_manager.ScreenManager.show_screen">show_screen</a></code></li>
+<li><code><a title="2024-sichiribe.gui.utils.screen_manager.ScreenManager.add_screen" href="#2024-sichiribe.gui.utils.screen_manager.ScreenManager.add_screen">add_screen</a></code></li>
+<li><code><a title="2024-sichiribe.gui.utils.screen_manager.ScreenManager.check_if_dark_mode" href="#2024-sichiribe.gui.utils.screen_manager.ScreenManager.check_if_dark_mode">check_if_dark_mode</a></code></li>
+<li><code><a title="2024-sichiribe.gui.utils.screen_manager.ScreenManager.get_screen" href="#2024-sichiribe.gui.utils.screen_manager.ScreenManager.get_screen">get_screen</a></code></li>
+<li><code><a title="2024-sichiribe.gui.utils.screen_manager.ScreenManager.popup" href="#2024-sichiribe.gui.utils.screen_manager.ScreenManager.popup">popup</a></code></li>
+<li><code><a title="2024-sichiribe.gui.utils.screen_manager.ScreenManager.quit" href="#2024-sichiribe.gui.utils.screen_manager.ScreenManager.quit">quit</a></code></li>
+<li><code><a title="2024-sichiribe.gui.utils.screen_manager.ScreenManager.resize_defualt" href="#2024-sichiribe.gui.utils.screen_manager.ScreenManager.resize_defualt">resize_defualt</a></code></li>
+<li><code><a title="2024-sichiribe.gui.utils.screen_manager.ScreenManager.restore_screen_size" href="#2024-sichiribe.gui.utils.screen_manager.ScreenManager.restore_screen_size">restore_screen_size</a></code></li>
+<li><code><a title="2024-sichiribe.gui.utils.screen_manager.ScreenManager.save_screen_size" href="#2024-sichiribe.gui.utils.screen_manager.ScreenManager.save_screen_size">save_screen_size</a></code></li>
+<li><code><a title="2024-sichiribe.gui.utils.screen_manager.ScreenManager.show_screen" href="#2024-sichiribe.gui.utils.screen_manager.ScreenManager.show_screen">show_screen</a></code></li>
 </ul>
 </li>
 </ul>
