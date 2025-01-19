@@ -16,7 +16,7 @@
 
 ---  
 
-![Python](https://img.shields.io/badge/python-3.9_|_3.10_|_3.11_|_3.12-blue)
+![Python](https://img.shields.io/badge/python-3.10_|_3.11_|_3.12-blue)
 [![Tensorflow](https://img.shields.io/badge/tensorflow-2.17.0-green)](https://github.com/tensorflow/tensorflow/tree/v2.17.0)
 [![PySide](https://img.shields.io/badge/PySide-6-green)](https://pypi.org/project/PySide6/6.7.2/)
 [![opencv](https://img.shields.io/badge/opencv-4.10-green)](https://pypi.org/project/opencv-python/4.10.0.84/)
