@@ -92,7 +92,7 @@ hljs.highlightAll();
 
     def _get_default_setting_path(self, pattern: str) -&gt; Path:
         &#34;&#34;&#34;設定ファイルのデフォルトパスを取得する&#34;&#34;&#34;
-        appname = &#34;Sichiribe&#34;
+        appname = &#34;sichiribe&#34;
         appauthor = &#34;EbinaKai&#34;
         user_dir = user_data_dir(appname, appauthor)
 
@@ -109,7 +109,15 @@ hljs.highlightAll();
         Returns:
             Dict[str, Any]: 設定ファイルの内容
         &#34;&#34;&#34;
-        return self.load(self.default_path)
+        try:
+            return self.load(self.default_path)
+        except FileNotFoundError:
+            logger.warning(
+                f&#34;Default settings file not found. Creating a new one at {self.default_path}.&#34;
+            )
+            initial_settings = {key: None for key in self.required_keys}
+            self.save(initial_settings)  # 初期設定を保存
+            return initial_settings
 
     def load(self, filepath: Union[str, Path]) -&gt; Dict[str, Any]:
         &#34;&#34;&#34;設定ファイルを読み込む
