@@ -197,7 +197,7 @@ See help(type(self)) for accurate signature.</p></div>
     def back(self) -&gt; None:
         &#34;&#34;&#34;戻るボタンがクリックされたときの処理&#34;&#34;&#34;
         self.get_settings_from_ui()
-        self.settings_manager.save(self.data_store.get_all())
+        self.settings_manager.save(self.data_store.get_all(), is_validate=False)
         self.confirm_txt.setText(&#34;&#34;)
         self.screen_manager.show_screen(&#34;menu&#34;)
 

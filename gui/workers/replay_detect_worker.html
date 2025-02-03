@@ -88,8 +88,10 @@ See help(type(self)) for accurate signature.</p></div>
 
     def __init__(self) -&gt; None:
         super().__init__()
-        self.logger = logging.getLogger(&#34;__main__&#34;).getChild(__name__)
         self.data_store = DataStore.get_instance()
+        self.out_dir = str(Path(self.data_store.get(&#34;out_dir&#34;)) / &#34;frames&#34;)
+        self.fe = FrameEditor(self.data_store.get(&#34;num_digits&#34;))
+        self.logger = logging.getLogger(&#34;__main__&#34;).getChild(__name__)
         self._is_cancelled = False
 
     def run(self) -&gt; None:
@@ -109,12 +111,20 @@ See help(type(self)) for accurate signature.</p></div>
             self.model_not_found.emit()
             return None
 
-        for frames, timestamp in zip(
-            self.data_store.get(&#34;frames&#34;), self.data_store.get(&#34;timestamps&#34;)
+        timestamps = []
+        for frames, timestamp in self.fe.frame_devide_generator(
+            video_path=self.data_store.get(&#34;video_path&#34;),
+            video_skip_sec=self.data_store.get(&#34;video_skip_sec&#34;),
+            sampling_sec=self.data_store.get(&#34;sampling_sec&#34;),
+            batch_frames=self.data_store.get(&#34;batch_frames&#34;),
+            save_frame=self.data_store.get(&#34;save_frame&#34;),
+            out_dir=self.out_dir,
+            click_points=self.data_store.get(&#34;click_points&#34;),
         ):
+            timestamps.append(timestamp)
             if self._is_cancelled:
                 self.cancelled.emit()
-                return None
+                break
 
             # GUI への送信用の画像二値化であり、predict 内で再度処理する
             image_bin = self.dt.preprocess_binarization(
@@ -129,6 +139,7 @@ See help(type(self)) for accurate signature.</p></div>
             self.logger.info(f&#34;Failed Rate: {failed_rate}&#34;)
             self.progress.emit(result, failed_rate, timestamp)
 
+        self.data_store.set(&#34;timestamps&#34;, timestamps)
         return None
 
     def cancel(self) -&gt; None:

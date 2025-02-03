@@ -142,7 +142,7 @@ See help(type(self)) for accurate signature.</p></div>
         if action == &#34;startup&#34;:
             self.startup(*args)
         elif action == &#34;continue&#34;:
-            self.frame_devide_process()
+            self.detect_start()
         else:
             raise ValueError(f&#34;Invalid action: {action}&#34;)
 
@@ -167,15 +167,14 @@ See help(type(self)) for accurate signature.</p></div>
 
         # 最初のフレームを取得
         self.fe = FrameEditor(self.data_store.get(&#34;num_digits&#34;))
-        first_frame, _ = self.fe.frame_devide(
+        gen = self.fe.frame_devide_generator(
             video_path=self.data_store.get(&#34;video_path&#34;),
             video_skip_sec=self.data_store.get(&#34;video_skip_sec&#34;),
-            sampling_sec=self.data_store.get(&#34;sampling_sec&#34;),
-            batch_frames=self.data_store.get(&#34;batch_frames&#34;),
-            save_frame=False,
             is_crop=False,
             extract_single_frame=True,
         )
+        first_frame, _ = next(gen)
+        gen.close()
         self.data_store.set(&#34;first_frame&#34;, first_frame)
 
         if (
@@ -188,35 +187,18 @@ See help(type(self)) for accurate signature.</p></div>
                 &#34;startup&#34;, &#34;replay_exe&#34;
             )
 
-    def frame_devide_process(self) -&gt; None:
-        &#34;&#34;&#34;フレーム分割処理を行う&#34;&#34;&#34;
-        self.screen_manager.show_screen(&#34;log&#34;)
-        settings = self.settings_manager.remove_non_require_keys(
-            self.data_store.get_all()
-        )
-        self.settings_manager.save(settings)
-        self.fd_worker = FrameDivideWorker()
-        self.fd_worker.end.connect(self.frame_devide_finished)
-        self.fd_worker.start()
-        self.logger.info(&#34;Frame Devide started.&#34;)
-
-    def frame_devide_finished(
-        self, frames: List[Union[str, np.ndarray]], timestamps: List[str]
-    ) -&gt; None:
+    def detect_start(self) -&gt; None:
         &#34;&#34;&#34;フレーム分割処理完了時の処理
+
+        解析処理を開始する
 
         Args:
             frames (List[Union[str, np.ndarray]]): 分割されたフレームまたはそのパスのリスト
             timestamps (List[str]): タイムスタンプのリスト
         &#34;&#34;&#34;
-        self.logger.debug(&#34;timestamps: %s&#34; % timestamps)
-        self.logger.info(&#34;Frame Devide finished.&#34;)
-        self.data_store.set(&#34;frames&#34;, frames)
-        self.data_store.set(&#34;timestamps&#34;, timestamps)
-        self.detect_start()
 
-    def detect_start(self) -&gt; None:
-        &#34;&#34;&#34;解析処理を開始する&#34;&#34;&#34;
+        self.screen_manager.show_screen(&#34;replay_exe&#34;)
+
         self.dt_worker = DetectWorker()
         self.dt_worker.progress.connect(self.detect_progress)
         self.dt_worker.send_image.connect(self.display_extract_image)
@@ -245,7 +227,6 @@ See help(type(self)) for accurate signature.</p></div>
             failed_rate (float): 失敗率
             timestamp (str): タイムスタンプ
         &#34;&#34;&#34;
-        self.screen_manager.show_screen(&#34;replay_exe&#34;)
         self.results.append(result)
         self.failed_rates.append(failed_rate)
         self.update_graph(result, failed_rate, timestamp)
@@ -382,7 +363,15 @@ See help(type(self)) for accurate signature.</p></div>
 <span>def <span class="ident">detect_start</span></span>(<span>self) ‑> None</span>
 </code></dt>
 <dd>
-<div class="desc"><p>解析処理を開始する</p></div>
+<div class="desc"><p>フレーム分割処理完了時の処理</p>
+<p>解析処理を開始する</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>frames</code></strong> :&ensp;<code>List[Union[str, np.ndarray]]</code></dt>
+<dd>分割されたフレームまたはそのパスのリスト</dd>
+<dt><strong><code>timestamps</code></strong> :&ensp;<code>List[str]</code></dt>
+<dd>タイムスタンプのリスト</dd>
+</dl></div>
 </dd>
 <dt id="2024-sichiribe.gui.views.replay_exe_view.ReplayExeWindow.display_extract_image"><code class="name flex">
 <span>def <span class="ident">display_extract_image</span></span>(<span>self, image: numpy.ndarray) ‑> None</span>
@@ -398,25 +387,6 @@ See help(type(self)) for accurate signature.</p></div>
 <div class="desc"><p>解析結果をファイルに出力する</p>
 <p>解析結果をファイルに出力し、保存場所を表示する
 使用したパラメータも出力する</p></div>
-</dd>
-<dt id="2024-sichiribe.gui.views.replay_exe_view.ReplayExeWindow.frame_devide_finished"><code class="name flex">
-<span>def <span class="ident">frame_devide_finished</span></span>(<span>self, frames: List[str | numpy.ndarray], timestamps: List[str]) ‑> None</span>
-</code></dt>
-<dd>
-<div class="desc"><p>フレーム分割処理完了時の処理</p>
-<h2 id="args">Args</h2>
-<dl>
-<dt><strong><code>frames</code></strong> :&ensp;<code>List[Union[str, np.ndarray]]</code></dt>
-<dd>分割されたフレームまたはそのパスのリスト</dd>
-<dt><strong><code>timestamps</code></strong> :&ensp;<code>List[str]</code></dt>
-<dd>タイムスタンプのリスト</dd>
-</dl></div>
-</dd>
-<dt id="2024-sichiribe.gui.views.replay_exe_view.ReplayExeWindow.frame_devide_process"><code class="name flex">
-<span>def <span class="ident">frame_devide_process</span></span>(<span>self) ‑> None</span>
-</code></dt>
-<dd>
-<div class="desc"><p>フレーム分割処理を行う</p></div>
 </dd>
 <dt id="2024-sichiribe.gui.views.replay_exe_view.ReplayExeWindow.initUI"><code class="name flex">
 <span>def <span class="ident">initUI</span></span>(<span>self)</span>
@@ -497,8 +467,6 @@ See help(type(self)) for accurate signature.</p></div>
 <li><code><a title="2024-sichiribe.gui.views.replay_exe_view.ReplayExeWindow.detect_start" href="#2024-sichiribe.gui.views.replay_exe_view.ReplayExeWindow.detect_start">detect_start</a></code></li>
 <li><code><a title="2024-sichiribe.gui.views.replay_exe_view.ReplayExeWindow.display_extract_image" href="#2024-sichiribe.gui.views.replay_exe_view.ReplayExeWindow.display_extract_image">display_extract_image</a></code></li>
 <li><code><a title="2024-sichiribe.gui.views.replay_exe_view.ReplayExeWindow.export" href="#2024-sichiribe.gui.views.replay_exe_view.ReplayExeWindow.export">export</a></code></li>
-<li><code><a title="2024-sichiribe.gui.views.replay_exe_view.ReplayExeWindow.frame_devide_finished" href="#2024-sichiribe.gui.views.replay_exe_view.ReplayExeWindow.frame_devide_finished">frame_devide_finished</a></code></li>
-<li><code><a title="2024-sichiribe.gui.views.replay_exe_view.ReplayExeWindow.frame_devide_process" href="#2024-sichiribe.gui.views.replay_exe_view.ReplayExeWindow.frame_devide_process">frame_devide_process</a></code></li>
 <li><code><a title="2024-sichiribe.gui.views.replay_exe_view.ReplayExeWindow.initUI" href="#2024-sichiribe.gui.views.replay_exe_view.ReplayExeWindow.initUI">initUI</a></code></li>
 <li><code><a title="2024-sichiribe.gui.views.replay_exe_view.ReplayExeWindow.model_not_found" href="#2024-sichiribe.gui.views.replay_exe_view.ReplayExeWindow.model_not_found">model_not_found</a></code></li>
 <li><code><a title="2024-sichiribe.gui.views.replay_exe_view.ReplayExeWindow.startup" href="#2024-sichiribe.gui.views.replay_exe_view.ReplayExeWindow.startup">startup</a></code></li>

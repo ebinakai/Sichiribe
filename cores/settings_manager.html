@@ -54,7 +54,7 @@ hljs.highlightAll();
         self.required_keys = self._get_required_keys(pattern)
         self.default_path = self._get_default_setting_path(pattern)
 
-    def _get_required_keys(self, pattern: str) -&gt; Dict[str, Callable[[Any], bool]]:
+    def _get_required_keys(self, pattern: str) -&gt; Dict[str, Dict[str, Any]]:
         &#34;&#34;&#34;設定ファイルに必要なキーとその検証関数を取得する
 
         Args:
@@ -66,28 +66,68 @@ hljs.highlightAll();
         Returns:
             Dict[str, Callable[[Any], bool]]: 必要なキーとその検証関数
         &#34;&#34;&#34;
+
         base_settings = {
-            &#34;num_digits&#34;: lambda x: isinstance(x, int) and x &gt;= 1,
-            &#34;sampling_sec&#34;: lambda x: isinstance(x, int) and x &gt;= 1,
-            &#34;batch_frames&#34;: lambda x: isinstance(x, int) and x &gt;= 1,
-            &#34;format&#34;: lambda x: x in get_supported_formats(),
-            &#34;save_frame&#34;: lambda x: isinstance(x, bool),
-            &#34;out_dir&#34;: lambda x: is_directory_writable(Path(x).parent),
-            &#34;click_points&#34;: lambda x: isinstance(x, list),
+            &#34;num_digits&#34;: {
+                &#34;rule&#34;: lambda x: isinstance(x, int) and x &gt;= 1,
+                &#34;default&#34;: 4,
+            },
+            &#34;sampling_sec&#34;: {
+                &#34;rule&#34;: lambda x: isinstance(x, int) and x &gt;= 1,
+                &#34;default&#34;: 3,
+            },
+            &#34;batch_frames&#34;: {
+                &#34;rule&#34;: lambda x: isinstance(x, int) and x &gt;= 1,
+                &#34;default&#34;: 10,
+            },
+            &#34;format&#34;: {
+                &#34;rule&#34;: lambda x: x in get_supported_formats(),
+                &#34;default&#34;: &#34;csv&#34;,
+            },
+            &#34;save_frame&#34;: {
+                &#34;rule&#34;: lambda x: isinstance(x, bool),
+                &#34;default&#34;: True,
+            },
+            &#34;out_dir&#34;: {
+                &#34;rule&#34;: lambda x: is_directory_writable(x),
+                &#34;default&#34;: Path(&#34;frames&#34;),
+            },
+            &#34;click_points&#34;: {
+                &#34;rule&#34;: lambda x: isinstance(x, list),
+                &#34;default&#34;: [],
+            },
         }
+
         if pattern == &#34;live&#34;:
             additional_settings = {
-                &#34;device_num&#34;: lambda x: isinstance(x, int) and x &gt;= 0,
-                &#34;total_sampling_sec&#34;: lambda x: isinstance(x, int) and x &gt;= 1,
-                &#34;cap_size&#34;: lambda x: isinstance(x, list) or isinstance(x, tuple),
+                &#34;device_num&#34;: {
+                    &#34;rule&#34;: lambda x: isinstance(x, int) and x &gt;= 0,
+                    &#34;default&#34;: 0,
+                },
+                &#34;total_sampling_sec&#34;: {
+                    &#34;rule&#34;: lambda x: isinstance(x, int) and x &gt;= 1,
+                    &#34;default&#34;: 60,
+                },
+                &#34;cap_size&#34;: {
+                    &#34;rule&#34;: lambda x: isinstance(x, (list, tuple)),
+                    &#34;default&#34;: [],
+                },
             }
         elif pattern == &#34;replay&#34;:
             additional_settings = {
-                &#34;video_path&#34;: lambda x: isinstance(x, str) and Path(x).exists(),
-                &#34;video_skip_sec&#34;: lambda x: isinstance(x, int) and x &gt;= 0,
+                &#34;video_path&#34;: {
+                    &#34;rule&#34;: lambda x: isinstance(x, str) and Path(x).exists(),
+                    &#34;default&#34;: &#34;&#34;,
+                },
+                &#34;video_skip_sec&#34;: {
+                    &#34;rule&#34;: lambda x: isinstance(x, int) and x &gt;= 0,
+                    &#34;default&#34;: 0,
+                },
             }
         else:
             raise ValueError(f&#34;Invalid pattern: {pattern}&#34;)
+
+        # base_settings と additional_settings をマージして返す
         return {**base_settings, **additional_settings}
 
     def _get_default_setting_path(self, pattern: str) -&gt; Path:
@@ -115,9 +155,13 @@ hljs.highlightAll();
             logger.warning(
                 f&#34;Default settings file not found. Creating a new one at {self.default_path}.&#34;
             )
-            initial_settings = {key: None for key in self.required_keys}
-            self.save(initial_settings)  # 初期設定を保存
-            return initial_settings
+            self.create_default()
+            return self.load(self.default_path)
+
+    def create_default(self) -&gt; None:
+        &#34;&#34;&#34;デフォルトの設定ファイルを作成する&#34;&#34;&#34;
+        initial_settings = {k: v[&#34;default&#34;] for k, v in self.required_keys.items()}
+        self.save(initial_settings, is_validate=False)
 
     def load(self, filepath: Union[str, Path]) -&gt; Dict[str, Any]:
         &#34;&#34;&#34;設定ファイルを読み込む
@@ -141,7 +185,7 @@ hljs.highlightAll();
             if not isinstance(settings, dict):
                 raise TypeError(f&#34;Data in {filepath} is not a dictionary&#34;)
 
-            for key in self.required_keys:
+            for key in self.required_keys.keys():
                 if key not in settings:
                     raise KeyError(f&#34;Key &#39;{key}&#39; not found in {filepath}&#34;)
 
@@ -156,13 +200,13 @@ hljs.highlightAll();
         Returns:
             bool: 検証結果
         &#34;&#34;&#34;
-        for key, rules in self.required_keys.items():
-            value = settings.get(key)
+        for k, v in self.required_keys.items():
+            value = settings.get(k)
             if value is None:
-                logger.error(f&#34;Missing key: {key}&#34;)
+                logger.error(f&#34;Missing key: {k}&#34;)
                 return False
-            if not rules(value):
-                logger.error(f&#34;Invalid value: {key}={value}&#34;)
+            if not v[&#34;rule&#34;](value):
+                logger.error(f&#34;Invalid value: {k}={value}&#34;)
                 return False
         return True
 
@@ -177,7 +221,7 @@ hljs.highlightAll();
         &#34;&#34;&#34;
         return filter_dict(settings, lambda k, _: k in self.required_keys)
 
-    def save(self, settings: Dict[str, Any]) -&gt; None:
+    def save(self, settings: Dict[str, Any], is_validate=True) -&gt; None:
         &#34;&#34;&#34;設定ファイルを保存する
 
         Args:
@@ -186,14 +230,21 @@ hljs.highlightAll();
         Raises:
             ValueError: 検証に失敗した場合
         &#34;&#34;&#34;
-        if not self.validate(settings):
+        if is_validate and not self.validate(settings):
             raise ValueError(&#34;Invalid settings&#34;)
         settings = self.remove_non_require_keys(settings)
+        self.default_path.parent.mkdir(parents=True, exist_ok=True)
         with open(self.default_path, &#34;w&#34;) as file:
             json.dump(settings, file, indent=4)</code></pre>
 </details>
 <h3>Methods</h3>
 <dl>
+<dt id="2024-sichiribe.cores.settings_manager.SettingsManager.create_default"><code class="name flex">
+<span>def <span class="ident">create_default</span></span>(<span>self) ‑> None</span>
+</code></dt>
+<dd>
+<div class="desc"><p>デフォルトの設定ファイルを作成する</p></div>
+</dd>
 <dt id="2024-sichiribe.cores.settings_manager.SettingsManager.load"><code class="name flex">
 <span>def <span class="ident">load</span></span>(<span>self, filepath: str | pathlib.Path) ‑> Dict[str, Any]</span>
 </code></dt>
@@ -247,7 +298,7 @@ hljs.highlightAll();
 </dl></div>
 </dd>
 <dt id="2024-sichiribe.cores.settings_manager.SettingsManager.save"><code class="name flex">
-<span>def <span class="ident">save</span></span>(<span>self, settings: Dict[str, Any]) ‑> None</span>
+<span>def <span class="ident">save</span></span>(<span>self, settings: Dict[str, Any], is_validate=True) ‑> None</span>
 </code></dt>
 <dd>
 <div class="desc"><p>設定ファイルを保存する</p>
@@ -298,6 +349,7 @@ hljs.highlightAll();
 <li>
 <h4><code><a title="2024-sichiribe.cores.settings_manager.SettingsManager" href="#2024-sichiribe.cores.settings_manager.SettingsManager">SettingsManager</a></code></h4>
 <ul class="">
+<li><code><a title="2024-sichiribe.cores.settings_manager.SettingsManager.create_default" href="#2024-sichiribe.cores.settings_manager.SettingsManager.create_default">create_default</a></code></li>
 <li><code><a title="2024-sichiribe.cores.settings_manager.SettingsManager.load" href="#2024-sichiribe.cores.settings_manager.SettingsManager.load">load</a></code></li>
 <li><code><a title="2024-sichiribe.cores.settings_manager.SettingsManager.load_default" href="#2024-sichiribe.cores.settings_manager.SettingsManager.load_default">load_default</a></code></li>
 <li><code><a title="2024-sichiribe.cores.settings_manager.SettingsManager.remove_non_require_keys" href="#2024-sichiribe.cores.settings_manager.SettingsManager.remove_non_require_keys">remove_non_require_keys</a></code></li>
