@@ -94,7 +94,10 @@ def main(settings) -> None:
     else:
         click_points = []
 
-    sampled_frames, timestamps = frame_editor.frame_devide(
+    timestamps = []
+    results = []
+    failed_rates = []
+    for frame_batch, timestamp in frame_editor.frame_devide_generator(
         video_path=settings["video_path"],
         video_skip_sec=settings["video_skip_sec"],
         sampling_sec=settings["sampling_sec"],
@@ -102,12 +105,8 @@ def main(settings) -> None:
         save_frame=settings["save_frame"],
         out_dir=str(out_dir / "frames"),
         click_points=click_points,
-    )
-    settings["click_points"] = frame_editor.get_click_points()
-
-    results = []
-    failed_rates = []
-    for frame_batch in sampled_frames:
+    ):
+        timestamps.append(timestamp)
         result, failed_rate = detector.predict(frame_batch)
         results.append(result)
         failed_rates.append(failed_rate)
@@ -121,6 +120,8 @@ def main(settings) -> None:
             "timestamps": timestamps,
         }
     )
+
+    settings["click_points"] = frame_editor.get_click_points()
     settings = settings_manager.remove_non_require_keys(settings)
     export(data, format=settings["format"], out_dir=out_dir, prefix="result")
     export(settings, format=settings["format"], out_dir=out_dir, prefix="settings")

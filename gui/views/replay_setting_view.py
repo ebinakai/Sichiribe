@@ -147,7 +147,7 @@ class ReplaySettingWindow(SettingWidget):
         メニュー画面に戻る
         """
         self.get_settings_from_ui()
-        self.settings_manager.save(self.data_store.get_all())
+        self.settings_manager.save(self.data_store.get_all(), is_validate=False)
         self.confirm_txt.setText("")
         self.screen_manager.show_screen("menu")
 

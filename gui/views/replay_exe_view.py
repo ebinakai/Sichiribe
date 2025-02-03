@@ -8,12 +8,11 @@ from gui.utils.screen_manager import ScreenManager
 from gui.utils.common import convert_cv_to_qimage
 from gui.utils.exporter import export_result, export_settings
 from gui.widgets.mpl_canvas_widget import MplCanvas
-from gui.workers.frame_devide_worker import FrameDivideWorker
 from gui.workers.replay_detect_worker import DetectWorker
 from cores.frame_editor import FrameEditor
 from cores.settings_manager import SettingsManager
 import logging
-from typing import List, Union
+from typing import List
 import numpy as np
 
 
@@ -98,7 +97,7 @@ class ReplayExeWindow(CustomQWidget):
         if action == "startup":
             self.startup(*args)
         elif action == "continue":
-            self.frame_devide_process()
+            self.detect_start()
         else:
             raise ValueError(f"Invalid action: {action}")
 
@@ -123,15 +122,14 @@ class ReplayExeWindow(CustomQWidget):
 
         # 最初のフレームを取得
         self.fe = FrameEditor(self.data_store.get("num_digits"))
-        first_frame, _ = self.fe.frame_devide(
+        gen = self.fe.frame_devide_generator(
             video_path=self.data_store.get("video_path"),
             video_skip_sec=self.data_store.get("video_skip_sec"),
-            sampling_sec=self.data_store.get("sampling_sec"),
-            batch_frames=self.data_store.get("batch_frames"),
-            save_frame=False,
             is_crop=False,
             extract_single_frame=True,
         )
+        first_frame, _ = next(gen)
+        gen.close()
         self.data_store.set("first_frame", first_frame)
 
         if (
@@ -144,35 +142,18 @@ class ReplayExeWindow(CustomQWidget):
                 "startup", "replay_exe"
             )
 
-    def frame_devide_process(self) -> None:
-        """フレーム分割処理を行う"""
-        self.screen_manager.show_screen("log")
-        settings = self.settings_manager.remove_non_require_keys(
-            self.data_store.get_all()
-        )
-        self.settings_manager.save(settings)
-        self.fd_worker = FrameDivideWorker()
-        self.fd_worker.end.connect(self.frame_devide_finished)
-        self.fd_worker.start()
-        self.logger.info("Frame Devide started.")
-
-    def frame_devide_finished(
-        self, frames: List[Union[str, np.ndarray]], timestamps: List[str]
-    ) -> None:
+    def detect_start(self) -> None:
         """フレーム分割処理完了時の処理
+
+        解析処理を開始する
 
         Args:
             frames (List[Union[str, np.ndarray]]): 分割されたフレームまたはそのパスのリスト
             timestamps (List[str]): タイムスタンプのリスト
         """
-        self.logger.debug("timestamps: %s" % timestamps)
-        self.logger.info("Frame Devide finished.")
-        self.data_store.set("frames", frames)
-        self.data_store.set("timestamps", timestamps)
-        self.detect_start()
 
-    def detect_start(self) -> None:
-        """解析処理を開始する"""
+        self.screen_manager.show_screen("replay_exe")
+
         self.dt_worker = DetectWorker()
         self.dt_worker.progress.connect(self.detect_progress)
         self.dt_worker.send_image.connect(self.display_extract_image)
@@ -201,7 +182,6 @@ class ReplayExeWindow(CustomQWidget):
             failed_rate (float): 失敗率
             timestamp (str): タイムスタンプ
         """
-        self.screen_manager.show_screen("replay_exe")
         self.results.append(result)
         self.failed_rates.append(failed_rate)
         self.update_graph(result, failed_rate, timestamp)

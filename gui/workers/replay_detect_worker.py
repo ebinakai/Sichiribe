@@ -13,6 +13,8 @@
 from PySide6.QtCore import Signal, QThread
 from gui.utils.data_store import DataStore
 from cores.cnn import cnn_init
+from cores.frame_editor import FrameEditor
+from pathlib import Path
 import logging
 import numpy as np
 
@@ -34,8 +36,10 @@ class DetectWorker(QThread):
 
     def __init__(self) -> None:
         super().__init__()
-        self.logger = logging.getLogger("__main__").getChild(__name__)
         self.data_store = DataStore.get_instance()
+        self.out_dir = str(Path(self.data_store.get("out_dir")) / "frames")
+        self.fe = FrameEditor(self.data_store.get("num_digits"))
+        self.logger = logging.getLogger("__main__").getChild(__name__)
         self._is_cancelled = False
 
     def run(self) -> None:
@@ -55,12 +59,20 @@ class DetectWorker(QThread):
             self.model_not_found.emit()
             return None
 
-        for frames, timestamp in zip(
-            self.data_store.get("frames"), self.data_store.get("timestamps")
+        timestamps = []
+        for frames, timestamp in self.fe.frame_devide_generator(
+            video_path=self.data_store.get("video_path"),
+            video_skip_sec=self.data_store.get("video_skip_sec"),
+            sampling_sec=self.data_store.get("sampling_sec"),
+            batch_frames=self.data_store.get("batch_frames"),
+            save_frame=self.data_store.get("save_frame"),
+            out_dir=self.out_dir,
+            click_points=self.data_store.get("click_points"),
         ):
+            timestamps.append(timestamp)
             if self._is_cancelled:
                 self.cancelled.emit()
-                return None
+                break
 
             # GUI への送信用の画像二値化であり、predict 内で再度処理する
             image_bin = self.dt.preprocess_binarization(
@@ -75,6 +87,7 @@ class DetectWorker(QThread):
             self.logger.info(f"Failed Rate: {failed_rate}")
             self.progress.emit(result, failed_rate, timestamp)
 
+        self.data_store.set("timestamps", timestamps)
         return None
 
     def cancel(self) -> None:

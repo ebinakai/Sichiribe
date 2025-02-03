@@ -1,7 +1,7 @@
 """コア機能内で使用する汎用関数"""
 
 import os
-import shutil
+from shutil import rmtree
 import logging
 import datetime
 from typing import Dict, Any, Callable, Union
@@ -27,7 +27,7 @@ def clear_directory(directory: Union[str, Path]) -> None:
             if path.is_file() or path.is_symlink():
                 path.unlink()
             elif path.is_dir():
-                shutil.rmtree(path)
+                rmtree(path)
         except Exception as e:
             logging.error(f"Failed to delete {path}. Reason: {e}")
 
@@ -51,7 +51,7 @@ def filter_dict(
     return {k: v for k, v in data.items() if predicate(k, v)}
 
 
-def is_directory_writable(directory_path: Path) -> bool:
+def is_directory_writable(directory_path: Union[str, Path]) -> bool:
     """指定されたディレクトリが存在し、書き込み可能かどうかを判定する
 
     Args:
@@ -60,12 +60,18 @@ def is_directory_writable(directory_path: Path) -> bool:
     Returns:
         bool: ディレクトリが存在し、書き込み可能な場合はTrue、それ以外はFalse
     """
-    if not directory_path.exists():
-        logger.error(f"Directory not found: {directory_path}")
+
+    if isinstance(directory_path, str):
+        parent_directory_path = Path(directory_path).parent
+
+    if not parent_directory_path.exists():
+        logger.error(f"Directory not found: {parent_directory_path}")
         return False
 
-    if not directory_path.is_dir() or not os.access(directory_path, os.W_OK):
-        logger.error(f"Directory '{directory_path}' is not writable.")
+    if not parent_directory_path.is_dir() or not os.access(
+        parent_directory_path, os.W_OK
+    ):
+        logger.error(f"Directory '{parent_directory_path}' is not writable.")
         return False
 
     return True

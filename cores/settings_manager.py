@@ -3,7 +3,7 @@
 from pathlib import Path
 from cores.export_utils import get_supported_formats
 from cores.common import filter_dict, is_directory_writable
-from typing import Dict, Any, Callable, Union
+from typing import Dict, Any, Union
 from platformdirs import user_data_dir
 import json
 import logging
@@ -18,7 +18,7 @@ class SettingsManager:
         self.required_keys = self._get_required_keys(pattern)
         self.default_path = self._get_default_setting_path(pattern)
 
-    def _get_required_keys(self, pattern: str) -> Dict[str, Callable[[Any], bool]]:
+    def _get_required_keys(self, pattern: str) -> Dict[str, Dict[str, Any]]:
         """設定ファイルに必要なキーとその検証関数を取得する
 
         Args:
@@ -30,28 +30,68 @@ class SettingsManager:
         Returns:
             Dict[str, Callable[[Any], bool]]: 必要なキーとその検証関数
         """
+
         base_settings = {
-            "num_digits": lambda x: isinstance(x, int) and x >= 1,
-            "sampling_sec": lambda x: isinstance(x, int) and x >= 1,
-            "batch_frames": lambda x: isinstance(x, int) and x >= 1,
-            "format": lambda x: x in get_supported_formats(),
-            "save_frame": lambda x: isinstance(x, bool),
-            "out_dir": lambda x: is_directory_writable(Path(x).parent),
-            "click_points": lambda x: isinstance(x, list),
+            "num_digits": {
+                "rule": lambda x: isinstance(x, int) and x >= 1,
+                "default": 4,
+            },
+            "sampling_sec": {
+                "rule": lambda x: isinstance(x, int) and x >= 1,
+                "default": 3,
+            },
+            "batch_frames": {
+                "rule": lambda x: isinstance(x, int) and x >= 1,
+                "default": 10,
+            },
+            "format": {
+                "rule": lambda x: x in get_supported_formats(),
+                "default": "csv",
+            },
+            "save_frame": {
+                "rule": lambda x: isinstance(x, bool),
+                "default": True,
+            },
+            "out_dir": {
+                "rule": lambda x: is_directory_writable(x),
+                "default": Path("frames"),
+            },
+            "click_points": {
+                "rule": lambda x: isinstance(x, list),
+                "default": [],
+            },
         }
+
         if pattern == "live":
             additional_settings = {
-                "device_num": lambda x: isinstance(x, int) and x >= 0,
-                "total_sampling_sec": lambda x: isinstance(x, int) and x >= 1,
-                "cap_size": lambda x: isinstance(x, list) or isinstance(x, tuple),
+                "device_num": {
+                    "rule": lambda x: isinstance(x, int) and x >= 0,
+                    "default": 0,
+                },
+                "total_sampling_sec": {
+                    "rule": lambda x: isinstance(x, int) and x >= 1,
+                    "default": 60,
+                },
+                "cap_size": {
+                    "rule": lambda x: isinstance(x, (list, tuple)),
+                    "default": [],
+                },
             }
         elif pattern == "replay":
             additional_settings = {
-                "video_path": lambda x: isinstance(x, str) and Path(x).exists(),
-                "video_skip_sec": lambda x: isinstance(x, int) and x >= 0,
+                "video_path": {
+                    "rule": lambda x: isinstance(x, str) and Path(x).exists(),
+                    "default": "",
+                },
+                "video_skip_sec": {
+                    "rule": lambda x: isinstance(x, int) and x >= 0,
+                    "default": 0,
+                },
             }
         else:
             raise ValueError(f"Invalid pattern: {pattern}")
+
+        # base_settings と additional_settings をマージして返す
         return {**base_settings, **additional_settings}
 
     def _get_default_setting_path(self, pattern: str) -> Path:
@@ -79,9 +119,13 @@ class SettingsManager:
             logger.warning(
                 f"Default settings file not found. Creating a new one at {self.default_path}."
             )
-            initial_settings = {key: None for key in self.required_keys}
-            self.save(initial_settings)  # 初期設定を保存
-            return initial_settings
+            self.create_default()
+            return self.load(self.default_path)
+
+    def create_default(self) -> None:
+        """デフォルトの設定ファイルを作成する"""
+        initial_settings = {k: v["default"] for k, v in self.required_keys.items()}
+        self.save(initial_settings, is_validate=False)
 
     def load(self, filepath: Union[str, Path]) -> Dict[str, Any]:
         """設定ファイルを読み込む
@@ -105,7 +149,7 @@ class SettingsManager:
             if not isinstance(settings, dict):
                 raise TypeError(f"Data in {filepath} is not a dictionary")
 
-            for key in self.required_keys:
+            for key in self.required_keys.keys():
                 if key not in settings:
                     raise KeyError(f"Key '{key}' not found in {filepath}")
 
@@ -120,13 +164,13 @@ class SettingsManager:
         Returns:
             bool: 検証結果
         """
-        for key, rules in self.required_keys.items():
-            value = settings.get(key)
+        for k, v in self.required_keys.items():
+            value = settings.get(k)
             if value is None:
-                logger.error(f"Missing key: {key}")
+                logger.error(f"Missing key: {k}")
                 return False
-            if not rules(value):
-                logger.error(f"Invalid value: {key}={value}")
+            if not v["rule"](value):
+                logger.error(f"Invalid value: {k}={value}")
                 return False
         return True
 
@@ -141,7 +185,7 @@ class SettingsManager:
         """
         return filter_dict(settings, lambda k, _: k in self.required_keys)
 
-    def save(self, settings: Dict[str, Any]) -> None:
+    def save(self, settings: Dict[str, Any], is_validate=True) -> None:
         """設定ファイルを保存する
 
         Args:
@@ -150,8 +194,9 @@ class SettingsManager:
         Raises:
             ValueError: 検証に失敗した場合
         """
-        if not self.validate(settings):
+        if is_validate and not self.validate(settings):
             raise ValueError("Invalid settings")
         settings = self.remove_non_require_keys(settings)
+        self.default_path.parent.mkdir(parents=True, exist_ok=True)
         with open(self.default_path, "w") as file:
             json.dump(settings, file, indent=4)
