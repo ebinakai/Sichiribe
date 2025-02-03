@@ -37,7 +37,8 @@ class FrameEditor:
         return self.click_points
 
     # 動画をフレームに分割
-    def frame_devide(
+
+    def frame_devide_generator(
         self,
         video_path: str,
         video_skip_sec: int = 0,
@@ -48,8 +49,9 @@ class FrameEditor:
         is_crop: bool = True,
         click_points: List = [],
         extract_single_frame: bool = False,
-    ) -> Tuple[Union[np.ndarray, List[List[np.ndarray]]], List[str]]:
-        """動画をフレームに分割する
+    ):
+        """
+        動画をフレームに分割し、フレームやバッチをジェネレータとして返す関数である。
 
         Args:
             video_path (str): 動画ファイルのパス
@@ -62,11 +64,14 @@ class FrameEditor:
             click_points (List, optional): クリックポイントの初期値
             extract_single_frame (bool, optional): 最初の位置フレームだけ取得するかどうか
 
-        Returns:
-            Tuple[Union[np.ndarray, List[List[np.ndarray]]], List[str]]: フレーム, タイムスタンプ
+        Yields:
+            Tuple[Union[np.ndarray, List[np.ndarray]], str]:
+                - フレームまたはフレームのリスト
+                - タイムスタンプ（文字列）
         """
         self.click_points = click_points
 
+        # フレームの保存用ディレクトリを準備
         if save_frame:
             Path(out_dir).mkdir(parents=True, exist_ok=True)
             clear_directory(out_dir)
@@ -74,63 +79,72 @@ class FrameEditor:
         cap = cv2.VideoCapture(video_path)
         if not cap.isOpened():
             self.logger.error("Error: Could not open video file.")
-            exit(1)
+            return
 
         fps = cap.get(cv2.CAP_PROP_FPS)
         interval_frames = 1 if sampling_sec == 0 else int(fps * sampling_sec)
-        skip_frames = fps * video_skip_sec
+        skip_frames = int(fps * video_skip_sec)
         frame_count = 0
         frame_batch = []
-        timestamps: List = []
-        return_frames = []
-        return_frame = None
+        timestamps: List[str] = []
 
-        # 指定の開始位置までスキップ
+        # 指定の開始位置までフレームをスキップ
         cap.set(cv2.CAP_PROP_POS_FRAMES, skip_frames)
 
-        while True:
-            ret, frame = cap.read()
-            if not ret:
-                self.logger.debug("Finsish: Could not read frame.")
-                break
-
-            # サンプリング間隔に基づいてフレームを保存
-            if frame_count % interval_frames < batch_frames:
-                self.logger.debug(f"Frame collected: {frame_count}")
-
-                if is_crop:
-                    if len(self.click_points) != 4:
-                        self.region_select(frame)
-                    cropped_frame = self.crop(frame, self.click_points)
-                    if cropped_frame is None:
-                        self.logger.error("Error: Could not crop image.")
-                        frame_count += 1
-                        continue
-                    frame = cropped_frame
-
-                # 最初の位置フレームだけ取得
-                if extract_single_frame:
-                    return_frame = frame
+        try:
+            while True:
+                ret, frame = cap.read()
+                if not ret:
+                    self.logger.info("Finsish: Could not read frame.")
                     break
 
-                if save_frame:
-                    frame_filename = Path(out_dir) / f"frame_{frame_count:06d}.jpg"
-                    cv2.imwrite(str(frame_filename), frame)
-                frame_batch.append(frame)
+                # サンプリング間隔に基づいてフレームを処理
+                if frame_count % interval_frames < batch_frames:
+                    self.logger.debug(f"Frame collected: {frame_count}")
 
-            elif len(frame_batch) != 0:
-                return_frames.append(frame_batch)
+                    if is_crop:
+                        if len(self.click_points) != 4:
+                            self.region_select(frame)
+                        cropped_frame = self.crop(frame, self.click_points)
+                        if cropped_frame is None:
+                            self.logger.error("Error: Could not crop image.")
+                            frame_count += 1
+                            continue
+                        frame = cropped_frame
+
+                    # 最初の位置フレームだけ取得したい場合
+                    if extract_single_frame:
+                        yield frame, timestamps
+                        break
+
+                    # フレームの保存
+                    if save_frame:
+                        frame_filename = Path(out_dir) / f"frame_{frame_count:06d}.jpg"
+                        cv2.imwrite(str(frame_filename), frame)
+
+                    frame_batch.append(frame)
+
+                else:
+                    # バッチサイズに達していたらフレームバッチをyieldする
+                    if len(frame_batch) != 0:
+                        i = len(timestamps)
+                        timestamp = timedelta(seconds=sampling_sec * i + video_skip_sec)
+                        timestamps.append(str(timestamp))
+                        # フレームバッチをyield
+                        yield frame_batch, str(timestamp)
+                        frame_batch = []
+
+                frame_count += 1
+
+            # ループを抜けた後、溜まっているフレームバッチがあれば最後にyield
+            if frame_batch:
                 i = len(timestamps)
                 timestamp = timedelta(seconds=sampling_sec * i + video_skip_sec)
-                timestamps.append(str(timestamp))
-                frame_batch = []
+                yield frame_batch, str(timestamp)
 
-            frame_count += 1
-
-        cap.release()
-        self.logger.debug("Capture resources released.")
-        return_value = return_frames if return_frame is None else return_frame
-        return return_value, timestamps
+        finally:
+            cap.release()
+            self.logger.info("Capture resources released.")
 
     def crop(
         self,

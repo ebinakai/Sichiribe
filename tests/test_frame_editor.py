@@ -35,14 +35,16 @@ class TestFrameEditor:
         mock_cap.read.side_effect = [(True, sample_frame)] * 100 + [(False, None)]
         mock_video_capture.return_value = mock_cap
 
-        frames, _ = frame_editor.frame_devide(
+        frames = []
+        for frame, timestamp in frame_editor.frame_devide_generator(
             video_path="dummy.mp4",
             video_skip_sec=0,
             sampling_sec=3,
             batch_frames=10,
             save_frame=False,
             is_crop=False,
-        )
+        ):
+            frames.append(frame)
 
         assert isinstance(frames, list)
         assert isinstance(frames[0][0], np.ndarray)
@@ -58,7 +60,8 @@ class TestFrameEditor:
         mock_cap.read.return_value = (True, sample_frame)
         mock_video_capture.return_value = mock_cap
 
-        frame, _ = frame_editor.frame_devide(
+        frames = []
+        for frame, timestamp in frame_editor.frame_devide_generator(
             video_path="dummy.mp4",
             video_skip_sec=0,
             sampling_sec=3,
@@ -66,7 +69,8 @@ class TestFrameEditor:
             save_frame=False,
             is_crop=False,
             extract_single_frame=True,
-        )
+        ):
+            frames.append(frame)
 
         assert isinstance(frame, np.ndarray)
         mock_cap.release.assert_called_once()

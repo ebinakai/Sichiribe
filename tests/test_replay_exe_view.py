@@ -1,5 +1,5 @@
 import pytest
-from unittest.mock import Mock, patch
+from unittest.mock import Mock, patch, MagicMock
 from gui.views.replay_exe_view import ReplayExeWindow
 from gui.utils.data_store import DataStore
 from cores.frame_editor import FrameEditor
@@ -45,19 +45,20 @@ class TestMethods:
 
         window.startup.assert_called_once_with()
 
-        window.frame_devide_process = Mock()
+        window.detect_start = Mock()
         window.trigger("continue")
-        window.frame_devide_process.assert_called_once()
+        window.detect_start.assert_called_once()
 
         with pytest.raises(ValueError):
             window.trigger("invalid")
 
     @patch("gui.views.replay_exe_view.FrameEditor")
     def test_startup(self, mock_frame_editor, window):
-        extracted_frame = Mock()
+        iter = MagicMock()
+        iter.__next__.return_value = (Mock(), "00:00:00")
         window.graph_label = Mock()
-        mock_frame_editor_instance = Mock()
-        mock_frame_editor_instance.frame_devide.return_value = extracted_frame, []
+        mock_frame_editor_instance = MagicMock()
+        mock_frame_editor_instance.frame_devide_generator.return_value = iter
         mock_frame_editor.return_value = mock_frame_editor_instance
 
         window.startup()
@@ -70,7 +71,7 @@ class TestMethods:
         assert window.graph_failed_rates == []
         assert window.graph_timestamps == []
         mock_frame_editor.assert_called_once()
-        mock_frame_editor_instance.frame_devide.assert_called_once()
+        mock_frame_editor_instance.frame_devide_generator.assert_called_once()
         window.screen_manager.get_screen.assert_called_once_with("region_select")
 
     @patch("gui.views.replay_exe_view.export_result")
@@ -101,17 +102,6 @@ class TestWorkerCallback:
     def setup_class(self):
         self.data_store = DataStore.get_instance()
         self.data_store.clear()
-
-    def test_frame_devide_finished(self, window):
-        frames = ["frame1", "frame2"]
-        timestamps = ["00:01", "00:02"]
-        window.detect_start = Mock()
-
-        window.frame_devide_finished(frames, timestamps)
-
-        assert self.data_store.get("frames") == frames
-        assert self.data_store.get("timestamps") == timestamps
-        window.detect_start.assert_called_once()
 
     @patch("gui.views.replay_exe_view.DetectWorker")
     def test_detect_start(self, worker_class, window):
