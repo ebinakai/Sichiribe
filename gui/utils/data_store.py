@@ -1,3 +1,5 @@
+"""GUIアプリケーション内の各ウィンドウで共有されるデータストア"""
+
 import numpy as np
 import tempfile
 import logging
