@@ -172,10 +172,6 @@ See help(type(self)) for accurate signature.</p></div>
 
         self.logger.info(&#34;Starting LiveExeWindow.&#34;)
         self.screen_manager.show_screen(&#34;log&#34;)
-        settings = self.settings_manager.remove_non_require_keys(
-            self.data_store.get_all()
-        )
-        self.settings_manager.save(settings)
         self.fe = FrameEditor(self.data_store.get(&#34;num_digits&#34;))
         p_, s_ = self.screen_manager.save_screen_size()
 
@@ -269,6 +265,12 @@ See help(type(self)) for accurate signature.</p></div>
         self.logger.info(&#34;Data exporting...&#34;)
         export_result(self.data_store.get_all())
         export_settings(self.data_store.get_all())
+        
+        settings = self.settings_manager.remove_non_require_keys(
+            self.data_store.get_all()
+        )
+        self.settings_manager.save(settings)
+        
         self.screen_manager.popup(f&#34;保存場所：{self.data_store.get(&#39;out_dir&#39;)}&#34;)
 
     def clear_env(self) -&gt; None:

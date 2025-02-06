@@ -6,7 +6,7 @@
 <meta name="generator" content="pdoc3 0.11.3">
 <link rel="icon" type="image/x-icon" href="/2024-sichiribe/favicon.ico">
 <title>2024-sichiribe.gui.utils.data_store API documentation</title>
-<meta name="description" content="アプリケーション全体で共有されるデータの管理機能">
+<meta name="description" content="">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/13.0.0/sanitize.min.css" integrity="sha512-y1dtMcuvtTMJc1yPgEqF0ZjQbhnc/bFhyvIyVNb9Zk5mIGtqVaAB1Ttl28su8AvFMOY0EwRbAe+HCLqj6W7/KA==" crossorigin>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/13.0.0/typography.min.css" integrity="sha512-Y1DYSb995BAfxobCkKepB1BqJJTPrOp3zPL74AWFugHHmmdcvO+C48WLrUOlhGMc0QG7AE3f7gmvvcrmX2fDoA==" crossorigin>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/default.min.css" crossorigin>
@@ -26,7 +26,6 @@ hljs.highlightAll();
 <h1 class="title">Module <code>2024-sichiribe.gui.utils.data_store</code></h1>
 </header>
 <section id="section-intro">
-<p>アプリケーション全体で共有されるデータの管理機能</p>
 </section>
 <section>
 </section>
@@ -42,8 +41,7 @@ hljs.highlightAll();
 </code></dt>
 <dd>
 <div class="desc"><p>アプリケーション全体で共有されるデータを管理するクラス
-シングルトロンパターンで実装されている
-また、スレッドセーフな実装となっている</p></div>
+シングルトンパターンで実装されており、スレッドセーフな設計</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
@@ -51,8 +49,7 @@ hljs.highlightAll();
 <pre><code class="python">class DataStore:
     &#34;&#34;&#34;
     アプリケーション全体で共有されるデータを管理するクラス
-    シングルトロンパターンで実装されている
-    また、スレッドセーフな実装となっている
+    シングルトンパターンで実装されており、スレッドセーフな設計
     &#34;&#34;&#34;
 
     _instance = None
@@ -73,8 +70,10 @@ hljs.highlightAll();
     def __init__(self) -&gt; None:
         if DataStore._instance is not None:
             raise Exception(&#34;This class is a singleton!&#34;)
-        self.shared_data: Dict = {}
+        self.shared_data: Dict[str, Any] = {}
         self._data_lock = Lock()
+        self.temp_files: Set[str] = set()
+        self.logger = logging.getLogger(&#34;__main__&#34;).getChild(__name__)
 
     def set(self, key: str, value: Any) -&gt; None:
         &#34;&#34;&#34;指定されたキーに値を設定する
@@ -83,17 +82,20 @@ hljs.highlightAll();
             key (str): キー
             value (Any): 値
         &#34;&#34;&#34;
+        if isinstance(value, np.ndarray):
+            value = self._set_numpy(value)
         with self._data_lock:
             self.shared_data[key] = value
+        self.logger.debug(f&#34;Set {key} to {value}&#34;)
 
-    def set_all(self, data: Dict) -&gt; None:
-        &#34;&#34;&#34;複数のキーに値を設定する
+    def set_all(self, data: Dict[str, Any]) -&gt; None:
+        &#34;&#34;&#34;複数のキーに値を一括設定する
 
         Args:
-            data (Dict): データストアに追加するデータ
+            data (Dict[str, Any]): 設定するデータ
         &#34;&#34;&#34;
-        with self._data_lock:
-            self.shared_data.update(data)
+        for key, value in data.items():
+            self.set(key, value)
 
     def get(self, key: str) -&gt; Any:
         &#34;&#34;&#34;指定されたキーの値を取得する
@@ -110,12 +112,20 @@ hljs.highlightAll();
         with self._data_lock:
             if key not in self.shared_data.keys():
                 raise ValueError(f&#34;{key} is not found.&#34;)
-            return self.shared_data.get(key)
+            value = self.shared_data.get(key)
+        if isinstance(value, str) and Path(value).suffix == &#34;.npy&#34;:
+            return self._get_numpy(value)
+        return value
 
-    def get_all(self) -&gt; Dict:
-        &#34;&#34;&#34;すべてのキーと値を取得する&#34;&#34;&#34;
+    def get_all(self) -&gt; Dict[str, Any]:
+        &#34;&#34;&#34;すべてのデータを取得する
+
+        Returns:
+            Dict[str, Any]: すべてのデータ
+        &#34;&#34;&#34;
         with self._data_lock:
-            return self.shared_data
+            keys = list(self.shared_data.keys())
+        return {key: self.get(key) for key in keys}
 
     def has(self, key: str) -&gt; bool:
         &#34;&#34;&#34;指定されたキーが存在するかどうかを判定する
@@ -127,12 +137,52 @@ hljs.highlightAll();
             bool: キーが存在する場合はTrue、存在しない場合はFalse
         &#34;&#34;&#34;
         with self._data_lock:
-            return key in self.shared_data.keys()
+            return key in self.shared_data
 
     def clear(self) -&gt; None:
-        &#34;&#34;&#34;すべてのキーと値を削除する&#34;&#34;&#34;
+        &#34;&#34;&#34;すべてのキーと値を削除し、一時ファイルもクリーンアップ&#34;&#34;&#34;
         with self._data_lock:
-            self.shared_data.clear()</code></pre>
+            self.shared_data.clear()
+            self._cleanup_temp_files()
+
+    def _cleanup_temp_files(self) -&gt; None:
+        &#34;&#34;&#34;保存した一時ファイルを削除&#34;&#34;&#34;
+        for file_path in self.temp_files:
+            path = Path(file_path)
+            if path.exists():
+                path.unlink()
+        self.temp_files.clear()
+
+    def _set_numpy(self, array: np.ndarray) -&gt; str:
+        &#34;&#34;&#34;numpy配列を一時ファイルに保存し、そのパスを返す
+
+        Args:
+            array (np.ndarray): numpy配列
+
+        Returns:
+            Path: 保存された一時ファイルのパス
+        &#34;&#34;&#34;
+        temp_file = tempfile.NamedTemporaryFile(delete=False, suffix=&#34;.npy&#34;)
+        np.save(temp_file.name, array)
+        temp_file.close()
+
+        with self._data_lock:
+            self.temp_files.add(temp_file.name)
+
+        return temp_file.name
+
+    def _get_numpy(self, file_path: str) -&gt; Optional[np.ndarray]:
+        &#34;&#34;&#34;一時ファイルからnumpy配列を取得する
+
+        Args:
+            file_path (Path): 一時ファイルのパス
+
+        Returns:
+            Optional[np.ndarray]: numpy配列（存在しない場合はNone）
+        &#34;&#34;&#34;
+        if Path(file_path).exists():
+            return np.load(file_path, mmap_mode=&#34;r&#34;)
+        return None</code></pre>
 </details>
 <h3>Static methods</h3>
 <dl>
@@ -154,7 +204,7 @@ hljs.highlightAll();
 <span>def <span class="ident">clear</span></span>(<span>self) ‑> None</span>
 </code></dt>
 <dd>
-<div class="desc"><p>すべてのキーと値を削除する</p></div>
+<div class="desc"><p>すべてのキーと値を削除し、一時ファイルもクリーンアップ</p></div>
 </dd>
 <dt id="2024-sichiribe.gui.utils.data_store.DataStore.get"><code class="name flex">
 <span>def <span class="ident">get</span></span>(<span>self, key: str) ‑> Any</span>
@@ -178,10 +228,15 @@ hljs.highlightAll();
 </dl></div>
 </dd>
 <dt id="2024-sichiribe.gui.utils.data_store.DataStore.get_all"><code class="name flex">
-<span>def <span class="ident">get_all</span></span>(<span>self) ‑> Dict</span>
+<span>def <span class="ident">get_all</span></span>(<span>self) ‑> Dict[str, Any]</span>
 </code></dt>
 <dd>
-<div class="desc"><p>すべてのキーと値を取得する</p></div>
+<div class="desc"><p>すべてのデータを取得する</p>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>Dict[str, Any]</code></dt>
+<dd>すべてのデータ</dd>
+</dl></div>
 </dd>
 <dt id="2024-sichiribe.gui.utils.data_store.DataStore.has"><code class="name flex">
 <span>def <span class="ident">has</span></span>(<span>self, key: str) ‑> bool</span>
@@ -213,14 +268,14 @@ hljs.highlightAll();
 </dl></div>
 </dd>
 <dt id="2024-sichiribe.gui.utils.data_store.DataStore.set_all"><code class="name flex">
-<span>def <span class="ident">set_all</span></span>(<span>self, data: Dict) ‑> None</span>
+<span>def <span class="ident">set_all</span></span>(<span>self, data: Dict[str, Any]) ‑> None</span>
 </code></dt>
 <dd>
-<div class="desc"><p>複数のキーに値を設定する</p>
+<div class="desc"><p>複数のキーに値を一括設定する</p>
 <h2 id="args">Args</h2>
 <dl>
-<dt><strong><code>data</code></strong> :&ensp;<code>Dict</code></dt>
-<dd>データストアに追加するデータ</dd>
+<dt><strong><code>data</code></strong> :&ensp;<code>Dict[str, Any]</code></dt>
+<dd>設定するデータ</dd>
 </dl></div>
 </dd>
 </dl>

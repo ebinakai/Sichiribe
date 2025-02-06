@@ -227,7 +227,6 @@ See help(type(self)) for accurate signature.</p></div>
             return
 
         self.data_store.set_all(settings)
-        self.save_settings()
         self.next_page()
 
     def next(self) -&gt; None:
@@ -246,12 +245,11 @@ See help(type(self)) for accurate signature.</p></div>
         if not self.settings_manager.validate(self.data_store.get_all()):
             self.confirm_txt.setText(&#34;不正な値が入力されています&#34;)
             return
-
-        self.save_settings()
         self.next_page()
 
     def next_page(self) -&gt; None:
         &#34;&#34;&#34;次の画面に遷移する&#34;&#34;&#34;
+        self.save_settings()
         if (
             len(self.data_store.get(&#34;click_points&#34;)) == 4
             and len(self.data_store.get(&#34;cap_size&#34;)) == 2

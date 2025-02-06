@@ -64,7 +64,7 @@ hljs.highlightAll();
             ValueError: patternが&#34;live&#34;または&#34;replay&#34;でない場合
 
         Returns:
-            Dict[str, Callable[[Any], bool]]: 必要なキーとその検証関数
+            Dict[str, Dict[str, Any]]: キーと検証関数、デフォルト値の辞書
         &#34;&#34;&#34;
 
         base_settings = {
