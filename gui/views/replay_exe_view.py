@@ -128,9 +128,9 @@ class ReplayExeWindow(CustomQWidget):
             is_crop=False,
             extract_single_frame=True,
         )
-        first_frame, _ = next(gen)
+        frame, _ = next(gen)
         gen.close()
-        self.data_store.set("first_frame", first_frame)
+        self.data_store.set("first_frame", frame)
 
         if (
             self.data_store.has("click_points")

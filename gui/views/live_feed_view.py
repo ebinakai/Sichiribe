@@ -131,10 +131,10 @@ class LiveFeedWindow(CustomQWidget):
         qimage = convert_cv_to_qimage(frame)
         self.feed_label.setPixmap(QPixmap(qimage))
 
-    def feed_finished(self, first_frame: np.ndarray) -> None:
+    def feed_finished(self, frame: np.ndarray) -> None:
         """フィードが終了したときの処理"""
         self.logger.info("Feed finished.")
-        self.data_store.set("first_frame", first_frame)
+        self.data_store.set("first_frame", frame)
         self.clear_env()
         QTimer.singleShot(
             10,
