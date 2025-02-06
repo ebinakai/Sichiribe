@@ -78,6 +78,7 @@ class TestMethods:
     @patch("gui.views.replay_exe_view.export_settings")
     def test_export(self, export_settings, export_result, window):
         self.data_store.set("out_dir", "test")
+        window.settings_manager.save = Mock()
 
         window.export()
 
