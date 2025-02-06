@@ -1,5 +1,6 @@
 import numpy as np
 import tempfile
+import logging
 from pathlib import Path
 from typing import Dict, Any, Optional, Set
 from threading import Lock
@@ -32,6 +33,7 @@ class DataStore:
         self.shared_data: Dict[str, Any] = {}
         self._data_lock = Lock()
         self.temp_files: Set[str] = set()
+        self.logger = logging.getLogger("__main__").getChild(__name__)
 
     def set(self, key: str, value: Any) -> None:
         """指定されたキーに値を設定する
@@ -44,6 +46,7 @@ class DataStore:
             value = self._set_numpy(value)
         with self._data_lock:
             self.shared_data[key] = value
+        self.logger.debug(f"Set {key} to {value}")
 
     def set_all(self, data: Dict[str, Any]) -> None:
         """複数のキーに値を一括設定する

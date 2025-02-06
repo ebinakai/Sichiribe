@@ -28,7 +28,7 @@ class SettingsManager:
             ValueError: patternが"live"または"replay"でない場合
 
         Returns:
-            Dict[str, Callable[[Any], bool]]: 必要なキーとその検証関数
+            Dict[str, Dict[str, Any]]: キーと検証関数、デフォルト値の辞書
         """
 
         base_settings = {

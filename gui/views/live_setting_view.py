@@ -188,7 +188,6 @@ class LiveSettingWindow(SettingWidget):
             return
 
         self.data_store.set_all(settings)
-        self.save_settings()
         self.next_page()
 
     def next(self) -> None:
@@ -207,12 +206,11 @@ class LiveSettingWindow(SettingWidget):
         if not self.settings_manager.validate(self.data_store.get_all()):
             self.confirm_txt.setText("不正な値が入力されています")
             return
-
-        self.save_settings()
         self.next_page()
 
     def next_page(self) -> None:
         """次の画面に遷移する"""
+        self.save_settings()
         if (
             len(self.data_store.get("click_points")) == 4
             and len(self.data_store.get("cap_size")) == 2
