@@ -146,10 +146,6 @@ class LiveExeWindow(CustomQWidget):
 
         self.logger.info("Starting LiveExeWindow.")
         self.screen_manager.show_screen("log")
-        settings = self.settings_manager.remove_non_require_keys(
-            self.data_store.get_all()
-        )
-        self.settings_manager.save(settings)
         self.fe = FrameEditor(self.data_store.get("num_digits"))
         p_, s_ = self.screen_manager.save_screen_size()
 
@@ -243,6 +239,12 @@ class LiveExeWindow(CustomQWidget):
         self.logger.info("Data exporting...")
         export_result(self.data_store.get_all())
         export_settings(self.data_store.get_all())
+
+        settings = self.settings_manager.remove_non_require_keys(
+            self.data_store.get_all()
+        )
+        self.settings_manager.save(settings)
+
         self.screen_manager.popup(f"保存場所：{self.data_store.get('out_dir')}")
 
     def clear_env(self) -> None:
